@@ -63,7 +63,7 @@ public class AuthController {
         // 7. Restituiamo il token al client
         return ResponseEntity.ok(new AuthResponse(jwtToken));
     }
-
+    
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         // 1. Diciamo a Spring Security di autenticare l'utente con l'email e la password fornite.
