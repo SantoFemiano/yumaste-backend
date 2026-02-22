@@ -4,10 +4,10 @@ import com.yumaste.yumasteapi.models.Allergene;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.testrepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+
 
 @Service
 public class testService{

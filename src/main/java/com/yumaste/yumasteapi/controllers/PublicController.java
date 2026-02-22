@@ -1,7 +1,6 @@
 package com.yumaste.yumasteapi.controllers;
 
 import com.yumaste.yumasteapi.DTO.response.CatalogBoxDTO;
-import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.services.BoxService;
 import com.yumaste.yumasteapi.services.testService;
 import org.springframework.data.domain.Page;

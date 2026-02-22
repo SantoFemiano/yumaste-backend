@@ -32,8 +32,5 @@ public class Carrello {
     @Column(name = "quantita", nullable = false)
     private Integer quantita;
 
-    @Column(name = "prezzo_unitario", nullable = false, precision = 5, scale = 2)
-    private BigDecimal prezzoUnitario;
-
 
 }

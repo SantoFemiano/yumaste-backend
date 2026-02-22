@@ -1,9 +1,12 @@
 package com.yumaste.yumasteapi.repositories;
 
 import com.yumaste.yumasteapi.models.Box;
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
 
 public interface BoxRepository extends JpaRepository<Box,Long> {
 
@@ -15,5 +18,9 @@ public interface BoxRepository extends JpaRepository<Box,Long> {
 
     Page<Box> findById(Long id, Pageable pageable);
 
-    Long id(Long id);
+    @Override
+    @NonNull
+    Optional<Box> findById(Long id);
+
+
 }
