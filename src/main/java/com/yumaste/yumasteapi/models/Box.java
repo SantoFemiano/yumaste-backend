@@ -1,10 +1,13 @@
 package com.yumaste.yumasteapi.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -41,15 +44,16 @@ public class Box {
     @Column(name = "immagine_url", length = 500)
     private String immagineUrl;
 
+    @NotNull
     @ColumnDefault("1")
-    @Column(name = "attivo")
-    private Boolean attivo;
+    @Column(name = "attivo", columnDefinition = "1")
+    private Boolean attivo = true;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "data_creazione")
+    @CreationTimestamp
+    @Column(name = "data_creazione", updatable = false)
     private Instant dataCreazione;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @UpdateTimestamp
     @Column(name = "data_aggiornamento")
     private Instant dataAggiornamento;
 

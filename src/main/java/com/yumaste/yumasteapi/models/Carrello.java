@@ -32,5 +32,4 @@ public class Carrello {
     @Column(name = "quantita", nullable = false)
     private Integer quantita;
 
-
 }

@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()       // Login e Registrazione liberi
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/user/**").hasRole("USER") // Solo user autenticati
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo amministratori
 

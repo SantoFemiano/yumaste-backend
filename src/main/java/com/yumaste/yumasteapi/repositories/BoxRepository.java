@@ -16,11 +16,13 @@ public interface BoxRepository extends JpaRepository<Box,Long> {
     //Metodo per trovare tutte le box attive di una categoria specifica con paginazione
     Page<Box> findByCategoriaAndAttivoTrue(String categoria, Pageable pageable);
 
+    //Metodo per trovare una box attiva per id con paginazione
     Page<Box> findById(Long id, Pageable pageable);
 
     @Override
     @NonNull
     Optional<Box> findById(Long id);
+
 
 
 }
