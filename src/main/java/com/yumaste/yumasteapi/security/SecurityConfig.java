@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/user/**").hasRole("USER") // Solo user autenticati
+                        .requestMatchers("/api/user/**").hasRole("ADMIN") // Solo user autenticati
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo amministratori
 
                         .anyRequest().authenticated()                      // Tutto il resto richiede il token

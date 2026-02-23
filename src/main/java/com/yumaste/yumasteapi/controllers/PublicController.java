@@ -1,8 +1,12 @@
 package com.yumaste.yumasteapi.controllers;
 
+import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
 import com.yumaste.yumasteapi.DTO.response.CatalogBoxDTO;
+import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.services.BoxCompositionService;
 import com.yumaste.yumasteapi.services.BoxService;
 import com.yumaste.yumasteapi.services.testService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -11,16 +15,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/public")
 public class PublicController {
 
     private final testService testService;
     private final BoxService boxService;
-
-    public PublicController(testService ser, BoxService boxService) {
-        this.testService= ser;
-        this.boxService = boxService;
-    }
+    private final BoxCompositionService boxCompositionService;
 
     @GetMapping("/boxes")
     public ResponseEntity<Page<CatalogBoxDTO>> getCatalog(
@@ -36,5 +37,17 @@ public class PublicController {
     return ResponseEntity.ok(box.getContent().stream().findFirst().orElse(null));
     }
 
+    @GetMapping("/box/ingredienti/{idBox}")
+    public ResponseEntity<List<BoxIngredientDTO>> getIngredientiByBoxId(@PathVariable Long idBox){
+      return ResponseEntity.ok().body(boxCompositionService.getBoxIngredients(idBox));
+    }
+
+    @GetMapping("/valori/box/{boxId}")
+    public ResponseEntity<List<IngredientiConValoriDTO>> getIngredientiBox(
+            @PathVariable Long boxId
+    ) {
+        List<IngredientiConValoriDTO> ingredienti = boxCompositionService.getIngredientiConValoriDellaBox(boxId);
+        return ResponseEntity.ok(ingredienti);
+    }
 
 }
