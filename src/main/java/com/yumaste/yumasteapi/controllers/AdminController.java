@@ -1,27 +1,31 @@
 package com.yumaste.yumasteapi.controllers;
 
+import com.yumaste.yumasteapi.DTO.request.AddIngredienteToBoxRequestDTO;
 import com.yumaste.yumasteapi.DTO.request.BoxRequestDTO;
 import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.BoxResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredienteResponseDTO;
-import com.yumaste.yumasteapi.services.BoxService;
-import com.yumaste.yumasteapi.services.IngredienteService;
+import com.yumaste.yumasteapi.DTO.response.*;
+import com.yumaste.yumasteapi.models.Allergene;
+import com.yumaste.yumasteapi.models.ValoriNutrizionali;
+import com.yumaste.yumasteapi.services.*;
 import jakarta.validation.Valid; // <-- IMPORTA QUESTO
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin")
+@RequiredArgsConstructor
 public class AdminController {
 
     private final BoxService boxService;
     private final IngredienteService ingredienteService;
+    private final BoxCompositionService boxCompositionService;
+    private final AllergeneService allergeneService;
+    private final NutritionalValueService nutritionalValueService;
 
-    public AdminController(BoxService boxService, IngredienteService ingredienteService) {
-        this.boxService = boxService;
-        this.ingredienteService=ingredienteService;
-    }
 
     @PostMapping("/addBox")
     public ResponseEntity<BoxResponseDTO> addBox(@Valid @RequestBody BoxRequestDTO boxRequestDTO) {
@@ -29,10 +33,26 @@ public class AdminController {
     }
 
 
-
     @PostMapping("/addIngredient")
     public ResponseEntity<IngredienteResponseDTO> addIngredient(@Valid @RequestBody IngredienteRequestDTO ingredienteRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ingredienteService.creaIngrediente(ingredienteRequestDTO));
+    }
+
+    @PostMapping("/addIngredientToBox/{boxId}")
+    public ResponseEntity<BoxIngredientDTO> addIngredientToBox(@PathVariable Long boxId,
+                                                               @Valid @RequestBody AddIngredienteToBoxRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(boxCompositionService.addBoxIngredient(boxId, request));
+
+    }
+    @GetMapping("/allergeni")
+    public ResponseEntity<List<AllergeneDTO>> getAllAllergenes() {
+        return ResponseEntity.ok().body(allergeneService.getAllAllergeni());
+
+    }
+
+    @GetMapping("/valorinutrizionali")
+    public ResponseEntity<List<NutritionalValueDTO>> getNutritionalValues() {
+        return ResponseEntity.ok().body(nutritionalValueService.getAllNutritionalValue());
     }
 
 }
