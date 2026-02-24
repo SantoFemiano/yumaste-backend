@@ -66,33 +66,32 @@ public class BoxCompositionService {
 
     public List<IngredientiConValoriDTO> getIngredientiConValoriDellaBox(Long boxId) {
 
-        // 1. Verifichiamo che la Box esista
         Box box = boxRepository.findById(boxId)
                 .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
 
-        // 2. Recuperiamo tutte le righe di composizione (gli ingredienti in quella box)
         List<ComposizioneBox> composizioni = boxCompositionRepository.findByBox(box);
 
-        // 3. Prepariamo la lista finale da restituire
+        //Estraggo la lista degli ingredienti presenti in questa box
+        List<Ingrediente> ingredientiDellaBox = composizioni.stream()
+                .map(ComposizioneBox::getIngrediente)
+                .toList();
+
+        //Chiedo TUTTI i valori nutrizionali
+        List<ValoriNutrizionali> tuttiIValori = nutritionalValueRepository.findByIngredienteIn(ingredientiDellaBox);
+
         List<IngredientiConValoriDTO> risultati = new ArrayList<>();
 
         for (ComposizioneBox cb : composizioni) {
-
-            // 4. Per ogni ingrediente, cerchiamo i suoi valori nutrizionali nel DB
-            // Usiamo orElse(null) perché un ingrediente potrebbe non avere ancora i valori registrati!
-            ValoriNutrizionali valori = nutritionalValueRepository
-                    .findByIngrediente(cb.getIngrediente())
+            //Cerco il valore nutrizionale nella lista che ho salvato in memoria (tuttiIValori)
+            ValoriNutrizionali valori = tuttiIValori.stream()
+                    .filter(v -> v.getIngrediente().getId().equals(cb.getIngrediente().getId()))
+                    .findFirst()
                     .orElse(null);
 
-            // 5. Passiamo ENTRAMBI gli oggetti al Mapper.
-            // Se "valori" è null, MapStruct lo gestisce senza andare in crash
-            // e lascerà i campi nutrizionali vuoti, ma mapperà comunque nome e quantità!
             IngredientiConValoriDTO dtoCalcolato = dettaglioBoxMapper.toDtoCalcolato(cb, valori);
-
             risultati.add(dtoCalcolato);
         }
 
         return risultati;
     }
-
 }

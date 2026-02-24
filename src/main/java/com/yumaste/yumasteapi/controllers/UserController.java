@@ -1,24 +1,32 @@
 package com.yumaste.yumasteapi.controllers;
 
 import com.yumaste.yumasteapi.DTO.request.AddToCart;
+import com.yumaste.yumasteapi.DTO.request.IndirizzoRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.CartDTO;
+import com.yumaste.yumasteapi.DTO.response.IndirizzoResponseDTO;
+import com.yumaste.yumasteapi.DTO.response.UtenteProfileDTO;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.services.CartService;
+import com.yumaste.yumasteapi.services.UserService;
+import jakarta.validation.Valid;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserController {
 
     private final CartService cartservice;
+    private final UserService userService;
 
-
-
-    public UserController(CartService cartservice) {
-        this.cartservice = cartservice;
-    }
 
     @GetMapping("cart")
     public ResponseEntity<CartDTO> getCart(@AuthenticationPrincipal Utente user) {
@@ -33,7 +41,7 @@ public class UserController {
             @RequestBody AddToCart request
     ) {
 
-        // Passiamo i dati dal JSON al nostro Service
+
         CartDTO carrelloAggiornato = cartservice.aggiungiBoxAlCarrello(
                 utenteCorrente,
                 request.boxId(),
@@ -42,5 +50,29 @@ public class UserController {
 
         return ResponseEntity.ok(carrelloAggiornato);
     }
+
+
+    @GetMapping("/profile")
+    public ResponseEntity<UtenteProfileDTO> getProfile(Principal principal) {
+
+        return ResponseEntity.ok(userService.getProfilo(principal.getName()));
+    }
+
+
+    @GetMapping("/indirizzi")
+    public ResponseEntity<List<IndirizzoResponseDTO>> getIndirizzi(Principal principal) {
+        return ResponseEntity.ok(userService.getIndirizziAttivi(principal.getName()));
+    }
+
+
+    @PostMapping("/insert/indirizzo")
+    public ResponseEntity<IndirizzoResponseDTO> addIndirizzo(
+            Principal principal,
+            @Valid @RequestBody IndirizzoRequestDTO request) {
+
+        IndirizzoResponseDTO nuovoIndirizzo = userService.aggiungiIndirizzo(principal.getName(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuovoIndirizzo);
+    }
+
 
 }

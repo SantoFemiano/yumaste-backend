@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.controllers;
 
+import com.yumaste.yumasteapi.DTO.response.BoxDetailDTO;
 import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
 import com.yumaste.yumasteapi.DTO.response.CatalogBoxDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
@@ -48,6 +49,12 @@ public class PublicController {
     ) {
         List<IngredientiConValoriDTO> ingredienti = boxCompositionService.getIngredientiConValoriDellaBox(boxId);
         return ResponseEntity.ok(ingredienti);
+    }
+
+    @GetMapping("/box/detail/{boxId}")
+    public ResponseEntity<BoxDetailDTO> getBoxDetail(@PathVariable Long boxId){
+        BoxDetailDTO boxDetail = boxService.getDettaglioBox(boxId);
+        return ResponseEntity.ok(boxDetail);
     }
 
 }

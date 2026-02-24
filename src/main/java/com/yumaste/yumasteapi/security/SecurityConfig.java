@@ -23,10 +23,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Disabilitiamo CSRF
+                //Disabilitiamo CSRF
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 2. Definiamo le regole di accesso agli endpoint
+                //Definiamo le regole di accesso agli endpoint
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()       // Login e Registrazione liberi
                         .requestMatchers("/api/public/**").permitAll()
@@ -34,16 +34,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasRole("USER") // Solo user autenticati
                         .requestMatchers("/api/user/**").hasRole("ADMIN") // Solo user autenticati
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo amministratori
-
+                        .requestMatchers("/v3/api-docs/**").permitAll() // Permetti l'accesso alla documentazione API
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()                      // Tutto il resto richiede il token
                 )
 
-                // 3. Gestione della Sessione (Stateless)
+                //Gestione della Sessione (Stateless)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // 4. Aggiungiamo il nostro Provider e il Filtro JWT
+                //Aggiungiamo il nostro Provider e il Filtro JWT
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
