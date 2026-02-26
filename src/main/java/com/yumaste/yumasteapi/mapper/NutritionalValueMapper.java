@@ -10,6 +10,5 @@ public interface NutritionalValueMapper {
 
     @Mapping(source = "ingrediente.nome", target = "nome_Ingrediente") // Mappa l'ID dell'entità al nome del DTO
     NutritionalValueDTO toDto(ValoriNutrizionali nutritionalValue);
-    ValoriNutrizionali toEntity(NutritionalValueDTO nutritionalValueDTO);
 
 }

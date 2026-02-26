@@ -55,4 +55,9 @@ public class AdminController {
         return ResponseEntity.ok().body(nutritionalValueService.getAllNutritionalValue());
     }
 
+    @GetMapping("/ingredienti-allergeni")
+    public ResponseEntity<List<IngredienteAllergeneResponseDTO>> getListaIngredientiAllergeni() {
+        return ResponseEntity.ok(ingredienteService.getAllIngredientiConAllergeni());
+    }
+
 }

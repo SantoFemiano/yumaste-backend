@@ -27,9 +27,6 @@ public class Ordine {
     @JoinColumn(name = "utente_id", nullable = false)
     private Utente utente;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sconto_id")
-    private Sconto sconto;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "data_ordine")

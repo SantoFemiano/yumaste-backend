@@ -1,14 +1,19 @@
 package com.yumaste.yumasteapi.services;
 
 import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
+import com.yumaste.yumasteapi.DTO.response.IngredienteAllergeneResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredienteResponseDTO;
+import com.yumaste.yumasteapi.mapper.IngredienteAllergeneMapper;
 import com.yumaste.yumasteapi.mapper.IngredienteMapper;
 import com.yumaste.yumasteapi.models.Fornitore;
 import com.yumaste.yumasteapi.models.Ingrediente;
 import com.yumaste.yumasteapi.repositories.FornitoreRepository;
+import com.yumaste.yumasteapi.repositories.IngredienteAllergeneRepository;
 import com.yumaste.yumasteapi.repositories.IngredienteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +22,8 @@ public class IngredienteService {
     private final IngredienteRepository ingredienteRepository;
     private final FornitoreRepository fornitoreRepository;
     private final IngredienteMapper ingredienteMapper;
+    private final IngredienteAllergeneRepository ingredienteAllergeneRepository;
+    private final IngredienteAllergeneMapper ingredienteAllergeneMapper;
 
     public IngredienteResponseDTO creaIngrediente(IngredienteRequestDTO request) {
 
@@ -36,4 +43,13 @@ public class IngredienteService {
         // 5. Restituiamo il DTO di risposta
         return ingredienteMapper.toResponseDTO(ingredienteSalvato);
     }
+
+
+    public List<IngredienteAllergeneResponseDTO> getAllIngredientiConAllergeni() {
+        return ingredienteAllergeneRepository.findAllWithDetails()
+                .stream().map(ingredienteAllergeneMapper::toDto)
+                .toList();
+    }
+
+
 }

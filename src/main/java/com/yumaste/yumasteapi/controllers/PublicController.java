@@ -29,6 +29,9 @@ public class PublicController {
             @RequestParam(required=false) String categoria, Pageable pageable){
 
         Page<CatalogBoxDTO> catolog = boxService.getAllActiveBoxes(categoria,pageable);
+        if(catolog.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(catolog);
     }
 
