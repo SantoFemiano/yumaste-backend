@@ -8,6 +8,8 @@ public record CatalogBoxDTO(
     String nome,
     String categoria,
     BigDecimal prezzo,
+    BigDecimal prezzoScontato,
+    Integer percentualeSconto,
     Byte porzioni,
     String immagineUrl
 ) {}

@@ -18,4 +18,6 @@ public interface IngredienteMapper {
     @Mapping(source = "fornitore.id", target = "fornitoreId")
     @Mapping(source = "fornitore.nome", target = "nomeFornitore")
     IngredienteResponseDTO toResponseDTO(Ingrediente ingrediente);
+
+
 }

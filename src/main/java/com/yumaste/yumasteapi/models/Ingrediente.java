@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -54,5 +55,8 @@ public class Ingrediente {
     @Column(name = "data_aggiornamento")
     private Instant dataAggiornamento;
 
+
+    @OneToMany(mappedBy = "ingrediente", fetch = FetchType.LAZY)
+    private List<IngredienteAllergene> allergeni;
 
 }

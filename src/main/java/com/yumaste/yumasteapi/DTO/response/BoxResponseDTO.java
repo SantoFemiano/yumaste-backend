@@ -9,7 +9,9 @@ public record BoxResponseDTO(
         String categoria,
         Byte porzioni,
         Integer quantitaInBox,
-        BigDecimal prezzo,
+        BigDecimal prezzoOriginale,
+        BigDecimal prezzoScontato,
+        Integer percentualeSconto,
         String immagineUrl,
         Boolean attivo
 ) {}

@@ -6,5 +6,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface AllergeneMapper {
+
    AllergeneDTO toDto(Allergene allergene);
+
 }
