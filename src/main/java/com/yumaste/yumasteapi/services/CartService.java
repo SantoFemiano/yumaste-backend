@@ -59,7 +59,7 @@ public class CartService {
                 carrello.getQuantita(),
                 box.getImmagineUrl(),
                 sconto.originale(),
-                sconto.scontato(),    // Il prezzoUnitario del carrello diventa quello scontato!
+                sconto.scontato(),
                 sconto.percentuale()
         );
     }
