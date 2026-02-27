@@ -1,8 +1,6 @@
 package com.yumaste.yumasteapi.controllers;
 
-import com.yumaste.yumasteapi.DTO.request.AddIngredienteToBoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.request.BoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
+import com.yumaste.yumasteapi.DTO.request.*;
 import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.models.Allergene;
 import com.yumaste.yumasteapi.models.ValoriNutrizionali;
@@ -25,6 +23,7 @@ public class AdminController {
     private final BoxCompositionService boxCompositionService;
     private final AllergeneService allergeneService;
     private final NutritionalValueService nutritionalValueService;
+    private final ScontoService ScontoService;
 
 
     @PostMapping("/addBox")
@@ -58,6 +57,16 @@ public class AdminController {
     @GetMapping("/ingredienti-allergeni")
     public ResponseEntity<List<IngredienteAllergeneResponseDTO>> getListaIngredientiAllergeni() {
         return ResponseEntity.ok(ingredienteService.getAllIngredientiConAllergeni());
+    }
+
+    @PostMapping("/adddiscount")
+    public ResponseEntity<ScontoResponseDTO> addDiscount(@Valid @RequestBody ScontoRequestDTO scontoRequestDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ScontoService.addSconto(scontoRequestDTO));
+    }
+
+    @PostMapping("/collega-sconto-box")
+    public ResponseEntity<List<ScontoBoxResponseDTO>> collegaScontoBox(@Valid @RequestBody ScontoBoxRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ScontoService.addScontoBox(request));
     }
 
 }
