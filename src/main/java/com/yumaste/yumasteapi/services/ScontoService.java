@@ -26,14 +26,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScontoService {
 
-    // Repository
+
     private final ScontoRepository scontoRepository;
     private final ScontoBoxRepository scontoBoxRepository;
     private final BoxRepository boxRepository;
 
-    // Mapper
+
     private final ScontoMapper scontoMapper;
-    private final ScontoBoxMapper scontoBoxMapper; // Aggiunto per mappare la risposta!
+    private final ScontoBoxMapper scontoBoxMapper;
 
     public ScontoResponseDTO addSconto(ScontoRequestDTO scontoRequestDTO) {
         Sconto sconto = scontoMapper.toEntity(scontoRequestDTO);
