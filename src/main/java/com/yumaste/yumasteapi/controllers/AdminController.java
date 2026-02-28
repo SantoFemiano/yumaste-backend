@@ -3,7 +3,7 @@ package com.yumaste.yumasteapi.controllers;
 import com.yumaste.yumasteapi.DTO.request.*;
 import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.*;
-import jakarta.validation.Valid; // <-- IMPORTA QUESTO
+import jakarta.validation.Valid; 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +22,7 @@ public class AdminController {
     private final AllergeneService allergeneService;
     private final NutritionalValueService nutritionalValueService;
     private final ScontoService ScontoService;
+
     private final FornitoreService fornitoreService;
     private final MagazzinoService magazzinoService;
 
@@ -64,6 +65,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ScontoService.addSconto(scontoRequestDTO));
     }
 
+
     @PostMapping("/add/scontobox")
     public ResponseEntity<List<ScontoBoxResponseDTO>> collegaScontoBox(@Valid @RequestBody ScontoBoxRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ScontoService.addScontoBox(request));
@@ -88,5 +90,6 @@ public class AdminController {
     public ResponseEntity<List<MagazzinoResponseDTO>> getMagazzini() {
         return ResponseEntity.ok().body(magazzinoService.getAllMagazzino());
     }
+
 
 }
