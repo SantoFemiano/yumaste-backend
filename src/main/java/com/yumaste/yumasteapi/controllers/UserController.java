@@ -1,12 +1,15 @@
 package com.yumaste.yumasteapi.controllers;
 
 import com.yumaste.yumasteapi.DTO.request.AddToCart;
+import com.yumaste.yumasteapi.DTO.request.CheckoutRequestDTO;
 import com.yumaste.yumasteapi.DTO.request.IndirizzoRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.CartDTO;
 import com.yumaste.yumasteapi.DTO.response.IndirizzoResponseDTO;
+import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.UtenteProfileDTO;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.services.CartService;
+import com.yumaste.yumasteapi.services.OrderService;
 import com.yumaste.yumasteapi.services.UserService;
 import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
@@ -26,6 +29,7 @@ public class UserController {
 
     private final CartService cartservice;
     private final UserService userService;
+    private final OrderService orderService;
 
 
     @GetMapping("cart")
@@ -72,6 +76,12 @@ public class UserController {
 
         IndirizzoResponseDTO nuovoIndirizzo = userService.aggiungiIndirizzo(principal.getName(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuovoIndirizzo);
+    }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<OrdineResponseDTO> checkout(@AuthenticationPrincipal Utente utente, @Valid @RequestBody CheckoutRequestDTO request) {
+        OrdineResponseDTO ordine = orderService.checkout(utente,request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(ordine);
     }
 
 
