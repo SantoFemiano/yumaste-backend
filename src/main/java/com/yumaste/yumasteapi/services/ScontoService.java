@@ -30,10 +30,9 @@ public class ScontoService {
     private final ScontoRepository scontoRepository;
     private final ScontoBoxRepository scontoBoxRepository;
     private final BoxRepository boxRepository;
-
-
     private final ScontoMapper scontoMapper;
     private final ScontoBoxMapper scontoBoxMapper;
+
 
     public ScontoResponseDTO addSconto(ScontoRequestDTO scontoRequestDTO) {
         Sconto sconto = scontoMapper.toEntity(scontoRequestDTO);
