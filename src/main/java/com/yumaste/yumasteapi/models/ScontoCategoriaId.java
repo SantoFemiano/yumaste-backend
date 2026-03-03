@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
@@ -17,6 +18,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Embeddable
 public class ScontoCategoriaId implements Serializable {
+    @Serial
     private static final long serialVersionUID = 7416820500468643602L;
     @NotNull
     @Column(name = "sconto_id", nullable = false)
