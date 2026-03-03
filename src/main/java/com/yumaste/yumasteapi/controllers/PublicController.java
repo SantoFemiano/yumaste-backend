@@ -6,7 +6,6 @@ import com.yumaste.yumasteapi.DTO.response.CatalogBoxDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import com.yumaste.yumasteapi.services.BoxService;
-import com.yumaste.yumasteapi.services.testService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/public")
 public class PublicController {
 
-    private final testService testService;
+
     private final BoxService boxService;
     private final BoxCompositionService boxCompositionService;
 

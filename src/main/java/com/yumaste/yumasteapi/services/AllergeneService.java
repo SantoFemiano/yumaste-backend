@@ -3,7 +3,6 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.DTO.response.AllergeneDTO;
 import com.yumaste.yumasteapi.mapper.AllergeneMapper;
 import com.yumaste.yumasteapi.models.Allergene;
-import com.yumaste.yumasteapi.models.IngredienteAllergeneId;
 import com.yumaste.yumasteapi.repositories.AllergeneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

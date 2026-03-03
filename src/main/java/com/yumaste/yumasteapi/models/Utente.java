@@ -80,7 +80,7 @@ public class Utente implements UserDetails {
 
     /**
      * Spring Security ha bisogno di sapere qual è la password criptata da confrontare.
-     * Mappiamo la tua colonna "passwordC".
+     * Mappiamo la colonna "passwordC".
      */
     @Override
     public String getPassword() {
