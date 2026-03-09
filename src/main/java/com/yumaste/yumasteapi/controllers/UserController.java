@@ -68,6 +68,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getIndirizziAttivi(principal.getName()));
     }
 
+    @GetMapping("/ordini")
+     public ResponseEntity<List<OrdineResponseDTO>> getOrdini(@AuthenticationPrincipal Utente user) {
+        return ResponseEntity.ok(orderService.findAllOrdini(user));
+    }
+
 
     @PostMapping("/insert/indirizzo")
     public ResponseEntity<IndirizzoResponseDTO> addIndirizzo(
@@ -83,6 +88,7 @@ public class UserController {
         OrdineResponseDTO ordine = orderService.checkout(utente,request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(ordine);
     }
+
 
 
 }
