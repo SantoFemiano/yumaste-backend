@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -25,6 +26,7 @@ public class UserController {
     private final CartService cartservice;
     private final UserService userService;
     private final OrderService orderService;
+    private final PasswordEncoder passwordEncoder;
 
 
     @GetMapping("cart")

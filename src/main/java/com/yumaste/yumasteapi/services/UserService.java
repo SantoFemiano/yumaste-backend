@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.services;
 
+import com.yumaste.yumasteapi.DTO.request.CambioPasswordDTO;
 import com.yumaste.yumasteapi.DTO.request.IndirizzoRequestDTO;
 
 import com.yumaste.yumasteapi.DTO.request.UserUpdateDTO;
