@@ -1,12 +1,7 @@
 package com.yumaste.yumasteapi.controllers;
 
-import com.yumaste.yumasteapi.DTO.request.AddToCart;
-import com.yumaste.yumasteapi.DTO.request.CheckoutRequestDTO;
-import com.yumaste.yumasteapi.DTO.request.IndirizzoRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.CartDTO;
-import com.yumaste.yumasteapi.DTO.response.IndirizzoResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.UtenteProfileDTO;
+import com.yumaste.yumasteapi.DTO.request.*;
+import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.services.CartService;
 import com.yumaste.yumasteapi.services.OrderService;
@@ -89,6 +84,23 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(ordine);
     }
 
+    @PutMapping("/update/profilo")
+    public ResponseEntity<UtenteAggDTO> aggiornaProfilo(@AuthenticationPrincipal Utente utente, @Valid @RequestBody UserUpdateDTO request){
+        UtenteAggDTO utenteaggiornato = userService.putProfile(utente, request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(utenteaggiornato);
+    }
 
+
+    @PutMapping("/update/profilo/password")
+    public ResponseEntity<?> aggiornaProfiloPassword(
+            @AuthenticationPrincipal Utente utente, @Valid @RequestBody CambioPasswordDTO request) {
+        try {
+            UtenteAggDTO utenteaggiornato = userService.putProfilePass(utente, request);
+            return ResponseEntity.ok(utenteaggiornato); // 200 OK
+        } catch (IllegalArgumentException e) {
+            // Se la password vecchia è errata, restituiamo un Bad Request (400)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 }
