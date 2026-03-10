@@ -7,7 +7,7 @@ import com.yumaste.yumasteapi.models.Magazzino;
 import com.yumaste.yumasteapi.models.Ordine;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring") // Fondamentale per l'iniezione @Autowired
+@Mapper(componentModel = "spring")
 public interface OrderMapper {
      OrdineResponseDTO toDto(Ordine ordine);
 }
