@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.services;
 
+import com.yumaste.yumasteapi.DTO.request.AggiornaQuantitaDTO;
 import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
 import com.yumaste.yumasteapi.DTO.response.CartDTO;
 import com.yumaste.yumasteapi.models.Box;
@@ -116,6 +117,30 @@ public class CartService {
         }
 
         return getCarrelloDellUtente(utente);
+    }
+
+
+    @Transactional
+    public void aggiornaQuantita(Utente utente, AggiornaQuantitaDTO request) {
+        // 1. Cerca la riga del carrello specifica per quell'utente e quella box
+        Carrello riga = carrelloRepository.findByUtenteAndBoxId(utente, request.boxId())
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato nel carrello"));
+
+        // 2. Aggiorna la quantità
+        riga.setQuantita(request.quantita());
+
+        // 3. Salva la modifica
+        carrelloRepository.save(riga);
+    }
+
+    @Transactional
+    public void rimuoviProdotto(Utente utente, Long boxId) {
+        // 1. Cerca la riga del carrello (così verifichiamo anche che appartenga a quell'utente!)
+        Carrello riga = carrelloRepository.findByUtenteAndBoxId(utente, boxId)
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato nel carrello"));
+
+        // 2. Elimina la riga dal database
+        carrelloRepository.delete(riga);
     }
 
 }

@@ -4,11 +4,14 @@ import com.yumaste.yumasteapi.DTO.request.CheckoutRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.CartDTO;
 import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
 import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
+import com.yumaste.yumasteapi.DTO.response.OrdiniDettagliDTO;
+import com.yumaste.yumasteapi.mapper.OrderDettagliMapper;
 import com.yumaste.yumasteapi.mapper.OrderMapper;
 import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -31,6 +34,7 @@ public class OrderService {
     private final FatturaRepository fatturaRepository;
     private final IndirizzoUtenteRepository indirizzoRepository;
     private final OrderMapper orderMapper;
+    private final OrderDettagliMapper orderDettagliMapper;
 
 
     @Transactional
@@ -116,5 +120,27 @@ public class OrderService {
                 .map(orderMapper::toDto)
                 .toList();
     }
+
+
+    public List<OrdiniDettagliDTO> getDettagliOrdini(Utente utenteCorrente, Long idOrdine){
+
+        Ordine ordine = ordineRepository.findById(idOrdine).orElseThrow(() -> new RuntimeException("Ordine non trovata!"));
+
+        if (!ordine.getUtente().getId().equals(utenteCorrente.getId())) {
+            // Se non coincidono, blocchiamo tutto! L'utente sta provando a spiare un ordine altrui.
+            throw new RuntimeException("Accesso negato: non sei autorizzato a visualizzare questo ordine.");
+        }
+
+        Spedizione spedizione = spedizioneRepository.findByOrdine(ordine).orElseThrow(() -> new RuntimeException("Spedizione non trovata!"));
+
+        Fattura fattura = fatturaRepository.findByOrdine(ordine).orElseThrow(() -> new RuntimeException("Spedizione non trovata!"));
+        List<DettaglioOrdine> dettaglioOrdine = dettaglioOrdineRepository.findByOrdine_Id(idOrdine);
+
+        return dettaglioOrdine.stream()
+                .map(singoloDettaglio -> orderDettagliMapper.toDto(ordine, singoloDettaglio, fattura, spedizione))
+                .collect(Collectors.toList());
+    }
+
+
 
 }

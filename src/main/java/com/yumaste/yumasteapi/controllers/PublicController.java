@@ -25,13 +25,17 @@ public class PublicController {
 
     @GetMapping("/boxes")
     public ResponseEntity<Page<CatalogBoxDTO>> getCatalog(
-            @RequestParam(required=false) String categoria, Pageable pageable){
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String search, // 👈 Aggiungiamo il parametro 'search'
+            Pageable pageable) {
 
-        Page<CatalogBoxDTO> catolog = boxService.getAllActiveBoxes(categoria,pageable);
-        if(catolog.isEmpty()){
+        // Passiamo 'search' al service
+        Page<CatalogBoxDTO> catalogo = boxService.getAllActiveBoxes(categoria, search, pageable);
+
+        if(catalogo.isEmpty()){
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(catolog);
+        return ResponseEntity.ok(catalogo);
     }
 
     @GetMapping("/box/{id}")
