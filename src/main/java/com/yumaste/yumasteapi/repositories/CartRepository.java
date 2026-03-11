@@ -14,4 +14,6 @@ public interface CartRepository extends JpaRepository<Carrello, Long> {
     List<Carrello> findByUtente(Utente utente);
 
     Optional<Carrello> findByUtenteAndBox(Utente utente, Box box);
+
+    Optional<Carrello> findByUtenteAndBoxId(Utente utente, Long aLong);
 }

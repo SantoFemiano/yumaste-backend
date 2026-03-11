@@ -7,6 +7,7 @@ import com.yumaste.yumasteapi.services.CartService;
 import com.yumaste.yumasteapi.services.OrderService;
 import com.yumaste.yumasteapi.services.UserService;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.security.Principal;
 import java.util.List;
@@ -27,6 +29,7 @@ public class UserController {
     private final UserService userService;
     private final OrderService orderService;
     private final PasswordEncoder passwordEncoder;
+
 
 
     @GetMapping("cart")
@@ -104,5 +107,34 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @GetMapping("/ordine/{id}/dettagli")
+    public ResponseEntity<List<OrdiniDettagliDTO>> getDettagli(  @AuthenticationPrincipal Utente utente,@PathVariable("id") Long id) {
+
+    List<OrdiniDettagliDTO> dettagli_ordine = orderService.getDettagliOrdini(utente, id);
+
+    return ResponseEntity.ok(dettagli_ordine);
+
+    }
+
+    @PutMapping("/cart/update")
+    public ResponseEntity<String> aggiornaQuantitaCarrello(
+            @AuthenticationPrincipal Utente utenteCorrente,
+            @Valid @RequestBody AggiornaQuantitaDTO request) {
+
+        cartservice.aggiornaQuantita(utenteCorrente, request);
+        return ResponseEntity.ok("Quantità aggiornata con successo");
+    }
+
+    // --- 2. ENDPOINT PER RIMUOVERE UN PRODOTTO ---
+    @DeleteMapping("cart/remove/{boxId}")
+    public ResponseEntity<String> rimuoviDalCarrello(
+            @AuthenticationPrincipal Utente utenteCorrente,
+            @PathVariable("boxId") Long boxId) {
+
+        cartservice.rimuoviProdotto(utenteCorrente, boxId);
+        return ResponseEntity.ok("Prodotto rimosso dal carrello");
+    }
+
 
 }

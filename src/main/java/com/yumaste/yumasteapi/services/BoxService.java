@@ -27,13 +27,30 @@ public class BoxService {
     private final IngredienteAllergeneRepository ingredienteAllergeneRepository;
     private final ScontoRepository scontoRepository;
 
-    public Page<CatalogBoxDTO> getAllActiveBoxes(String categoria,Pageable pageable){
-        if(categoria!=null && !categoria.isBlank()) {
+    public Page<CatalogBoxDTO> getAllActiveBoxes(String categoria, String search, Pageable pageable) {
+        Page<Box> boxes;
 
-            return boxRepository.findByCategoriaAndAttivoTrue(categoria,pageable).map(this::mapToCatalogBoxDTOConSconto);
+        // Puliamo i parametri per evitare stringhe vuote o spazi
+        boolean haCategoria = categoria != null && !categoria.trim().isEmpty() && !categoria.equalsIgnoreCase("Tutte");
+        boolean haRicerca = search != null && !search.trim().isEmpty();
+
+        // Logica di instradamento
+        if (haCategoria && haRicerca) {
+            // Filtra per ENTRAMBI
+            boxes = boxRepository.findByCategoriaAndNomeContainingIgnoreCaseAndAttivoTrue(categoria, search, pageable);
+        } else if (haCategoria) {
+            // Filtra SOLO per Categoria
+            boxes = boxRepository.findByCategoriaAndAttivoTrue(categoria, pageable);
+        } else if (haRicerca) {
+            // Filtra SOLO per Ricerca
+            boxes = boxRepository.findByNomeContainingIgnoreCaseAndAttivoTrue(search, pageable);
+        } else {
+            // NESSUN filtro: prendi tutto
+            boxes = boxRepository.findByAttivoTrue(pageable);
         }
 
-        return boxRepository.findByAttivoTrue(pageable).map(this::mapToCatalogBoxDTOConSconto);
+
+        return boxes.map(this::mapToCatalogBoxDTOConSconto);
     }
 
     public Page<CatalogBoxDTO> getBoxById(Long Id,Pageable pageable){
