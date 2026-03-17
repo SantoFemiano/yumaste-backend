@@ -18,8 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +34,24 @@ public class ScontoService {
     private final BoxRepository boxRepository;
     private final ScontoMapper scontoMapper;
     private final ScontoBoxMapper scontoBoxMapper;
+
+    public List<ScontoResponseDTO> getSconti(){
+        List<Sconto> lista_sconti;
+        lista_sconti = scontoRepository.findAll();
+        return lista_sconti.stream().map(scontoMapper::toDto).toList();
+    }
+
+    public List<ScontoResponseDTO> getScontiValidi() {
+        // Calcola la data di oggi nel momento esatto in cui viene chiamata l'API
+        LocalDate oggi = LocalDate.now();
+
+        List<Sconto> scontiValidi = scontoRepository.findScontiAttiviEValidiOggi(oggi);
+
+
+        return scontiValidi.stream()
+                .map(scontoMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
 
     public ScontoResponseDTO addSconto(ScontoRequestDTO scontoRequestDTO) {

@@ -55,6 +55,11 @@ public class AdminController {
         return ResponseEntity.ok().body(nutritionalValueService.getAllNutritionalValue());
     }
 
+    @GetMapping("/ingredienti")
+    public ResponseEntity<List<IngredienteResponseDTO>> getIngredienti() {
+        return ResponseEntity.ok(ingredienteService.getAllIngredienti());
+    }
+
     @GetMapping("/ingredienti/allergeni")
     public ResponseEntity<List<IngredienteAllergeneResponseDTO>> getListaIngredientiAllergeni() {
         return ResponseEntity.ok(ingredienteService.getAllIngredientiConAllergeni());
@@ -63,6 +68,17 @@ public class AdminController {
     @PostMapping("/add/sconto")
     public ResponseEntity<ScontoResponseDTO> addDiscount(@Valid @RequestBody ScontoRequestDTO scontoRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ScontoService.addSconto(scontoRequestDTO));
+    }
+
+    @GetMapping("/sconti")
+    public ResponseEntity<List<ScontoResponseDTO>> getSconto() {
+        return ResponseEntity.ok(ScontoService.getSconti());
+    }
+
+    @GetMapping("/scontiattivi")
+    public ResponseEntity<List<ScontoResponseDTO>> getScontiattivi() {
+        List<ScontoResponseDTO> sconti = ScontoService.getScontiValidi();
+        return ResponseEntity.ok(sconti);
     }
 
     @PostMapping("/add/scontobox")

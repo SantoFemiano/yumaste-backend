@@ -4,6 +4,6 @@ import com.yumaste.yumasteapi.models.Allergene;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface AllergeneRepository extends JpaRepository<Allergene, Integer> {
+public interface AllergeneRepository extends JpaRepository<Allergene, Long> {
 
 }
