@@ -11,5 +11,6 @@ public record CatalogBoxDTO(
     BigDecimal prezzoScontato,
     Integer percentualeSconto,
     Byte porzioni,
-    String immagineUrl
+    String immagineUrl,
+    Boolean attivo
 ) {}

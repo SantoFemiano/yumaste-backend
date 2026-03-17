@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public record IngredienteResponseDTO(
         Long id,
         String ean,
+        String partitaIvaFornitore,
         Long fornitoreId,
         String nomeFornitore,
         String nome,

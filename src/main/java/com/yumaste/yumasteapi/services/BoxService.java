@@ -183,7 +183,8 @@ Dati_Sconto datiScontobox = calcolaSconto(box);
                 sconto.scontato(),    // Prezzo scontrato (es. 16.00)
                 sconto.percentuale(), // Percentuale (es. 20)
                 box.getPorzioni(),
-                box.getImmagineUrl()
+                box.getImmagineUrl(),
+                box.getAttivo()
         );
     }
 
