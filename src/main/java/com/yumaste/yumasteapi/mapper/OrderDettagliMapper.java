@@ -30,5 +30,6 @@ public interface OrderDettagliMapper {
     @Mapping(source = "spedizione.provincia", target = "indirizzoresponsedto.provincia")
     @Mapping(target="indirizzoresponsedto.stato", ignore=true)
     @Mapping(target="indirizzoresponsedto.id", ignore=true)
+    @Mapping(source = "box.box.nome", target = "nomeBox")
     OrdiniDettagliDTO toDto(Ordine ordine, DettaglioOrdine box, Fattura fattura, Spedizione spedizione);
 }

@@ -16,5 +16,9 @@ import java.time.LocalDate;
 
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
+
+     @Mapping(source = "utente.id", target = "utenteId")
+     @Mapping(source = "utente.nome", target = "nomeCliente")
+     @Mapping(source = "utente.cognome", target = "cognomeCliente")
      OrdineResponseDTO toDto(Ordine ordine);
 }
