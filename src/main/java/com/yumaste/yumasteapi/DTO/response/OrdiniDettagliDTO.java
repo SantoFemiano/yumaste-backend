@@ -6,6 +6,7 @@ import java.time.LocalDate;
 public record OrdiniDettagliDTO(
         Long ordineid,
         Long boxid,
+        String nomeBox,
         Integer quantita,
         BigDecimal prezzounitario,
         String metodopagamento,

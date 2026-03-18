@@ -110,7 +110,10 @@ public class OrderService {
                 ordinesalvato.getDataOrdine(),
                 ordinesalvato.getTotalePrezzo(),
                 ordinesalvato.getStatoOrdine(),
-                spedizionesalvata.getStatoSpedizione()
+                spedizionesalvata.getStatoSpedizione(),
+                utente.getId(),
+                utente.getNome(),
+                utente.getCognome()
         );
     }
 
@@ -119,6 +122,28 @@ public class OrderService {
                 .stream()
                 .map(orderMapper::toDto)
                 .toList();
+    }
+
+    public List<OrdineResponseDTO> findAllOrdini() {
+        return ordineRepository.findAll()
+                .stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
+
+    public List<OrdiniDettagliDTO> getDettagliOrdineAdmin(Long idOrdine) {
+        Ordine ordine = ordineRepository.findById(idOrdine)
+                .orElseThrow(() -> new RuntimeException("Ordine non trovato!"));
+        Spedizione spedizione = spedizioneRepository.findByOrdine(ordine)
+                .orElseThrow(() -> new RuntimeException("Spedizione non trovata!"));
+        Fattura fattura = fatturaRepository.findByOrdine(ordine)
+                .orElseThrow(() -> new RuntimeException("Fattura non trovata!"));
+
+        List<DettaglioOrdine> dettaglioOrdine = dettaglioOrdineRepository.findByOrdine_Id(idOrdine);
+
+        return dettaglioOrdine.stream()
+                .map(singoloDettaglio -> orderDettagliMapper.toDto(ordine, singoloDettaglio, fattura, spedizione))
+                .collect(Collectors.toList());
     }
 
 

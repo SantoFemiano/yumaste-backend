@@ -29,6 +29,7 @@ public class UserService {
     private final UtenteMapper utenteMapper;
     private final PasswordEncoder passwordEncoder;
 
+
     // Metodo privato di supporto per estrarre l'utente in modo sicuro
     private Utente getUtenteLoggato(String email) {
         return utenteRepository.findByEmail(email) // Richiede che nel UtenteRepository ci sia findByEmail
@@ -47,6 +48,12 @@ public class UserService {
                 utente.getCf(),
                 indirizziAttivi
         );
+    }
+
+
+    public List<UtenteProfileDTO> getClienti(){
+        List<Utente> clienti = utenteRepository.findAll();
+        return clienti.stream().map(utenteMapper::toDTO).toList();
     }
 
     public IndirizzoResponseDTO aggiungiIndirizzo(String email, IndirizzoRequestDTO request) {

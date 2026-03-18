@@ -9,6 +9,9 @@ public record OrdineResponseDTO(
         Instant dataOrdine,
         BigDecimal totalePrezzo,
         String statoOrdine,
-        String statoSpedizione
+        String statoSpedizione,
+        Long utenteId,
+        String nomeCliente,
+        String cognomeCliente
 ) {
 }

@@ -2,11 +2,13 @@ package com.yumaste.yumasteapi.controllers;
 
 import com.yumaste.yumasteapi.DTO.request.*;
 import com.yumaste.yumasteapi.DTO.response.*;
+import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.services.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +27,8 @@ public class AdminController {
     private final FornitoreService fornitoreService;
     private final MagazzinoService magazzinoService;
     private final IngredienteMagazzinoService ingredienteMagazzinoService;
+    private final OrderService orderService;
+    private final UserService userService;
 
 
     @PostMapping("/addBox")
@@ -115,5 +119,24 @@ public class AdminController {
     public ResponseEntity<List<IngredienteMagazzinoResponse>> getIngredienteMagazzino() {
         return ResponseEntity.ok().body(ingredienteMagazzinoService.getAllIngredienteMagazzino());
     }
+
+    @GetMapping("/ordini/clienti")
+    public ResponseEntity<List<OrdineResponseDTO>> getOrdiniClienti() {
+        return ResponseEntity.ok().body(orderService.findAllOrdini());
+    }
+
+
+    @GetMapping("/clienti")
+public ResponseEntity<List<UtenteProfileDTO>> getClienti() {
+        return ResponseEntity.ok().body(userService.getClienti());
+    }
+
+    @GetMapping("/ordine/{id}/dettagli")
+    public ResponseEntity<List<OrdiniDettagliDTO>> getDettagliOrdine(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getDettagliOrdineAdmin(id));
+    }
+
+
+
 
 }
