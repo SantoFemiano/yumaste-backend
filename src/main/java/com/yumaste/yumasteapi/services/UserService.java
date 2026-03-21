@@ -51,9 +51,24 @@ public class UserService {
     }
 
 
-    public List<UtenteProfileDTO> getClienti(){
+    public List<UtenteProfileDTO> getClienti() {
         List<Utente> clienti = utenteRepository.findAll();
-        return clienti.stream().map(utenteMapper::toDTO).toList();
+
+        return clienti.stream().map(utente -> {
+            List<IndirizzoResponseDTO> indirizzi = indirizzoUtenteRepository.findByUtente(utente)
+                    .stream()
+                    .map(indirizzoMapper::toDTO)
+                    .toList();
+
+            return new UtenteProfileDTO(
+                    utente.getId(),
+                    utente.getNome(),
+                    utente.getCognome(),
+                    utente.getEmail(),
+                    utente.getCf(),
+                    indirizzi
+            );
+        }).toList();
     }
 
     public IndirizzoResponseDTO aggiungiIndirizzo(String email, IndirizzoRequestDTO request) {

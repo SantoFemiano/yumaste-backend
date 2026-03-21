@@ -1,6 +1,7 @@
 package com.yumaste.yumasteapi.DTO.response;
 
 public record MagazzinoResponseDTO(
+        Long id,
         String nome,
         String via,
         String civico,
