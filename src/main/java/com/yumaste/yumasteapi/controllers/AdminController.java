@@ -29,6 +29,7 @@ public class AdminController {
     private final IngredienteMagazzinoService ingredienteMagazzinoService;
     private final OrderService orderService;
     private final UserService userService;
+    private final CartService cartService;
 
 
     @PostMapping("/addBox")
@@ -136,7 +137,11 @@ public ResponseEntity<List<UtenteProfileDTO>> getClienti() {
         return ResponseEntity.ok(orderService.getDettagliOrdineAdmin(id));
     }
 
-
+@GetMapping("/utente/{id}/cliente")
+public ResponseEntity<CartDTO> getCarrelloUtente(@PathVariable Long id){
+        CartDTO carrello = cartService.getCarrelloUtenteById(id);
+        return ResponseEntity.ok(carrello);
+}
 
 
 }
