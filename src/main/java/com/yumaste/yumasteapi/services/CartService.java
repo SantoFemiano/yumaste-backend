@@ -10,6 +10,7 @@ import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.CartRepository;
 import com.yumaste.yumasteapi.repositories.ScontoRepository;
+import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class CartService {
     private final CartRepository carrelloRepository;
     private final ScontoRepository scontoRepository;
     private final BoxRepository BoxRepository;
+    private final UtenteRepository utenteRepository;
 
     private DatiSconto calcolaSconto(Box box) {
         BigDecimal prezzoOriginale = box.getPrezzo();
@@ -141,6 +143,13 @@ public class CartService {
 
         // 2. Elimina la riga dal database
         carrelloRepository.delete(riga);
+    }
+
+    public CartDTO getCarrelloUtenteById(Long utente_id){
+        Utente utente_corrente = utenteRepository.findById(utente_id)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        return getCarrelloDellUtente(utente_corrente);
     }
 
 }
