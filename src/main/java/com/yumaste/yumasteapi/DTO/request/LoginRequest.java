@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data // Genera in automatico Getter, Setter, toString, equals e hashCode
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

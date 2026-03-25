@@ -5,13 +5,12 @@ import com.yumaste.yumasteapi.DTO.response.CartDTO;
 import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
 import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.OrdiniDettagliDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.OrderDettagliMapper;
-import com.yumaste.yumasteapi.mapper.OrderMapper;
 import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,7 +32,6 @@ public class OrderService {
     private final SpedizioneRepository spedizioneRepository;
     private final FatturaRepository fatturaRepository;
     private final IndirizzoUtenteRepository indirizzoRepository;
-    private final OrderMapper orderMapper;
     private final OrderDettagliMapper orderDettagliMapper;
 
 
@@ -44,16 +42,16 @@ public class OrderService {
 
         //controllo se carrello è vuoto
         if(carrello.items().isEmpty()){
-            throw  new RuntimeException("Impossibile effettuare l'ordine: il carrello è vuoto.");
+            throw new RuntimeException("Impossibile effettuare l'ordine: il carrello è vuoto.");
         }
 
         //recupero indirizzo utente da id_utente richiesta e controllo
-        IndirizzoUtente indirizzo= indirizzoRepository.findById(requestDTO.indirizzoId()).filter(
-                ind -> ind.getUtente().getId().equals(utente.getId()))
-                .orElseThrow(()-> new RuntimeException("Indirizzo non trovato o non appartenente all'utente")
-        );
+        IndirizzoUtente indirizzo = indirizzoRepository.findById(requestDTO.indirizzoId()).filter(
+                        ind -> ind.getUtente().getId().equals(utente.getId()))
+                .orElseThrow(()-> new ResourceNotFoundException("Indirizzo non trovato o non appartenente all'utente")
+                );
 
-//creazione oggetto ordine e compilazione oggetto
+        //creazione oggetto ordine e compilazione oggetto
         Ordine ordine = new Ordine();
         ordine.setUtente(utente);
         ordine.setCodiceOrdine("ORD-"+ UUID.randomUUID().toString().substring(0,8).toUpperCase());
@@ -64,17 +62,43 @@ public class OrderService {
 
         Ordine ordinesalvato = ordineRepository.save(ordine);
 
-//ciclo tutti gli item del carrello e creo per ogni item riga in dettaglio ordine
+        // =====================================================================
+        // FIX PERFORMANCE: GESTIONE IN BULK PER EVITARE N+1 QUERIES
+        // =====================================================================
+
+        // 1. Estraiamo tutti gli ID delle box presenti nel carrello
+        List<Long> boxIds = carrello.items().stream().map(CartItemDTO::boxId).toList();
+
+        // 2. Chiediamo al DB di darci TUTTE queste box con UNA SOLA query (SELECT ... WHERE id IN (...))
+        // e le inseriamo in una Mappa per trovarle velocemente in memoria
+        java.util.Map<Long, Box> boxMap = boxRepository.findAllById(boxIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Box::getId, b -> b));
+
+        List<DettaglioOrdine> dettagliDaSalvare = new java.util.ArrayList<>();
+
+        // 3. Cicliamo gli item del carrello
         for(CartItemDTO item : carrello.items()){
             DettaglioOrdine dettaglio = new DettaglioOrdine();
             dettaglio.setOrdine(ordinesalvato);
 
-            Box box = boxRepository.findById(item.boxId()).orElseThrow(() -> new RuntimeException("Box non trovata!") );
+            // Peschiamo la box dalla mappa in memoria (ZERO chiamate al DB in questo ciclo!)
+            Box box = boxMap.get(item.boxId());
+            if(box == null) {
+                throw new ResourceNotFoundException("Box non trovata!");
+            }
+
             dettaglio.setBox(box);
             dettaglio.setQuantita(item.quantita());
             dettaglio.setPrezzoUnitario(item.prezzoScontato());
-            dettaglioOrdineRepository.save(dettaglio);
+
+            // Aggiungiamo l'entità alla lista invece di salvarla subito
+            dettagliDaSalvare.add(dettaglio);
         }
+
+        // 4. Eseguiamo una SINGOLA operazione di INSERT multipla nel database! (Velocissimo)
+        dettaglioOrdineRepository.saveAll(dettagliDaSalvare);
+
+        // =====================================================================
 
         // creo oggetto spedizione associato all ordine
         Spedizione spedizione = new Spedizione();
@@ -91,7 +115,6 @@ public class OrderService {
         Spedizione spedizionesalvata = spedizioneRepository.save(spedizione);
 
         //creo oggetto fattura associato all ordine
-
         Fattura fattura = new Fattura();
         fattura.setOrdine(ordinesalvato);
         fattura.setMetodoPagamento(requestDTO.metodoPagamento());
@@ -100,10 +123,9 @@ public class OrderService {
 
         fatturaRepository.save(fattura);
 
-
         cartRepository.deleteAll(cartRepository.findByUtente(utente));
 
-//ritorno del dto ordine compilato
+        //ritorno del dto ordine compilato
         return new OrdineResponseDTO(
                 ordinesalvato.getId(),
                 ordinesalvato.getCodiceOrdine(),
@@ -133,11 +155,11 @@ public class OrderService {
 
     public List<OrdiniDettagliDTO> getDettagliOrdineAdmin(Long idOrdine) {
         Ordine ordine = ordineRepository.findById(idOrdine)
-                .orElseThrow(() -> new RuntimeException("Ordine non trovato!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ordine non trovato!"));
         Spedizione spedizione = spedizioneRepository.findByOrdine(ordine)
-                .orElseThrow(() -> new RuntimeException("Spedizione non trovata!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Spedizione non trovata!"));
         Fattura fattura = fatturaRepository.findByOrdine(ordine)
-                .orElseThrow(() -> new RuntimeException("Fattura non trovata!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata!"));
 
         List<DettaglioOrdine> dettaglioOrdine = dettaglioOrdineRepository.findByOrdine_Id(idOrdine);
 
@@ -149,16 +171,16 @@ public class OrderService {
 
     public List<OrdiniDettagliDTO> getDettagliOrdini(Utente utenteCorrente, Long idOrdine){
 
-        Ordine ordine = ordineRepository.findById(idOrdine).orElseThrow(() -> new RuntimeException("Ordine non trovata!"));
+        Ordine ordine = ordineRepository.findById(idOrdine).orElseThrow(() -> new ResourceNotFoundException("Ordine non trovata!"));
 
         if (!ordine.getUtente().getId().equals(utenteCorrente.getId())) {
             // Se non coincidono, blocchiamo tutto! L'utente sta provando a spiare un ordine altrui.
             throw new RuntimeException("Accesso negato: non sei autorizzato a visualizzare questo ordine.");
         }
 
-        Spedizione spedizione = spedizioneRepository.findByOrdine(ordine).orElseThrow(() -> new RuntimeException("Spedizione non trovata!"));
+        Spedizione spedizione = spedizioneRepository.findByOrdine(ordine).orElseThrow(() -> new ResourceNotFoundException("Spedizione non trovata!"));
 
-        Fattura fattura = fatturaRepository.findByOrdine(ordine).orElseThrow(() -> new RuntimeException("Spedizione non trovata!"));
+        Fattura fattura = fatturaRepository.findByOrdine(ordine).orElseThrow(() -> new ResourceNotFoundException("Spedizione non trovata!"));
         List<DettaglioOrdine> dettaglioOrdine = dettaglioOrdineRepository.findByOrdine_Id(idOrdine);
 
         return dettaglioOrdine.stream()
@@ -169,7 +191,7 @@ public class OrderService {
     @Transactional
     public OrdineResponseDTO updateStatoOrdine(Long id, String statoOrdine, String statoSpedizione) {
         Ordine ordine = ordineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ordine non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ordine non trovato"));
 
         if (statoOrdine != null && !statoOrdine.isBlank()) {
             ordine.setStatoOrdine(statoOrdine);
@@ -177,7 +199,7 @@ public class OrderService {
 
         if (statoSpedizione != null && !statoSpedizione.isBlank()) {
             Spedizione spedizione = spedizioneRepository.findByOrdine(ordine)
-                    .orElseThrow(() -> new RuntimeException("Spedizione non trovata"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Spedizione non trovata"));
             spedizione.setStatoSpedizione(statoSpedizione);
             spedizioneRepository.save(spedizione);
         }

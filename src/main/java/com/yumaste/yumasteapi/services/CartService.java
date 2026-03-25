@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.DTO.request.AggiornaQuantitaDTO;
 import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
 import com.yumaste.yumasteapi.DTO.response.CartDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.models.Carrello;
 import com.yumaste.yumasteapi.models.Sconto;
@@ -80,7 +81,6 @@ public class CartService {
                 .mapToInt(CartItemDTO::quantita)
                 .sum();
 
-        // Il calcolo del totale ora è PERFETTO perché prezzoUnitario è già scontato!
         BigDecimal totalPrice = items.stream()
                 .map(i -> i.prezzoScontato().multiply(BigDecimal.valueOf(i.quantita())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -97,7 +97,7 @@ public class CartService {
         }
 
         Box box = BoxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
 
         // Controllo di Sicurezza extra aggiunto: la Box deve essere in vendita!
         if (Boolean.FALSE.equals(box.getAttivo())) {
@@ -147,7 +147,7 @@ public class CartService {
 
     public CartDTO getCarrelloUtenteById(Long utente_id){
         Utente utente_corrente = utenteRepository.findById(utente_id)
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato"));
 
         return getCarrelloDellUtente(utente_corrente);
     }

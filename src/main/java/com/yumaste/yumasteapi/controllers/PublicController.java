@@ -40,8 +40,8 @@ public class PublicController {
 
     @GetMapping("/box/{id}")
     public ResponseEntity<CatalogBoxDTO> getBoxById(@PathVariable Long id){
-        Page<CatalogBoxDTO> box= boxService.getBoxById(id,Pageable.unpaged());
-    return ResponseEntity.ok(box.getContent().stream().findFirst().orElse(null));
+        CatalogBoxDTO box = boxService.getBoxById(id);
+        return ResponseEntity.ok(box);
     }
 
     @GetMapping("/box/ingredienti/{idBox}")

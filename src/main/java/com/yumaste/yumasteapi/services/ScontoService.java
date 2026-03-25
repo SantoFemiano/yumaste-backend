@@ -4,6 +4,7 @@ import com.yumaste.yumasteapi.DTO.request.ScontoBoxRequestDTO;
 import com.yumaste.yumasteapi.DTO.request.ScontoRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.ScontoBoxResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.ScontoResponseDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.ScontoBoxMapper;
 import com.yumaste.yumasteapi.mapper.ScontoMapper;
 import com.yumaste.yumasteapi.models.*;
@@ -61,7 +62,7 @@ public class ScontoService {
     public List<ScontoBoxResponseDTO> addScontoBox(ScontoBoxRequestDTO request) {
 
         Sconto sconto = scontoRepository.findById(request.scontoId())
-                .orElseThrow(() -> new RuntimeException("Sconto non trovato con ID: " + request.scontoId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Sconto non trovato con ID: " + request.scontoId()));
 
         List<Box> boxesTrovate = boxRepository.findAllById(request.boxIds());
         List<ScontoBox> associazioniDaSalvare = new ArrayList<>();
@@ -120,7 +121,7 @@ public class ScontoService {
 
     public ScontoResponseDTO updateSconto(Long id, ScontoRequestDTO request) {
         Sconto sconto = scontoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sconto non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Sconto non trovato"));
 
         sconto.setNome(request.nome());
         sconto.setValore(request.valore());
@@ -138,7 +139,7 @@ public class ScontoService {
         }
 
         Sconto sconto = scontoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sconto non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Sconto non trovato"));
 
         scontoRepository.delete(sconto);
     }

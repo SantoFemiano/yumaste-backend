@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.services;
 
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Sconto;
 import com.yumaste.yumasteapi.DTO.request.BoxRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.*;
@@ -56,8 +57,11 @@ public class BoxService {
         return boxes.map(this::mapToCatalogBoxDTOConSconto);
     }
 
-    public Page<CatalogBoxDTO> getBoxById(Long Id,Pageable pageable){
-        return boxRepository.findById(Id,pageable).map(this::mapToCatalogBoxDTOConSconto);
+    public CatalogBoxDTO getBoxById(Long id) {
+        Box box = boxRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
+
+        return mapToCatalogBoxDTOConSconto(box);
     }
 
     public BoxResponseDTO insertBox(BoxRequestDTO boxRequestDTO){
@@ -73,7 +77,7 @@ public class BoxService {
 
         //Prendo la Box base dal Database
         Box box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
 
         //Prendo gli ingredienti, con loro anche i valori nutrizionali
         List<IngredientiConValoriDTO> ingredientiBox = boxCompositionService.getIngredientiConValoriDellaBox(boxId);
@@ -200,7 +204,7 @@ Dati_Sconto datiScontobox = calcolaSconto(box);
     @Transactional
     public BoxResponseDTO updateBox(Long id, BoxRequestDTO request) {
         Box box = boxRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
 
         box.setEan(request.ean());
         box.setNome(request.nome());
@@ -217,7 +221,7 @@ Dati_Sconto datiScontobox = calcolaSconto(box);
     @Transactional
     public void deleteBox(Long id) {
         Box box = boxRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
         box.setAttivo(false);
         boxRepository.save(box);
     }

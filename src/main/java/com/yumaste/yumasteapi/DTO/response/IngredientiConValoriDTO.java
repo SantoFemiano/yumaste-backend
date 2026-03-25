@@ -17,7 +17,7 @@ public record IngredientiConValoriDTO(
         BigDecimal grassi,
         BigDecimal sale      // Aggiunto
 ) {
-    // COSTRUTTORE COMPATTO: scatta in automatico!
+
     public IngredientiConValoriDTO {
         if (quantitaNellaBox != null && chilocalorie != null && unitaMisura != null) {
 
@@ -25,21 +25,20 @@ public record IngredientiConValoriDTO(
             BigDecimal fattoreDiMoltiplicazione;
 
             // Logica di calcolo in base all'unità di misura
-            if (unita.equals("kg") || unita.equals("l") || unita.equals("litri")) {
-                // Es. 1.5 Kg -> 1500g. Dividiamo per 100 -> fattore 15
-                BigDecimal quantitaInGrammi = quantitaNellaBox.multiply(new BigDecimal("1000"));
-                fattoreDiMoltiplicazione = quantitaInGrammi.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
-
-            } else if (unita.equals("g") || unita.equals("ml")) {
-                // Es. 250g / 100 = fattore 2.5
-                fattoreDiMoltiplicazione = quantitaNellaBox.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
-
-            } else if (unita.equals("pz") || unita.equals("pezzi") || unita.equals("unita")) {
-                // Calcolo per unità singola (es. 3 uova = fattore 3)
-                fattoreDiMoltiplicazione = quantitaNellaBox;
-
-            } else {
-                fattoreDiMoltiplicazione = quantitaNellaBox.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
+            switch (unita) {
+                case "kg", "l", "litri" -> {
+                    // Es. 1.5 Kg -> 1500g. Dividiamo per 100 -> fattore 15
+                    BigDecimal quantitaInGrammi = quantitaNellaBox.multiply(new BigDecimal("1000"));
+                    fattoreDiMoltiplicazione = quantitaInGrammi.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
+                }
+                case "g", "ml" ->
+                    // Es. 250g / 100 = fattore 2.5
+                        fattoreDiMoltiplicazione = quantitaNellaBox.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
+                case "pz", "pezzi", "unita" ->
+                    // Calcolo per unità singola (es. 3 uova = fattore 3)
+                        fattoreDiMoltiplicazione = quantitaNellaBox;
+                default ->
+                        fattoreDiMoltiplicazione = quantitaNellaBox.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
             }
 
             // APPLICHIAMO IL FATTORE A TUTTI I CAMPI E ARROTONDIAMO A 2 DECIMALI

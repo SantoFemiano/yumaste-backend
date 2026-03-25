@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredienteAllergeneResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredienteResponseDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.IngredienteAllergeneMapper;
 import com.yumaste.yumasteapi.mapper.IngredienteMapper;
 import com.yumaste.yumasteapi.models.*;
@@ -30,7 +31,7 @@ public class IngredienteService {
 
         // 1. SALVATAGGIO INGREDIENTE BASE
         Ingrediente nuovoIngrediente = ingredienteMapper.toEntity(request);
-        Fornitore fornitore = fornitoreRepository.findByPartitaIva((request.partitaIva())).orElseThrow(() -> new RuntimeException("Fornitore non trovato con Partita Iva: " + request.partitaIva()));
+        Fornitore fornitore = fornitoreRepository.findByPartitaIva((request.partitaIva())).orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato con Partita Iva: " + request.partitaIva()));
         nuovoIngrediente.setFornitore(fornitore);
         Ingrediente ingredienteSalvato = ingredienteRepository.save(nuovoIngrediente);
 
@@ -54,7 +55,7 @@ public class IngredienteService {
             for (Long idAllergene : request.allergeniIds()) {
 
                 Allergene allergene = allergeneRepository.findById(idAllergene)
-                        .orElseThrow(() -> new RuntimeException("Allergene non trovato ID: " + idAllergene));
+                        .orElseThrow(() -> new ResourceNotFoundException("Allergene non trovato ID: " + idAllergene));
 
                 IngredienteAllergene associazione = new IngredienteAllergene();
                 associazione.setId(new IngredienteAllergeneId(ingredienteSalvato.getId(), allergene.getId()));
@@ -86,7 +87,7 @@ public class IngredienteService {
     @Transactional
     public IngredienteResponseDTO updateIngrediente(Long id, IngredienteRequestDTO request) {
         Ingrediente ingrediente = ingredienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato"));
 
         ingrediente.setNome(request.nome());
         ingrediente.setDescrizione(request.descrizione());
@@ -98,7 +99,7 @@ public class IngredienteService {
         // Se la P.IVA del fornitore cambia, aggiorna la relazione
         if(!ingrediente.getFornitore().getPartitaIva().equals(request.partitaIva())) {
             Fornitore fornitore = fornitoreRepository.findByPartitaIva(request.partitaIva())
-                    .orElseThrow(() -> new RuntimeException("Fornitore non trovato"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato"));
             ingrediente.setFornitore(fornitore);
         }
 
@@ -108,7 +109,7 @@ public class IngredienteService {
     @Transactional
     public void deleteIngrediente(Long id) {
         Ingrediente ingrediente = ingredienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato"));
         ingrediente.setAttivo(false);
         ingredienteRepository.save(ingrediente);
     }

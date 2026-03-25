@@ -27,7 +27,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        //porte di React e Angular
+        //porte di React e Angular in locale per test e sviluppo
         configuration.setAllowedOrigins(List.of("http://localhost:9000", "http://localhost:4200"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
@@ -56,8 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()       // Login e Registrazione liberi
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/user/**").hasRole("USER") // Solo user autenticati
-                        .requestMatchers("/api/user/**").hasRole("ADMIN") // Solo user autenticati
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") //solo user e admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo amministratori
                         .requestMatchers("/v3/api-docs/**").permitAll() // Permetti l'accesso alla documentazione API
                         .requestMatchers("/swagger-ui/**").permitAll()

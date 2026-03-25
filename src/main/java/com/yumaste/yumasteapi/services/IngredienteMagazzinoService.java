@@ -2,6 +2,7 @@ package com.yumaste.yumasteapi.services;
 
 import com.yumaste.yumasteapi.DTO.request.IngredienteMagazzinoRequest;
 import com.yumaste.yumasteapi.DTO.response.IngredienteMagazzinoResponse;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.IngredienteMagazzinoMapper;
 import com.yumaste.yumasteapi.models.Ingrediente;
 import com.yumaste.yumasteapi.models.IngredienteMagazzino;
@@ -28,9 +29,9 @@ public class IngredienteMagazzinoService {
     @Transactional
     public IngredienteMagazzinoResponse caricaMerci(IngredienteMagazzinoRequest request) {
 
-        Ingrediente ingrediente = ingredienteRepository.findById(request.ingredienteId()).orElseThrow(() ->new RuntimeException("Ingrediente non trovato!"));
+        Ingrediente ingrediente = ingredienteRepository.findById(request.ingredienteId()).orElseThrow(() ->new ResourceNotFoundException("Ingrediente non trovato!"));
 
-        Magazzino magazzino = magazzinoRepository.findById(request.magazzinoId()).orElseThrow(() -> new RuntimeException("Magazzino non trovato!"));
+        Magazzino magazzino = magazzinoRepository.findById(request.magazzinoId()).orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato!"));
 
         Optional<IngredienteMagazzino> giacenzaesistente = ingredienteMagazzinoRepository.findByMagazzinoAndIngredienteAndLotto(magazzino,ingrediente, request.lotto());
 
