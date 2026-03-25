@@ -120,14 +120,14 @@ public class OrderService {
     public List<OrdineResponseDTO> findAllOrdini(Utente utente) {
         return ordineRepository.findByUtente(utente)
                 .stream()
-                .map(orderMapper::toDto)
+                .map(this::creaOrdineDTO) // Usiamo il nostro metodo!
                 .toList();
     }
 
     public List<OrdineResponseDTO> findAllOrdini() {
         return ordineRepository.findAll()
                 .stream()
-                .map(orderMapper::toDto)
+                .map(this::creaOrdineDTO) // Usiamo il nostro metodo!
                 .toList();
     }
 
@@ -166,6 +166,47 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public OrdineResponseDTO updateStatoOrdine(Long id, String statoOrdine, String statoSpedizione) {
+        Ordine ordine = ordineRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ordine non trovato"));
 
+        if (statoOrdine != null && !statoOrdine.isBlank()) {
+            ordine.setStatoOrdine(statoOrdine);
+        }
+
+        if (statoSpedizione != null && !statoSpedizione.isBlank()) {
+            Spedizione spedizione = spedizioneRepository.findByOrdine(ordine)
+                    .orElseThrow(() -> new RuntimeException("Spedizione non trovata"));
+            spedizione.setStatoSpedizione(statoSpedizione);
+            spedizioneRepository.save(spedizione);
+        }
+
+        ordineRepository.save(ordine);
+
+        return creaOrdineDTO(ordine);
+    }
+
+    private OrdineResponseDTO creaOrdineDTO(Ordine ordine) {
+        String statoSped = "IN_ATTESA";
+
+        //spedizione collegata a questo ordine
+        Optional<Spedizione> optSpedizione = spedizioneRepository.findByOrdine(ordine);
+        if (optSpedizione.isPresent()) {
+            statoSped = optSpedizione.get().getStatoSpedizione();
+        }
+
+        return new OrdineResponseDTO(
+                ordine.getId(),
+                ordine.getCodiceOrdine(),
+                ordine.getDataOrdine(),
+                ordine.getTotalePrezzo(),
+                ordine.getStatoOrdine(),
+                statoSped,
+                ordine.getUtente().getId(),
+                ordine.getUtente().getNome(),
+                ordine.getUtente().getCognome()
+        );
+    }
 
 }

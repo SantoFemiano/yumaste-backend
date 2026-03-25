@@ -6,10 +6,7 @@ import com.yumaste.yumasteapi.DTO.response.ScontoBoxResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.ScontoResponseDTO;
 import com.yumaste.yumasteapi.mapper.ScontoBoxMapper;
 import com.yumaste.yumasteapi.mapper.ScontoMapper;
-import com.yumaste.yumasteapi.models.Box;
-import com.yumaste.yumasteapi.models.Sconto;
-import com.yumaste.yumasteapi.models.ScontoBox;
-import com.yumaste.yumasteapi.models.ScontoBoxId;
+import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.ScontoBoxRepository;
 import com.yumaste.yumasteapi.repositories.ScontoRepository;
@@ -98,4 +95,52 @@ public class ScontoService {
                 .map(scontoBoxMapper::toDto)
                 .toList();
     }
+
+
+    @Transactional
+    public void removeScontoBox(Long scontoId, Long boxId) {
+        ScontoBoxId idComposto = new ScontoBoxId();
+        idComposto.setScontoId(scontoId);
+        idComposto.setBoxId(boxId);
+
+        if (scontoBoxRepository.existsById(idComposto)) {
+            scontoBoxRepository.deleteById(idComposto);
+            log.info("Rimosso sconto {} dalla box {}", scontoId, boxId);
+        } else {
+            throw new RuntimeException("Associazione Sconto-Box non trovata");
+        }
+    }
+
+    public List<ScontoBoxResponseDTO> getAllScontoBox() {
+        return scontoBoxRepository.findAll().stream()
+                .map(scontoBoxMapper::toDto)
+                .toList();
+    }
+
+
+    public ScontoResponseDTO updateSconto(Long id, ScontoRequestDTO request) {
+        Sconto sconto = scontoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sconto non trovato"));
+
+        sconto.setNome(request.nome());
+        sconto.setValore(request.valore());
+        sconto.setInizioSconto(request.inizioSconto());
+        sconto.setFineSconto(request.fineSconto());
+        sconto.setAttivo(request.attivo());
+
+        return scontoMapper.toDto(scontoRepository.save(sconto));
+    }
+
+    @Transactional
+    public void deleteSconto(Long id) {
+        if (scontoBoxRepository.existsBySconto_Id(id)) {
+            throw new RuntimeException("Impossibile eliminare: lo sconto è ancora associato a una o più Box.");
+        }
+
+        Sconto sconto = scontoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sconto non trovato"));
+
+        scontoRepository.delete(sconto);
+    }
+
 }

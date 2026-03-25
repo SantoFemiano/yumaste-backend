@@ -25,4 +25,23 @@ public class MagazzinoService {
         return magazzinoRepository.findAll().stream().map(magazzinoMapper::toDto).toList();
     }
 
+    public void deleteMagazzino(long id){
+        Magazzino magazzino = magazzinoRepository.findById(id).orElseThrow(() -> new RuntimeException("Magazzino non trovato con id: " + id));
+        magazzinoRepository.delete(magazzino);
+    }
+
+    public MagazzinoResponseDTO updateMagazzino(Long id, MagazzinoRequestDTO request) {
+        Magazzino magazzino = magazzinoRepository.findById(id).orElseThrow(() -> new RuntimeException("Magazzino non trovato"));
+
+        magazzino.setNome(request.nome());
+        magazzino.setCap(request.cap());
+        magazzino.setVia(request.via());
+        magazzino.setCivico(request.civico());
+        magazzino.setProvincia(request.provincia());
+        magazzino.setCitta(request.citta());
+
+        return magazzinoMapper.toDto(magazzinoRepository.save(magazzino));
+
+    }
+
 }

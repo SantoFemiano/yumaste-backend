@@ -26,7 +26,7 @@ public class PublicController {
     @GetMapping("/boxes")
     public ResponseEntity<Page<CatalogBoxDTO>> getCatalog(
             @RequestParam(required = false) String categoria,
-            @RequestParam(required = false) String search, // 👈 Aggiungiamo il parametro 'search'
+            @RequestParam(required = false) String search,
             Pageable pageable) {
 
         // Passiamo 'search' al service
