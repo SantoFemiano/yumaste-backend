@@ -25,4 +25,24 @@ public class FornitoreService {
         return fornitoreRepository.findAll().stream().map(fornitoreMapper::toDto).toList();
     }
 
+    public void deleteFornitore(Long id ) {
+        Fornitore fornitore=fornitoreRepository.findById(id).orElseThrow(() -> new RuntimeException("Fornitore non trovato con id: " + id));
+         fornitoreRepository.delete(fornitore);
+    }
+
+    public FornitoreResponseDTO updateFornitore(Long id, FornitoreRequestDTO request) {
+        Fornitore fornitore=fornitoreRepository.findById(id).orElseThrow(() -> new RuntimeException("Fornitore non trovato con id: " + id));
+
+        fornitore.setCap(request.cap());
+        fornitore.setNome(request.nome());
+        fornitore.setCitta(request.citta());
+        fornitore.setVia(request.via());
+        fornitore.setProvincia(request.provincia());
+        fornitore.setPartitaIva(request.partitaIva());
+        fornitore.setCivico(request.civico());
+
+        return fornitoreMapper.toDto(fornitoreRepository.save(fornitore));
+
+    }
+
 }

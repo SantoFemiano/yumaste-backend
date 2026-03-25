@@ -94,4 +94,20 @@ public class BoxCompositionService {
 
         return risultati;
     }
+
+    @Transactional
+    public void removeIngredienteFromBox(Long boxId, Long ingredienteId) {
+        Box box = boxRepository.findById(boxId)
+                .orElseThrow(() -> new RuntimeException("Box non trovata"));
+        Ingrediente ingrediente = ingredienteRepository.findById(ingredienteId)
+                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
+
+        ComposizioneBox composizione = boxCompositionRepository.findByBoxAndIngrediente(box, ingrediente)
+                .orElseThrow(() -> new RuntimeException("Associazione non trovata"));
+
+        boxCompositionRepository.delete(composizione);
+    }
+
+
+
 }

@@ -29,7 +29,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         //porte di React e Angular
         configuration.setAllowedOrigins(List.of("http://localhost:9000", "http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -31,4 +31,8 @@ public interface BoxRepository extends JpaRepository<Box,Long> {
     // 2. Cerca per Categoria E per nome (es. l'utente è in "Asiatica" e cerca "Pollo")
     Page<Box> findByCategoriaAndNomeContainingIgnoreCaseAndAttivoTrue(String categoria, String nome, Pageable pageable);
 
+    Page<Box> findByAttivoFalse(Pageable pageable);
+
+    // Conta solo le box attualmente attive
+    Long countByAttivoTrue();
 }

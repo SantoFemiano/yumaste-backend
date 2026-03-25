@@ -83,4 +83,36 @@ public class IngredienteService {
                 .toList();
     }
 
+    @Transactional
+    public IngredienteResponseDTO updateIngrediente(Long id, IngredienteRequestDTO request) {
+        Ingrediente ingrediente = ingredienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
+
+        ingrediente.setNome(request.nome());
+        ingrediente.setDescrizione(request.descrizione());
+        ingrediente.setEan(request.ean());
+        ingrediente.setPrezzoPerUnita(request.prezzoPerUnita());
+        ingrediente.setUnitaMisura(request.unitaMisura());
+        ingrediente.setAttivo(request.attivo() != null ? request.attivo() : ingrediente.getAttivo());
+
+        // Se la P.IVA del fornitore cambia, aggiorna la relazione
+        if(!ingrediente.getFornitore().getPartitaIva().equals(request.partitaIva())) {
+            Fornitore fornitore = fornitoreRepository.findByPartitaIva(request.partitaIva())
+                    .orElseThrow(() -> new RuntimeException("Fornitore non trovato"));
+            ingrediente.setFornitore(fornitore);
+        }
+
+        return ingredienteMapper.toResponseDTO(ingredienteRepository.save(ingrediente));
+    }
+
+    @Transactional
+    public void deleteIngrediente(Long id) {
+        Ingrediente ingrediente = ingredienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
+        ingrediente.setAttivo(false);
+        ingredienteRepository.save(ingrediente);
+    }
+
+
+
 }

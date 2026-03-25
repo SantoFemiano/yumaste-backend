@@ -8,10 +8,12 @@ import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.IngredienteAllergeneRepository;
 import com.yumaste.yumasteapi.repositories.ScontoRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,6 +28,7 @@ public class BoxService {
     private final BoxCompositionService boxCompositionService;
     private final IngredienteAllergeneRepository ingredienteAllergeneRepository;
     private final ScontoRepository scontoRepository;
+    private final MapperBuilder mapperBuilder;
 
     public Page<CatalogBoxDTO> getAllActiveBoxes(String categoria, String search, Pageable pageable) {
         Page<Box> boxes;
@@ -165,6 +168,11 @@ Dati_Sconto datiScontobox = calcolaSconto(box);
         return  new Dati_Sconto(box.getPrezzo(),prezzoScontato,percentuale_sconto);
     }
 
+    public Page<CatalogBoxDTO> getAllInattiveBoxes(Pageable pageable) {
+        Page<Box> boxes = boxRepository.findByAttivoFalse(pageable);
+        return boxes.map(this::mapToCatalogBoxDTOConSconto);
+    }
+
     private record Dati_Sconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
 
 
@@ -187,6 +195,35 @@ Dati_Sconto datiScontobox = calcolaSconto(box);
                 box.getAttivo()
         );
     }
+
+
+    @Transactional
+    public BoxResponseDTO updateBox(Long id, BoxRequestDTO request) {
+        Box box = boxRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + id));
+
+        box.setEan(request.ean());
+        box.setNome(request.nome());
+        box.setCategoria(request.categoria());
+        box.setPrezzo(BigDecimal.valueOf(request.prezzo()));
+        box.setPorzioni(request.porzioni());
+        box.setQuantitaInBox(request.quantitaInBox());
+        box.setImmagineUrl(request.immagineUrl());
+        box.setAttivo(request.attivo() != null ? request.attivo() : box.getAttivo());
+
+        return boxMapper.toResponseDTO(boxRepository.save(box));
+    }
+
+    @Transactional
+    public void deleteBox(Long id) {
+        Box box = boxRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + id));
+        box.setAttivo(false);
+        boxRepository.save(box);
+    }
+
+
+
 
 
 }

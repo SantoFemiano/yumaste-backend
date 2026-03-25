@@ -33,4 +33,8 @@ public interface ScontoRepository extends JpaRepository<Sconto, Long> {
     // Seleziona gli sconti dove attivo è true e la data di oggi è compresa tra inizio e fine
     @Query("SELECT s FROM Sconto s WHERE s.attivo = true AND s.inizioSconto <= :oggi AND s.fineSconto >= :oggi")
     List<Sconto> findScontiAttiviEValidiOggi(@Param("oggi") LocalDate oggi);
+
+
+
+
 }

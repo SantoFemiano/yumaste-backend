@@ -52,7 +52,7 @@ public class UserService {
 
 
     public List<UtenteProfileDTO> getClienti() {
-        List<Utente> clienti = utenteRepository.findAll();
+        List<Utente> clienti = utenteRepository.findByRuolo("ROLE_USER");
 
         return clienti.stream().map(utente -> {
             List<IndirizzoResponseDTO> indirizzi = indirizzoUtenteRepository.findByUtente(utente)
@@ -123,7 +123,11 @@ public class UserService {
         return utenteMapper.toDto(utenteRepository.save(utentecorrente));
     }
 
+      public void deleteUser(Long id){
+        Utente utente = utenteRepository.findById(id).orElseThrow(() -> new RuntimeException("User non trovato con ID: " + id));
+       utenteRepository.delete(utente);
 
+    }
 
 
 }
