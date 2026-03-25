@@ -34,7 +34,7 @@ public class AuthController {
 
         // 1. Controllo base: l'email esiste già?
         if (utenteRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().build(); // In un'app reale, qui lanceresti una Custom Exception
+            return ResponseEntity.badRequest().build();
         }
 
         // 2. Creiamo la nuova entità Utente travasando i dati dal DTO
@@ -46,7 +46,7 @@ public class AuthController {
         utente.setTelefono(request.getTelefono());
         utente.setEmail(request.getEmail());
 
-        // 3. CRIPTIAMO LA PASSWORD! Questo è il passaggio vitale.
+        // 3. CRIPTIAMO LA PASSWORD
         utente.setPasswordC(passwordEncoder.encode(request.getPassword()));
 
         // 4. Impostiamo i valori di default per il sistema

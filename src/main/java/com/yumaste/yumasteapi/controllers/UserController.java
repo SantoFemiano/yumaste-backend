@@ -7,8 +7,7 @@ import com.yumaste.yumasteapi.services.CartService;
 import com.yumaste.yumasteapi.services.OrderService;
 import com.yumaste.yumasteapi.services.UserService;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,8 @@ public class UserController {
     private final CartService cartservice;
     private final UserService userService;
     private final OrderService orderService;
+
+    @Getter
     private final PasswordEncoder passwordEncoder;
 
 
@@ -103,13 +104,12 @@ public class UserController {
             UtenteAggDTO utenteaggiornato = userService.putProfilePass(utente, request);
             return ResponseEntity.ok(utenteaggiornato); // 200 OK
         } catch (IllegalArgumentException e) {
-            // Se la password vecchia è errata, restituiamo un Bad Request (400)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
     @GetMapping("/ordine/{id}/dettagli")
-    public ResponseEntity<List<OrdiniDettagliDTO>> getDettagli(  @AuthenticationPrincipal Utente utente,@PathVariable("id") Long id) {
+    public ResponseEntity<List<OrdiniDettagliDTO>> getDettagli(@AuthenticationPrincipal Utente utente, @PathVariable Long id) {
 
     List<OrdiniDettagliDTO> dettagli_ordine = orderService.getDettagliOrdini(utente, id);
 
@@ -126,11 +126,9 @@ public class UserController {
         return ResponseEntity.ok("Quantità aggiornata con successo");
     }
 
-    // --- 2. ENDPOINT PER RIMUOVERE UN PRODOTTO ---
     @DeleteMapping("cart/remove/{boxId}")
     public ResponseEntity<String> rimuoviDalCarrello(
-            @AuthenticationPrincipal Utente utenteCorrente,
-            @PathVariable("boxId") Long boxId) {
+            @AuthenticationPrincipal Utente utenteCorrente, @PathVariable Long boxId) {
 
         cartservice.rimuoviProdotto(utenteCorrente, boxId);
         return ResponseEntity.ok("Prodotto rimosso dal carrello");

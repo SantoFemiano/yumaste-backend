@@ -7,12 +7,14 @@ import com.yumaste.yumasteapi.DTO.request.UserUpdateDTO;
 import com.yumaste.yumasteapi.DTO.response.IndirizzoResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.UtenteAggDTO;
 import com.yumaste.yumasteapi.DTO.response.UtenteProfileDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.IndirizzoMapper;
 import com.yumaste.yumasteapi.mapper.UtenteMapper;
 import com.yumaste.yumasteapi.models.IndirizzoUtente;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.IndirizzoUtenteRepository;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,7 @@ public class UserService {
     // Metodo privato di supporto per estrarre l'utente in modo sicuro
     private Utente getUtenteLoggato(String email) {
         return utenteRepository.findByEmail(email) // Richiede che nel UtenteRepository ci sia findByEmail
-                .orElseThrow(() -> new RuntimeException("Utente non trovato nel database"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato nel database"));
     }
 
     public UtenteProfileDTO getProfilo(String email) {
@@ -93,6 +95,7 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public UtenteAggDTO putProfile(Utente utente , UserUpdateDTO request) {
         Utente utentecorrente = getUtenteLoggato(utente.getEmail());
 
@@ -106,6 +109,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public UtenteAggDTO putProfilePass(Utente utente, CambioPasswordDTO request) {
 
         Utente utentecorrente = getUtenteLoggato(utente.getEmail());
@@ -123,8 +127,9 @@ public class UserService {
         return utenteMapper.toDto(utenteRepository.save(utentecorrente));
     }
 
+      @Transactional
       public void deleteUser(Long id){
-        Utente utente = utenteRepository.findById(id).orElseThrow(() -> new RuntimeException("User non trovato con ID: " + id));
+        Utente utente = utenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User non trovato con ID: " + id));
        utenteRepository.delete(utente);
 
     }

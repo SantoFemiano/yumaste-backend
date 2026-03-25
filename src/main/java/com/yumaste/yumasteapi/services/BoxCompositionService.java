@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.DTO.request.AddIngredienteToBoxRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.BoxCompositionMapper;
 import com.yumaste.yumasteapi.mapper.DettaglioBoxMapper;
 import com.yumaste.yumasteapi.models.Box;
@@ -39,7 +40,7 @@ public class BoxCompositionService {
         Box box = boxRepository.findById(boxId).orElseThrow(() -> new RuntimeException("Box non trovato con id: " + boxId));
 
         Ingrediente ingrediente = ingredienteRepository.findById(request.ingredienteId())
-                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato con id: " + request.ingredienteId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato con id: " + request.ingredienteId()));
         Optional<ComposizioneBox> composizioneEsistente = boxCompositionRepository.findByBoxAndIngrediente(box, ingrediente);
         ComposizioneBox composizione;
         if(composizioneEsistente.isPresent()){
@@ -59,7 +60,7 @@ public class BoxCompositionService {
     }
 
     public List<BoxIngredientDTO> getBoxIngredients(Long boxId) {
-        Box box = boxRepository.findById(boxId).orElseThrow(() -> new RuntimeException("Box non trovato con id: " + boxId));
+        Box box = boxRepository.findById(boxId).orElseThrow(() -> new ResourceNotFoundException("Box non trovato con id: " + boxId));
         List<ComposizioneBox> composizioni = boxCompositionRepository.findByBox(box);
         return composizioni.stream().map(boxCompositionMapper::toDto).toList();
     }
@@ -67,7 +68,7 @@ public class BoxCompositionService {
     public List<IngredientiConValoriDTO> getIngredientiConValoriDellaBox(Long boxId) {
 
         Box box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
 
         List<ComposizioneBox> composizioni = boxCompositionRepository.findByBox(box);
 
@@ -98,12 +99,12 @@ public class BoxCompositionService {
     @Transactional
     public void removeIngredienteFromBox(Long boxId, Long ingredienteId) {
         Box box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata"));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata"));
         Ingrediente ingrediente = ingredienteRepository.findById(ingredienteId)
-                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato"));
 
         ComposizioneBox composizione = boxCompositionRepository.findByBoxAndIngrediente(box, ingrediente)
-                .orElseThrow(() -> new RuntimeException("Associazione non trovata"));
+                .orElseThrow(() -> new ResourceNotFoundException("Associazione non trovata"));
 
         boxCompositionRepository.delete(composizione);
     }
