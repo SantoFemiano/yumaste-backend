@@ -233,6 +233,10 @@ public class AdminController {
         return ResponseEntity.ok(catalogo_box_inattive);
     }
 
+    @GetMapping("/ingredienti/inattivi")
+    public ResponseEntity<List<IngredienteResponseDTO>> getIngredientiInattivi() {
+        return ResponseEntity.ok(ingredienteService.getAllIngredientiInattivi());
+    }
 
 
     @GetMapping("/dashboard/stats")

@@ -78,7 +78,14 @@ public class IngredienteService {
     }
 
     public List<IngredienteResponseDTO> getAllIngredienti() {
-        return ingredienteRepository.findAll()
+        return ingredienteRepository.findByAttivoTrue()
+                .stream()
+                .map(ingredienteMapper::toResponseDTO)
+                .toList();
+    }
+
+    public List<IngredienteResponseDTO> getAllIngredientiInattivi() {
+        return ingredienteRepository.findByAttivoFalse()
                 .stream()
                 .map(ingredienteMapper::toResponseDTO)
                 .toList();
@@ -87,7 +94,7 @@ public class IngredienteService {
     @Transactional
     public IngredienteResponseDTO updateIngrediente(Long id, IngredienteRequestDTO request) {
         Ingrediente ingrediente = ingredienteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato"));
+                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
 
         ingrediente.setNome(request.nome());
         ingrediente.setDescrizione(request.descrizione());
@@ -99,8 +106,27 @@ public class IngredienteService {
         // Se la P.IVA del fornitore cambia, aggiorna la relazione
         if(!ingrediente.getFornitore().getPartitaIva().equals(request.partitaIva())) {
             Fornitore fornitore = fornitoreRepository.findByPartitaIva(request.partitaIva())
-                    .orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato"));
+                    .orElseThrow(() -> new RuntimeException("Fornitore non trovato"));
             ingrediente.setFornitore(fornitore);
+        }
+
+
+        if (request.valoriNutrizionali() != null) {
+            // Cerca i vecchi valori nutrizionali nel DB. Se l'ingrediente non li aveva, ne crea uno nuovo.
+            ValoriNutrizionali vn = nutritionalValueRepository.findByIngrediente(ingrediente)
+                    .orElse(new ValoriNutrizionali());
+
+            vn.setIngrediente(ingrediente);
+            vn.setProteine(request.valoriNutrizionali().proteine());
+            vn.setCarboidrati(request.valoriNutrizionali().carboidrati());
+            vn.setZuccheri(request.valoriNutrizionali().zuccheri());
+            vn.setFibre(request.valoriNutrizionali().fibre());
+            vn.setGrassi(request.valoriNutrizionali().grassi());
+            vn.setSale(request.valoriNutrizionali().sale());
+            vn.setChilocalorie(request.valoriNutrizionali().chilocalorie());
+
+            // Salva le modifiche nella tabella VALORI_NUTRIZIONALI
+            nutritionalValueRepository.save(vn);
         }
 
         return ingredienteMapper.toResponseDTO(ingredienteRepository.save(ingrediente));

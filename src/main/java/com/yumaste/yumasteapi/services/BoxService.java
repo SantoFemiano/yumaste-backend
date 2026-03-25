@@ -77,11 +77,10 @@ public class BoxService {
 
         //Prendo la Box base dal Database
         Box box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
 
         //Prendo gli ingredienti, con loro anche i valori nutrizionali
         List<IngredientiConValoriDTO> ingredientiBox = boxCompositionService.getIngredientiConValoriDellaBox(boxId);
-
 
         BigDecimal totProteine = BigDecimal.ZERO;
         BigDecimal totCarboidrati = BigDecimal.ZERO;
@@ -93,59 +92,40 @@ public class BoxService {
 
         //Ciclo gli ingredienti e faccio le addizioni in totale sicurezza
         for (IngredientiConValoriDTO ingrediente : ingredientiBox) {
-
-            if (ingrediente.chilocalorie() != null) {
-                totKcal = totKcal.add(ingrediente.chilocalorie());
-            }
-            if (ingrediente.proteine() != null) {
-                totProteine = totProteine.add(ingrediente.proteine());
-            }
-            if (ingrediente.carboidrati() != null) {
-                totCarboidrati = totCarboidrati.add(ingrediente.carboidrati());
-            }
-            if (ingrediente.grassi() != null) {
-                totGrassi = totGrassi.add(ingrediente.grassi());
-            }
-            if (ingrediente.zuccheri() != null) {
-                totZuccheri = totZuccheri.add(ingrediente.zuccheri());
-            }
-            if (ingrediente.fibre() != null) {
-                totFibre = totFibre.add(ingrediente.fibre());
-            }
-            if (ingrediente.sale() != null) {
-                totSale = totSale.add(ingrediente.sale());
-            }
-
-
+            if (ingrediente.chilocalorie() != null) totKcal = totKcal.add(ingrediente.chilocalorie());
+            if (ingrediente.proteine() != null) totProteine = totProteine.add(ingrediente.proteine());
+            if (ingrediente.carboidrati() != null) totCarboidrati = totCarboidrati.add(ingrediente.carboidrati());
+            if (ingrediente.grassi() != null) totGrassi = totGrassi.add(ingrediente.grassi());
+            if (ingrediente.zuccheri() != null) totZuccheri = totZuccheri.add(ingrediente.zuccheri());
+            if (ingrediente.fibre() != null) totFibre = totFibre.add(ingrediente.fibre());
+            if (ingrediente.sale() != null) totSale = totSale.add(ingrediente.sale());
         }
-
 
         NutritionalValueDetailDTO macroTotali = new NutritionalValueDetailDTO(
                 totProteine,
                 totCarboidrati,
                 totGrassi,
-                totFibre,
-                totZuccheri,
+                totZuccheri, // FIX: Ora l'ordine è corretto!
+                totFibre,    // FIX: Ora l'ordine è corretto!
                 totSale,
-                totKcal.intValue() // Trasformo le Kcal totali in numero intero (es. 450 invece di 450.00)
+                totKcal.intValue()
         );
 
         //ricaviamo la lista degli allergeni.
         List<String> allergeniDellaBox = ingredienteAllergeneRepository.findNomiAllergeniByBoxId(boxId);
 
-
-Dati_Sconto datiScontobox = calcolaSconto(box);
+        Dati_Sconto datiScontobox = calcolaSconto(box);
 
         return new BoxDetailDTO(
                 box.getId(),
                 box.getNome(),
                 box.getCategoria(),
-                datiScontobox.originale,
-                datiScontobox.scontato,
-                datiScontobox.percentuale,
+                datiScontobox.originale(),
+                datiScontobox.scontato(),
+                datiScontobox.percentuale(),
                 box.getImmagineUrl(),
                 macroTotali,
-               allergeniDellaBox,
+                allergeniDellaBox,
                 ingredientiBox
         );
     }
