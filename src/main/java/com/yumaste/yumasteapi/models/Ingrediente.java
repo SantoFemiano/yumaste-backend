@@ -40,6 +40,9 @@ public class Ingrediente {
     @Column(name = "unita_misura", nullable = false, length = 10)
     private String unitaMisura;
 
+    @Column(name = "peso_per_pezzo", precision = 7, scale = 2)
+    private BigDecimal pesoPerPezzo;
+
     @Column(name = "prezzo_per_unita", nullable = false, precision = 7, scale = 4)
     private BigDecimal prezzoPerUnita;
 

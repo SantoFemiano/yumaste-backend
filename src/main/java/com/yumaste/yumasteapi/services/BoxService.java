@@ -120,6 +120,7 @@ public class BoxService {
                 box.getId(),
                 box.getNome(),
                 box.getCategoria(),
+                box.getPorzioni(),
                 datiScontobox.originale(),
                 datiScontobox.scontato(),
                 datiScontobox.percentuale(),

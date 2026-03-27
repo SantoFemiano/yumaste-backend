@@ -101,6 +101,10 @@ public class IngredienteService {
         ingrediente.setEan(request.ean());
         ingrediente.setPrezzoPerUnita(request.prezzoPerUnita());
         ingrediente.setUnitaMisura(request.unitaMisura());
+
+        // --- LA RIGA MANCANTE: AGGIORNIAMO IL PESO PER PEZZO ---
+        ingrediente.setPesoPerPezzo(request.pesoPerPezzo());
+
         ingrediente.setAttivo(request.attivo() != null ? request.attivo() : ingrediente.getAttivo());
 
         // Se la P.IVA del fornitore cambia, aggiorna la relazione
@@ -139,7 +143,4 @@ public class IngredienteService {
         ingrediente.setAttivo(false);
         ingredienteRepository.save(ingrediente);
     }
-
-
-
 }
