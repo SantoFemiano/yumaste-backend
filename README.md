@@ -288,7 +288,7 @@ Da qui è possibile esplorare e testare tutti gli endpoint direttamente dal brow
 
 **Santo Femiano**
 - GitHub: [@SantoFemiano](https://github.com/SantoFemiano)
-- 
+  
 **Salvatore Santaniello**
 - GitHub: [@salvsant](https://github.com/salvsant)
 ---
