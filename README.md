@@ -284,11 +284,11 @@ Da qui è possibile esplorare e testare tutti gli endpoint direttamente dal brow
 
 ---
 
-## 👤 Autore
+## 👤 Autori
 
 **Santo Femiano**
 - GitHub: [@SantoFemiano](https://github.com/SantoFemiano)
-
+- 
+**Salvatore Santaniello**
+- GitHub: [@salvsant](https://github.com/salvsant)
 ---
-
-*Readme generato con ❤️ per il progetto Yumaste*
