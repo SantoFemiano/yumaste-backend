@@ -22,13 +22,16 @@ public record IngredienteRequestDTO(
         String descrizione,
         String unitaMisura,
 
+        @Positive(message = "Il peso per pezzo deve essere positivo")
+        BigDecimal pesoPerPezzo, // <-- NUOVO CAMPO AGGIUNTO
+
         @NotNull(message = "Il prezzo è obbligatorio")
         @Positive(message = "Il prezzo deve essere positivo")
         BigDecimal prezzoPerUnita,
 
         Boolean attivo,
 
-        List<Long>allergeniIds, // Lista degli ID degli allergeni spuntati nel frontend
+        List<Long> allergeniIds, // Lista degli ID degli allergeni spuntati nel frontend
         ValoriNutrizionaliRequestDTO valoriNutrizionali
 ) {
     // Costruttore compatto per i default (così ignoriamo i @ColumnDefault di Hibernate)

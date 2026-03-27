@@ -7,6 +7,7 @@ public record BoxDetailDTO(
         Long id,
         String nome,
         String categoria,
+        Byte porzioni,
         BigDecimal prezzoOriginale,
         BigDecimal prezzoScontato,
         Integer percentualeSconto,

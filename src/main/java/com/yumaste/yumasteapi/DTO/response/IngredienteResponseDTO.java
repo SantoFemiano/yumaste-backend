@@ -11,6 +11,7 @@ public record IngredienteResponseDTO(
         String nome,
         String descrizione,
         String unitaMisura,
+        BigDecimal pesoPerPezzo,
         BigDecimal prezzoPerUnita,
         Boolean attivo
 ) {}

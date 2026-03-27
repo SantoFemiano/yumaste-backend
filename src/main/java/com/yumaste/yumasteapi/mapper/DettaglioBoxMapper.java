@@ -36,9 +36,26 @@ public interface DettaglioBoxMapper {
         BigDecimal quantita = cb.getQuantita();
         BigDecimal moltiplicatore;
 
-        if (unita != null && (unita.equalsIgnoreCase("kg") || unita.equalsIgnoreCase("l"))) {
+        if (unita != null && unita.equalsIgnoreCase("pz")) {
+            // Gestione per pezzi
+            BigDecimal pesoPezzo = cb.getIngrediente().getPesoPerPezzo();
+
+            // Se il peso per pezzo non è stato inserito, restituiamo zero (o puoi lanciare un'eccezione)
+            if (pesoPezzo == null || pesoPezzo.compareTo(BigDecimal.ZERO) == 0) {
+                return BigDecimal.ZERO;
+            }
+
+            // 1. Calcolo il peso totale in grammi (quantità pezzi * peso in grammi di un pezzo)
+            BigDecimal pesoTotaleInGrammi = quantita.multiply(pesoPezzo);
+
+            // 2. I valori nutrizionali sono su 100g, quindi divido per 100
+            moltiplicatore = pesoTotaleInGrammi.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+
+        } else if (unita != null && (unita.equalsIgnoreCase("kg") || unita.equalsIgnoreCase("l"))) {
+            // Unità in kg o litri (moltiplico per 10 perché (kg * 1000) / 100 = 10)
             moltiplicatore = quantita.multiply(BigDecimal.valueOf(10));
         } else {
+            // Unità base in grammi o millilitri
             moltiplicatore = quantita.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
         }
 
