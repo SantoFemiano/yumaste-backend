@@ -48,8 +48,8 @@ Yumaste è un progetto **multi-repo**. Di seguito le repository che compongono l
 |---|---|
 | ⬅️ **Sei qui** — `yumaste-backend` | REST API Spring Boot |
 | 🗄️ [yumaste-db](https://github.com/SantoFemiano/yumaste-db/tree/main) | Schema del database, DDL, DML e diagramma UML |
-| 🗄️ [yumaste-admin]([https://github.com/SantoFemiano/yumaste-db/tree/main](https://github.com/SantoFemiano/yumasteadminshop)) | Front-end Admin in Angular |
-| 🗄️ [yumaste-client]([https://github.com/SantoFemiano/yumaste-db/tree/main](https://github.com/SantoFemiano/yumaste-shop)) | Front-end Client in React  |
+| 🗄️ [yumaste-admin](https://github.com/SantoFemiano/yumasteadminshop) | Front-end Admin in Angular |
+| 🗄️ [yumaste-client](https://github.com/SantoFemiano/yumaste-shop) | Front-end Client in React  |
 ---
 
 ## 🛠️ Stack Tecnologico
