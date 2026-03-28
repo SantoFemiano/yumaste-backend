@@ -13,6 +13,7 @@ Backend RESTful per la piattaforma **Yumaste**, un servizio di food delivery / b
 ## 📋 Indice
 
 - [Panoramica](#-panoramica)
+- [Repository Collegate](#-repository-collegate)
 - [Stack Tecnologico](#-stack-tecnologico)
 - [Architettura del Progetto](#-architettura-del-progetto)
 - [Modelli di Dominio](#-modelli-di-dominio)
@@ -36,6 +37,17 @@ Yumaste Backend è una REST API sviluppata con **Spring Boot 4** che gestisce l'
 - Sistema di sconti su box e categorie
 - Pannello amministrativo dedicato
 - Documentazione interattiva via OpenAPI / Swagger UI
+
+---
+
+## 🔗 Repository Collegate
+
+Yumaste è un progetto **multi-repo**. Di seguito le repository che compongono l'ecosistema:
+
+| Repository | Descrizione |
+|---|---|
+| ⬅️ **Sei qui** — `yumaste-backend` | REST API Spring Boot |
+| 🗄️ [yumaste-db](https://github.com/SantoFemiano/yumaste-db/tree/main) | Schema del database, DDL, DML e diagramma UML |
 
 ---
 
@@ -115,6 +127,8 @@ Il dominio è modellato con le seguenti entità JPA:
 | `Sconto` | Codice sconto generale |
 | `ScontoBox` | Sconto applicato su una specifica box |
 | `ScontoCategoria` | Sconto applicato per categoria |
+
+> 🗄️ Per lo schema completo del database (DDL, DML e diagramma UML) consulta la repository [yumaste-db](https://github.com/SantoFemiano/yumaste-db/tree/main).
 
 ---
 
@@ -225,10 +239,16 @@ git clone https://github.com/SantoFemiano/yumaste-backend.git
 cd yumaste-backend
 ```
 
-### 2. Crea il database MySQL
+### 2. Crea e inizializza il database MySQL
 
-```sql
-CREATE DATABASE yumaste;
+Clona ed esegui i file SQL dalla repository [yumaste-db](https://github.com/SantoFemiano/yumaste-db/tree/main):
+
+```bash
+git clone https://github.com/SantoFemiano/yumaste-db.git
+mysql -u <utente> -p -e "CREATE DATABASE yumaste;"
+mysql -u <utente> -p yumaste < yumaste-db/DDL.sql
+# Opzionale: dati di esempio
+mysql -u <utente> -p yumaste < yumaste-db/DML.sql
 ```
 
 ### 3. Configura le variabili d'ambiente
