@@ -297,13 +297,13 @@ Da qui è possibile esplorare e testare tutti gli endpoint direttamente dal brow
 ![Auth e Public Controller](Screenshot%202026-03-31%20alle%2018.17.04.png)
 
 ### 👤 User Controller
-![User Controller](Screenshot%202026-03-31%20alle%2018.16.58.png)
+![User Controller](Screenshot%202026-03-31%20alle%2018.16.11.png)
 
 ### 🔐 Admin Controller (parte 1)
 ![Admin Controller - parte 1](Screenshot%202026-03-31%20alle%2018.16.43.png)
 
 ### 🔐 Admin Controller (parte 2)
-![Admin Controller - parte 2](Screenshot%202026-03-31%20alle%2018.16.11.png)
+![Admin Controller - parte 2](Screenshot%202026-03-31%20alle%2018.16.58.png)
 
 ---
 
