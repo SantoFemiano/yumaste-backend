@@ -1,10 +1,13 @@
-# Fase 2: Creazione del server di produzione con Java 21
+FROM maven:3.9.6-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-# Copia il file .jar generato dalla fase 1
 COPY --from=build /app/target/*.jar app.jar
 
-# Render imposterà la variabile PORT, ma possiamo esporre la 8084 di default
 EXPOSE 8084
 
 # Comando di avvio di Spring Boot
