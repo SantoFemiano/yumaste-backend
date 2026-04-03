@@ -29,7 +29,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         //porte di React e Angular in locale per test e sviluppo
         configuration.setAllowedOrigins(List.of("http://localhost:9000", "http://localhost:4200"
-        ,"https://yumaste-shop-admin.vercel.app"));
+        ,"https://yumaste-shop-admin.vercel.app","https://yumaste-shop.vercel.app/"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
