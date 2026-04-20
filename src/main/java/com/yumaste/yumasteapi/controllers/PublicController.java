@@ -2,6 +2,7 @@ package com.yumaste.yumasteapi.controllers;
 
 import com.yumaste.yumasteapi.DTO.response.BoxDetailDTO;
 import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
+import com.yumaste.yumasteapi.DTO.response.PagedResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.CatalogBoxDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
@@ -24,15 +25,14 @@ public class PublicController {
     private final BoxCompositionService boxCompositionService;
 
     @GetMapping("/boxes")
-    public ResponseEntity<Page<CatalogBoxDTO>> getCatalog(
+    public ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> getCatalog(
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) String search,
             Pageable pageable) {
 
-        // Passiamo 'search' al service
-        Page<CatalogBoxDTO> catalogo = boxService.getAllActiveBoxes(categoria, search, pageable);
+        PagedResponseDTO<CatalogBoxDTO> catalogo = boxService.getAllActiveBoxes(categoria, search, pageable);
 
-        if(catalogo.isEmpty()){
+        if(catalogo.content().isEmpty()){
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(catalogo);
