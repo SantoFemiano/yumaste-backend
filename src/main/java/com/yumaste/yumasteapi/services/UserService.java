@@ -15,6 +15,9 @@ import com.yumaste.yumasteapi.repositories.IndirizzoUtenteRepository;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +40,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato nel database"));
     }
 
+    @Cacheable(value = "profilo", key = "#email")
     public UtenteProfileDTO getProfilo(String email) {
         Utente utente = getUtenteLoggato(email);
         List<IndirizzoResponseDTO> indirizziAttivi = getIndirizziAttivi(email);
@@ -52,6 +56,7 @@ public class UserService {
     }
 
 
+    @Cacheable(value = "clienti")
     public List<UtenteProfileDTO> getClienti() {
         List<Utente> clienti = utenteRepository.findByRuolo("ROLE_USER");
 
@@ -72,6 +77,11 @@ public class UserService {
         }).toList();
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "profilo", key = "#email"),
+            @CacheEvict(value = "indirizzi_utente", key = "#email"),
+            @CacheEvict(value = "clienti", allEntries = true)
+    })
     public IndirizzoResponseDTO aggiungiIndirizzo(String email, IndirizzoRequestDTO request) {
         Utente utente = getUtenteLoggato(email);
 
@@ -85,6 +95,7 @@ public class UserService {
         return indirizzoMapper.toDTO(salvato);
     }
 
+    @Cacheable(value = "indirizzi_utente", key = "#email")
     public List<IndirizzoResponseDTO> getIndirizziAttivi(String email) {
         Utente utente = getUtenteLoggato(email);
 
@@ -94,7 +105,13 @@ public class UserService {
                 .toList();
     }
 
+
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "profilo", key = "#utente.email"),
+            @CacheEvict(value = "indirizzi_utente", key = "#utente.email"),
+            @CacheEvict(value = "clienti", allEntries = true)
+    })
     public UtenteAggDTO putProfile(Utente utente , UserUpdateDTO request) {
         Utente utentecorrente = getUtenteLoggato(utente.getEmail());
 
@@ -127,6 +144,11 @@ public class UserService {
     }
 
       @Transactional
+      @Caching(evict = {
+              @CacheEvict(value = "profilo", allEntries = true),
+              @CacheEvict(value = "indirizzi_utente", allEntries = true),
+              @CacheEvict(value = "clienti", allEntries = true)
+      })
       public void deleteUser(Long id){
         Utente utente = utenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User non trovato con ID: " + id));
        utenteRepository.delete(utente);

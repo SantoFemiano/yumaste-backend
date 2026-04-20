@@ -8,6 +8,8 @@ import com.yumaste.yumasteapi.models.Magazzino;
 import com.yumaste.yumasteapi.repositories.MagazzinoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,22 +21,26 @@ public class MagazzinoService {
     private final MagazzinoRepository magazzinoRepository;
 
     @Transactional
+    @CacheEvict(value = "magazzino", allEntries = true)
     public MagazzinoResponseDTO addMagazzino(MagazzinoRequestDTO request) {
         Magazzino magazzino = magazzinoRepository.save(magazzinoMapper.toEntity(request));
         return magazzinoMapper.toDto(magazzino);
     }
 
+    @Cacheable(value = "magazzino")
     public List<MagazzinoResponseDTO> getAllMagazzino() {
         return magazzinoRepository.findAll().stream().map(magazzinoMapper::toDto).toList();
     }
 
     @Transactional
+    @CacheEvict(value = "magazzino", allEntries = true)
     public void deleteMagazzino(long id){
         Magazzino magazzino = magazzinoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato con id: " + id));
         magazzinoRepository.delete(magazzino);
     }
 
     @Transactional
+    @CacheEvict(value = "magazzino", allEntries = true)
     public MagazzinoResponseDTO updateMagazzino(Long id, MagazzinoRequestDTO request) {
         Magazzino magazzino = magazzinoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
 

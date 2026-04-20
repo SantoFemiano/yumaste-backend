@@ -8,6 +8,8 @@ import com.yumaste.yumasteapi.models.Fornitore;
 import com.yumaste.yumasteapi.repositories.FornitoreRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,22 +21,26 @@ public class FornitoreService {
     private  final FornitoreMapper fornitoreMapper;
 
     @Transactional
+    @CacheEvict(value = "fornitori", allEntries = true)
     public FornitoreResponseDTO addFornitore(FornitoreRequestDTO fornitoreRequestDTO) {
         Fornitore fornitore=fornitoreRepository.save(fornitoreMapper.toEntity(fornitoreRequestDTO));
         return fornitoreMapper.toDto(fornitore);
     }
 
+    @Cacheable(value = "fornitori")
     public List<FornitoreResponseDTO> getAllFornitore(){
         return fornitoreRepository.findAll().stream().map(fornitoreMapper::toDto).toList();
     }
 
     @Transactional
+    @CacheEvict(value = "fornitori", allEntries = true)
     public void deleteFornitore(Long id ) {
         Fornitore fornitore=fornitoreRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato con id: " + id));
          fornitoreRepository.delete(fornitore);
     }
 
     @Transactional
+    @CacheEvict(value = "fornitori", allEntries = true)
     public FornitoreResponseDTO updateFornitore(Long id, FornitoreRequestDTO request) {
         Fornitore fornitore=fornitoreRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato con id: " + id));
 

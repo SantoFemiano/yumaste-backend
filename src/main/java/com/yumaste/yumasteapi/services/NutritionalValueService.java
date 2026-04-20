@@ -4,6 +4,7 @@ import com.yumaste.yumasteapi.DTO.response.NutritionalValueDTO;
 import com.yumaste.yumasteapi.mapper.NutritionalValueMapper;
 import com.yumaste.yumasteapi.repositories.NutritionalValueRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public class NutritionalValueService {
     private final NutritionalValueRepository nutritionalValueRepository;
     private final NutritionalValueMapper nutritionalValueMapper;
 
-
+    @Cacheable(value = "valori_nutrizionali")
     public List<NutritionalValueDTO> getAllNutritionalValue() {
         return nutritionalValueRepository.findAll().stream()
                 .map(nutritionalValueMapper::toDto)

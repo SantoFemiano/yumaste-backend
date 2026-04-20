@@ -5,6 +5,7 @@ import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.OrdineRepository;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class DashboardService {
     private final UtenteRepository utenteRepository;
     private final BoxRepository boxRepository;
 
+    @Cacheable(value = "statistiche")
     public DashboardStatsDTO getStats() {
         Long totaleOrdini = ordineRepository.countOrdiniValidi();
         if (totaleOrdini == null) totaleOrdini = 0L;
