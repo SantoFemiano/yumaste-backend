@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -12,5 +13,5 @@ public record IngredienteMagazzinoResponse(
         BigDecimal quantita,
         String unitaMisura,
         String lotto,
-        LocalDate dataIngresso)
+        LocalDate dataIngresso)implements Serializable
 {}

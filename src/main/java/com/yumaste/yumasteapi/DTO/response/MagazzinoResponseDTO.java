@@ -1,5 +1,7 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
+
 public record MagazzinoResponseDTO(
         Long id,
         String nome,
@@ -8,5 +10,5 @@ public record MagazzinoResponseDTO(
         String cap,
         String citta,
         String provincia
-) {
+)implements Serializable {
 }

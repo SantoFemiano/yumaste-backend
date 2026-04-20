@@ -1,7 +1,8 @@
 package com.yumaste.yumasteapi.DTO.response;
 
-import org.springframework.data.domain.Page;
+import java.io.Serializable;
 import java.util.List;
+import org.springframework.data.domain.Page;
 
 public record PagedResponseDTO<T>(
         List<T> content,
@@ -10,7 +11,7 @@ public record PagedResponseDTO<T>(
         long totalElements,
         int totalPages,
         boolean last
-) {
+) implements Serializable {
 
     public PagedResponseDTO(Page<T> page) {
         this(
@@ -21,5 +22,6 @@ public record PagedResponseDTO<T>(
                 page.getTotalPages(),
                 page.isLast()
         );
+
     }
 }

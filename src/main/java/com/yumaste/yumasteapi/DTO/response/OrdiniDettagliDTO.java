@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -15,5 +16,5 @@ public record OrdiniDettagliDTO(
         String corriere,
         String statospedizione,
         IndirizzoResponseDTO indirizzoresponsedto
-) {
+)implements Serializable {
 }

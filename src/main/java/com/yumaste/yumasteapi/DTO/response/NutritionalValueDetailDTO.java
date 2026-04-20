@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record NutritionalValueDetailDTO(
@@ -10,5 +11,5 @@ public record NutritionalValueDetailDTO(
         BigDecimal fibre,
         BigDecimal sale,
         Integer chilocalorie
-) {
+)implements Serializable {
 }

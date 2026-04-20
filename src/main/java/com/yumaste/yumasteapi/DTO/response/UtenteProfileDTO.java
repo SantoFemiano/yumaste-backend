@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.util.List;
 
 public record UtenteProfileDTO(
@@ -9,4 +10,4 @@ public record UtenteProfileDTO(
         String email,
         String cf,
         List<IndirizzoResponseDTO> indirizzi
-) {}
+)implements Serializable {}
