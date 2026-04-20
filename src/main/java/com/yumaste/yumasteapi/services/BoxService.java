@@ -35,7 +35,7 @@ public class BoxService {
     private final MapperBuilder mapperBuilder;
 
     @Cacheable(value = "catalogo_box", key = "{#categoria, #search, #pageable.pageNumber, #pageable.pageSize,#pageable.sort}")
-    public Page<CatalogBoxDTO> getAllActiveBoxes(String categoria, String search, Pageable pageable) {
+    public PagedResponseDTO<CatalogBoxDTO> getAllActiveBoxes(String categoria, String search, Pageable pageable) {
         Page<Box> boxes;
 
         // Puliamo i parametri per evitare stringhe vuote o spazi
@@ -58,7 +58,8 @@ public class BoxService {
         }
 
 
-        return boxes.map(this::mapToCatalogBoxDTOConSconto);
+        Page<CatalogBoxDTO> pageResult = boxes.map(this::mapToCatalogBoxDTOConSconto);
+        return new PagedResponseDTO<>(pageResult);
     }
 
     @Cacheable(value = "box", key="#id")
@@ -161,9 +162,9 @@ public class BoxService {
     }
 
     @Cacheable(value = "box_inattive", key = "{#pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
-    public Page<CatalogBoxDTO> getAllInattiveBoxes(Pageable pageable) {
+    public PagedResponseDTO<CatalogBoxDTO> getAllInattiveBoxes(Pageable pageable) {
         Page<Box> boxes = boxRepository.findByAttivoFalse(pageable);
-        return boxes.map(this::mapToCatalogBoxDTOConSconto);
+        return new PagedResponseDTO<>(boxes.map(this::mapToCatalogBoxDTOConSconto));
     }
 
     private record Dati_Sconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
