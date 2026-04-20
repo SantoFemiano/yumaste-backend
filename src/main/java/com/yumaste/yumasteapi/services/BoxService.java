@@ -17,7 +17,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,7 +31,7 @@ public class BoxService {
     private final BoxCompositionService boxCompositionService;
     private final IngredienteAllergeneRepository ingredienteAllergeneRepository;
     private final ScontoRepository scontoRepository;
-    private final MapperBuilder mapperBuilder;
+
 
     @Cacheable(value = "catalogo_box", key = "{#categoria, #search, #pageable.pageNumber, #pageable.pageSize,#pageable.sort}")
     public PagedResponseDTO<CatalogBoxDTO> getAllActiveBoxes(String categoria, String search, Pageable pageable) {

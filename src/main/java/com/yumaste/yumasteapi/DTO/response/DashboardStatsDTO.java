@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record DashboardStatsDTO(
@@ -7,5 +8,5 @@ public record DashboardStatsDTO(
         BigDecimal incassoTotale,
         Long totaleClienti,
         Long boxAttive
-) {
+)implements Serializable {
 }

@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record IngredientiConValoriDTO(
@@ -14,5 +15,5 @@ public record IngredientiConValoriDTO(
         BigDecimal fibre,
         BigDecimal grassi,
         BigDecimal sale
-) {
+)implements Serializable {
 }

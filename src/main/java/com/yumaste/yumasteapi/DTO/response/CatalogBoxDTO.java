@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record CatalogBoxDTO(
@@ -13,4 +14,4 @@ public record CatalogBoxDTO(
     Byte porzioni,
     String immagineUrl,
     Boolean attivo
-) {}
+)implements Serializable {}

@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -13,5 +14,5 @@ public record OrdineResponseDTO(
         Long utenteId,
         String nomeCliente,
         String cognomeCliente
-) {
+)implements Serializable {
 }

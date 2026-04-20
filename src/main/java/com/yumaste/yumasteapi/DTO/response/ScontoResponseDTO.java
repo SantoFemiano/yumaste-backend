@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 public record ScontoResponseDTO(
@@ -9,5 +10,5 @@ public record ScontoResponseDTO(
         Boolean attivo,
         LocalDate inizioSconto,
         LocalDate fineSconto
-) {
+)implements Serializable {
 }
