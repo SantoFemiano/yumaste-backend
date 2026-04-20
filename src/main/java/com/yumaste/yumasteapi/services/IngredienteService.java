@@ -10,6 +10,10 @@ import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +31,12 @@ public class IngredienteService {
     private final AllergeneRepository allergeneRepository;
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "ingredienti", allEntries = true),
+            @CacheEvict(value = "ingredienti_allergeni", allEntries = true),
+            @CacheEvict(value = "ingredienti_inattivi", allEntries = true),
+            @CacheEvict(value = {"ingredienti_con_valori", "box_dettagli"}, allEntries = true)
+    })
     public IngredienteResponseDTO creaIngrediente(IngredienteRequestDTO request) {
 
         // 1. SALVATAGGIO INGREDIENTE BASE
@@ -70,6 +80,7 @@ public class IngredienteService {
         return ingredienteMapper.toResponseDTO(ingredienteSalvato);
     }
 
+    @Cacheable(value = "ingredienti_allergeni")
     public List<IngredienteAllergeneResponseDTO> getAllIngredientiConAllergeni() {
 
         return ingredienteAllergeneRepository.findAllWithDetails()
@@ -77,6 +88,7 @@ public class IngredienteService {
                 .toList();
     }
 
+    @Cacheable(value = "ingredienti")
     public List<IngredienteResponseDTO> getAllIngredienti() {
         return ingredienteRepository.findByAttivoTrue()
                 .stream()
@@ -84,6 +96,7 @@ public class IngredienteService {
                 .toList();
     }
 
+    @Cacheable(value = "ingredienti_inattivi")
     public List<IngredienteResponseDTO> getAllIngredientiInattivi() {
         return ingredienteRepository.findByAttivoFalse()
                 .stream()
@@ -92,6 +105,12 @@ public class IngredienteService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "ingredienti", allEntries = true),
+            @CacheEvict(value = "ingredienti_allergeni", allEntries = true),
+            @CacheEvict(value = "valori_nutrizionali", allEntries = true),
+            @CacheEvict(value = {"ingredienti_con_valori", "box_dettagli"}, allEntries = true)
+    })
     public IngredienteResponseDTO updateIngrediente(Long id, IngredienteRequestDTO request) {
         Ingrediente ingrediente = ingredienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
@@ -137,6 +156,10 @@ public class IngredienteService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = {"ingredienti", "ingredienti_allergeni", "ingredienti_inattivi"}, allEntries = true),
+            @CacheEvict(value = {"ingredienti_con_valori", "box_dettagli"}, allEntries = true)
+    })
     public void deleteIngrediente(Long id) {
         Ingrediente ingrediente = ingredienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato"));

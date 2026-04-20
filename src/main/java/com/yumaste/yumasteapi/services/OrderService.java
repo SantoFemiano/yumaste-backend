@@ -11,6 +11,9 @@ import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -36,6 +39,10 @@ public class OrderService {
 
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "ordini", key = "#utente.id"),
+            @CacheEvict(value = "ordini", allEntries = true)
+    })
     public OrdineResponseDTO checkout(Utente utente, CheckoutRequestDTO requestDTO){
         //recupero carrello dell utente corrente
         CartDTO carrello = cartService.getCarrelloDellUtente(utente);
@@ -139,6 +146,7 @@ public class OrderService {
         );
     }
 
+    @Cacheable(value="ordini",key = "#utente.id")
     public List<OrdineResponseDTO> findAllOrdini(Utente utente) {
         return ordineRepository.findByUtente(utente)
                 .stream()
@@ -146,6 +154,7 @@ public class OrderService {
                 .toList();
     }
 
+    @Cacheable(value = "ordini")
     public List<OrdineResponseDTO> findAllOrdini() {
         return ordineRepository.findAll()
                 .stream()
@@ -153,6 +162,7 @@ public class OrderService {
                 .toList();
     }
 
+    @Cacheable(value = "dettaglio_ordine_admin", key="#idOrdine")
     public List<OrdiniDettagliDTO> getDettagliOrdineAdmin(Long idOrdine) {
         Ordine ordine = ordineRepository.findById(idOrdine)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordine non trovato!"));
@@ -168,7 +178,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-
+    @Cacheable(value = "dettaglio_ordine", key="#idOrdine")
     public List<OrdiniDettagliDTO> getDettagliOrdini(Utente utenteCorrente, Long idOrdine){
 
         Ordine ordine = ordineRepository.findById(idOrdine).orElseThrow(() -> new ResourceNotFoundException("Ordine non trovata!"));
@@ -189,6 +199,11 @@ public class OrderService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "ordini", allEntries = true), // Svuota le liste (utente e admin)
+            @CacheEvict(value = "dettaglio_ordine", key = "#id"),
+            @CacheEvict(value = "dettaglio_ordine_admin", key = "#id")
+    })
     public OrdineResponseDTO updateStatoOrdine(Long id, String statoOrdine, String statoSpedizione) {
         Ordine ordine = ordineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordine non trovato"));

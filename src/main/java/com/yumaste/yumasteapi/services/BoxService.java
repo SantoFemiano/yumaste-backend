@@ -11,6 +11,9 @@ import com.yumaste.yumasteapi.repositories.IngredienteAllergeneRepository;
 import com.yumaste.yumasteapi.repositories.ScontoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,7 @@ public class BoxService {
     private final ScontoRepository scontoRepository;
     private final MapperBuilder mapperBuilder;
 
+    @Cacheable(value = "catalogo_box", key = "{#categoria, #search, #pageable.pageNumber, #pageable.pageSize,#pageable.sort}")
     public Page<CatalogBoxDTO> getAllActiveBoxes(String categoria, String search, Pageable pageable) {
         Page<Box> boxes;
 
@@ -57,6 +61,7 @@ public class BoxService {
         return boxes.map(this::mapToCatalogBoxDTOConSconto);
     }
 
+    @Cacheable(value = "box", key="#id")
     public CatalogBoxDTO getBoxById(Long id) {
         Box box = boxRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
@@ -64,6 +69,7 @@ public class BoxService {
         return mapToCatalogBoxDTOConSconto(box);
     }
 
+    @CacheEvict(value = {"catalogo_box", "box_inattive"}, allEntries = true)
     public BoxResponseDTO insertBox(BoxRequestDTO boxRequestDTO){
         Box nuovaBox = boxMapper.toBox(boxRequestDTO);
         if(nuovaBox.getAttivo()==null){
@@ -73,6 +79,7 @@ public class BoxService {
         return boxMapper.toResponseDTO(boxsalvata);
     }
 
+    @Cacheable(value = "box_dettagli", key = "#boxId")
     public BoxDetailDTO getDettaglioBox(Long boxId) {
 
         //Prendo la Box base dal Database
@@ -153,6 +160,7 @@ public class BoxService {
         return  new Dati_Sconto(box.getPrezzo(),prezzoScontato,percentuale_sconto);
     }
 
+    @Cacheable(value = "box_inattive", key = "{#pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
     public Page<CatalogBoxDTO> getAllInattiveBoxes(Pageable pageable) {
         Page<Box> boxes = boxRepository.findByAttivoFalse(pageable);
         return boxes.map(this::mapToCatalogBoxDTOConSconto);
@@ -183,6 +191,12 @@ public class BoxService {
 
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "box", key = "#id"),
+            @CacheEvict(value = "box_dettagli", key = "#id"),
+            @CacheEvict(value = "catalogo_box", allEntries = true),
+            @CacheEvict(value = "box_inattive", allEntries = true)
+    })
     public BoxResponseDTO updateBox(Long id, BoxRequestDTO request) {
         Box box = boxRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
@@ -200,6 +214,12 @@ public class BoxService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "box", key = "#id"),
+            @CacheEvict(value = "box_dettagli", key = "#id"),
+            @CacheEvict(value = "catalogo_box", allEntries = true),
+            @CacheEvict(value = "box_inattive", allEntries = true)
+    })
     public void deleteBox(Long id) {
         Box box = boxRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));

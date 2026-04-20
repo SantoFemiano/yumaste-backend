@@ -14,6 +14,7 @@ import com.yumaste.yumasteapi.repositories.ScontoRepository;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -144,6 +145,7 @@ public class CartService {
         // 2. Elimina la riga dal database
         carrelloRepository.delete(riga);
     }
+
 
     public CartDTO getCarrelloUtenteById(Long utente_id){
         Utente utente_corrente = utenteRepository.findById(utente_id)

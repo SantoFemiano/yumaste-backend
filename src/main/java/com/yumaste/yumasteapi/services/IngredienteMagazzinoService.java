@@ -12,6 +12,8 @@ import com.yumaste.yumasteapi.repositories.IngredienteRepository;
 import com.yumaste.yumasteapi.repositories.MagazzinoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +29,7 @@ public class IngredienteMagazzinoService {
     private final MagazzinoRepository magazzinoRepository;
 
     @Transactional
+    @CacheEvict(value = "ingredientiMagazzino", allEntries = true)
     public IngredienteMagazzinoResponse caricaMerci(IngredienteMagazzinoRequest request) {
 
         Ingrediente ingrediente = ingredienteRepository.findById(request.ingredienteId()).orElseThrow(() ->new ResourceNotFoundException("Ingrediente non trovato!"));
@@ -55,7 +58,7 @@ public class IngredienteMagazzinoService {
 
     }
 
-
+    @Cacheable(value= "ingredientiMagazzino" )
     public List<IngredienteMagazzinoResponse> getAllIngredienteMagazzino(){
         return ingredienteMagazzinoRepository.findAll().stream().map(ingredienteMagazzinoMapper::ToDto).toList();
     }
