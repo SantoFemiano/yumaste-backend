@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.controllers;
 import com.yumaste.yumasteapi.DTO.request.*;
 import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.*;
+import com.yumaste.yumasteapi.DTO.response.PagedResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -228,9 +229,15 @@ public class AdminController {
     }
 
     @GetMapping("/boxes/inattive")
-    public ResponseEntity<Page<CatalogBoxDTO>> getCatalogBoxInattive(Pageable pageable){
-         Page<CatalogBoxDTO> catalogo_box_inattive = boxService.getAllInattiveBoxes(pageable);
-        return ResponseEntity.ok(catalogo_box_inattive);
+    public ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> getInattiveBoxes(Pageable pageable) {
+
+        PagedResponseDTO<CatalogBoxDTO> catalogo = boxService.getAllInattiveBoxes(pageable);
+
+
+        if(catalogo.content().isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(catalogo);
     }
 
     @GetMapping("/ingredienti/inattivi")
