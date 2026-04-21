@@ -9,6 +9,7 @@ import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.OrderDettagliMapper;
 import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.*;
+import com.yumaste.yumasteapi.services.email.emailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -36,7 +37,7 @@ public class OrderService {
     private final FatturaRepository fatturaRepository;
     private final IndirizzoUtenteRepository indirizzoRepository;
     private final OrderDettagliMapper orderDettagliMapper;
-
+    private final emailService emailService;
 
     @Transactional
     @Caching(evict = {
@@ -69,15 +70,13 @@ public class OrderService {
 
         Ordine ordinesalvato = ordineRepository.save(ordine);
 
-        // =====================================================================
-        // FIX PERFORMANCE: GESTIONE IN BULK PER EVITARE N+1 QUERIES
-        // =====================================================================
 
-        // 1. Estraiamo tutti gli ID delle box presenti nel carrello
+
+
+
+
         List<Long> boxIds = carrello.items().stream().map(CartItemDTO::boxId).toList();
 
-        // 2. Chiediamo al DB di darci TUTTE queste box con UNA SOLA query (SELECT ... WHERE id IN (...))
-        // e le inseriamo in una Mappa per trovarle velocemente in memoria
         java.util.Map<Long, Box> boxMap = boxRepository.findAllById(boxIds).stream()
                 .collect(java.util.stream.Collectors.toMap(Box::getId, b -> b));
 
@@ -129,6 +128,14 @@ public class OrderService {
         fattura.setDataPagamento(LocalDate.now());
 
         fatturaRepository.save(fattura);
+
+        emailService.sendFatturaOrdine(
+                ordine.getUtente().getEmail(),
+                ordine.getUtente().getNome(),
+                fattura
+        );
+
+
 
         cartRepository.deleteAll(cartRepository.findByUtente(utente));
 
