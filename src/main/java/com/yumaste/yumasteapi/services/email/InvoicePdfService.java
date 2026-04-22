@@ -4,8 +4,7 @@ package com.yumaste.yumasteapi.services.email;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import com.yumaste.yumasteapi.DTO.response.OrdiniDettagliDTO;
-import com.yumaste.yumasteapi.models.Box;
+
 import com.yumaste.yumasteapi.models.DettaglioOrdine;
 import com.yumaste.yumasteapi.models.Ordine;
 import com.yumaste.yumasteapi.repositories.DettaglioOrdineRepository;
@@ -13,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Objects;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,8 +48,9 @@ public class InvoicePdfService {
         table.addCell("Prezzo");
 
 
+        List<DettaglioOrdine> dettagli = dettaglioOrdineRepository.findByOrdine_Id(ordine.getId());
 
-        for (DettaglioOrdine box : ordine.getDettagli()) {
+        for (DettaglioOrdine box : dettagli) {
             table.addCell(box.getBox().getNome());
             table.addCell(String.valueOf(box.getQuantita()));
             table.addCell("€ " + box.getPrezzoUnitario());
