@@ -47,8 +47,6 @@ public class Ordine {
     @Column(name = "stato_ordine", length = 20)
     private String statoOrdine;
 
-    @OneToMany(mappedBy = "ordine", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DettaglioOrdine> dettagli;
 
 
 
