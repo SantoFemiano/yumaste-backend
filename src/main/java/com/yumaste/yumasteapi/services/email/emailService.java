@@ -1,10 +1,12 @@
 package com.yumaste.yumasteapi.services.email;
 
+import com.lowagie.text.DocumentException;
 import com.yumaste.yumasteapi.models.Fattura;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class emailService {
 
     private final JavaMailSender mailSender;
+    private final InvoicePdfService invoicePdfService; // ← inietta il nuovo service
 
     @Value("${mail.from}")
     private String from;
@@ -25,8 +28,17 @@ public class emailService {
             helper.setFrom(from);
             helper.setTo(toEmail);
             helper.setSubject("Yumaste — Conferma ordine #" + fattura.getId());
-            helper.setText(buildEmailBody(nomeCliente, fattura), true);
-        } catch (MessagingException e) {
+            helper.setText(buildEmailBody(nomeCliente, fattura), true); // già presente ✅
+
+            // ← aggiungi solo queste 3 righe
+            byte[] pdf = invoicePdfService.generateInvoice(fattura.getOrdine());
+            helper.addAttachment(
+                    "fattura-" + fattura.getId() + ".pdf",
+                    new ByteArrayResource(pdf),
+                    "application/pdf"
+            );
+
+        } catch (MessagingException | DocumentException e) {
             throw new RuntimeException("Errore invio email", e);
         }
         mailSender.send(message);
