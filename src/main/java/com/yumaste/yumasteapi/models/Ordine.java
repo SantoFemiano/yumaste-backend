@@ -8,6 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -45,6 +46,11 @@ public class Ordine {
     @ColumnDefault("'IN_ATTESA'")
     @Column(name = "stato_ordine", length = 20)
     private String statoOrdine;
+
+    @OneToMany(mappedBy = "ordine", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DettaglioOrdine> dettagli;
+
+
 
 
 }
