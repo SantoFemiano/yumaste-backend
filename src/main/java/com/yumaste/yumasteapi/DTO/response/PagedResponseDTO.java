@@ -1,8 +1,9 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import org.springframework.data.domain.Page;
+
 import java.io.Serializable;
 import java.util.List;
-import org.springframework.data.domain.Page;
 
 public record PagedResponseDTO<T>(
         List<T> content,

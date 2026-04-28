@@ -1,13 +1,15 @@
 package com.yumaste.yumasteapi.services;
 
 import com.yumaste.yumasteapi.DTO.request.AddIngredienteToBoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.AllergeneDTO;
 import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.BoxCompositionMapper;
 import com.yumaste.yumasteapi.mapper.DettaglioBoxMapper;
-import com.yumaste.yumasteapi.models.*;
+import com.yumaste.yumasteapi.models.Box;
+import com.yumaste.yumasteapi.models.ComposizioneBox;
+import com.yumaste.yumasteapi.models.Ingrediente;
+import com.yumaste.yumasteapi.models.ValoriNutrizionali;
 import com.yumaste.yumasteapi.repositories.BoxCompositionRepository;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.IngredienteRepository;
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
