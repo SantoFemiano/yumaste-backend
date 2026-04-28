@@ -6,6 +6,7 @@ import com.yumaste.yumasteapi.models.Ordine;
 import com.yumaste.yumasteapi.repositories.FatturaRepository;
 import com.yumaste.yumasteapi.repositories.OrdineRepository;
 import com.yumaste.yumasteapi.services.email.emailService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,7 +21,7 @@ public class NotificationListener {
     private final OrdineRepository ordineRepository;
     private final FatturaRepository fatturaRepository;
 
-
+    @Transactional
     @KafkaListener(topics = "order-created-topic", groupId = "yumaste-group")
     public void handleOrderCreatedEvent(OrderCreatedEvent event) {
         log.info("Ricevuto evento Kafka per l'ordine ID: {}", event.getOrdineId());
