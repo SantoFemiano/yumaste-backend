@@ -5,6 +5,7 @@ import com.yumaste.yumasteapi.DTO.response.CartDTO;
 import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
 import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.OrdiniDettagliDTO;
+import com.yumaste.yumasteapi.events.OrderCreatedEvent;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.OrderDettagliMapper;
 import com.yumaste.yumasteapi.models.*;
@@ -38,6 +39,8 @@ public class OrderService {
     private final IndirizzoUtenteRepository indirizzoRepository;
     private final OrderDettagliMapper orderDettagliMapper;
     private final emailService emailService;
+
+    private final org.springframework.kafka.core.KafkaTemplate<String,Object> kafkaTemplate;
 
     @Transactional
     @Caching(evict = {
@@ -129,13 +132,13 @@ public class OrderService {
 
         fatturaRepository.save(fattura);
 
-        emailService.sendFatturaOrdine(
-                ordine.getUtente().getEmail(),
-                ordine.getUtente().getNome(),
-                fattura
+        OrderCreatedEvent evento = new OrderCreatedEvent(
+                ordinesalvato.getId(),
+                utente.getEmail(),
+                utente.getNome()
         );
 
-
+        kafkaTemplate.send("order-created-topic", evento);
 
         cartRepository.deleteAll(cartRepository.findByUtente(utente));
 

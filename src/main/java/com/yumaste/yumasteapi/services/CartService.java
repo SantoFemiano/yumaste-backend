@@ -14,7 +14,6 @@ import com.yumaste.yumasteapi.repositories.ScontoRepository;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

@@ -1,14 +1,9 @@
 package com.yumaste.yumasteapi.controllers;
 
-import com.yumaste.yumasteapi.DTO.response.BoxDetailDTO;
-import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
-import com.yumaste.yumasteapi.DTO.response.PagedResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.CatalogBoxDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import com.yumaste.yumasteapi.services.BoxService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -4,7 +4,6 @@ package com.yumaste.yumasteapi.services.email;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-
 import com.yumaste.yumasteapi.models.DettaglioOrdine;
 import com.yumaste.yumasteapi.models.Ordine;
 import com.yumaste.yumasteapi.repositories.DettaglioOrdineRepository;
