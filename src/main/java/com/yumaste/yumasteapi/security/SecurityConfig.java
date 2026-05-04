@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll() // Permetti l'accesso alla documentazione API
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()                      // Tutto il resto richiede il token
                 )
 
