@@ -28,7 +28,11 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <sonar.organization>santofemiano</sonar.organization>
     </properties>
+
+
+
     <dependencies>
 
         <dependency>
