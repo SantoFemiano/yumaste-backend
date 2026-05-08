@@ -42,7 +42,7 @@ public class CartService {
             Sconto sconto = scontoOpt.get();
             percentuale = sconto.getValore();
 
-            BigDecimal moltiplicatore = BigDecimal.valueOf(100 - percentuale).divide(BigDecimal.valueOf(100));
+            BigDecimal moltiplicatore = BigDecimal.valueOf(100L - percentuale).divide(BigDecimal.valueOf(100));
             prezzoScontato = prezzoOriginale.multiply(moltiplicatore).setScale(2, RoundingMode.HALF_UP);
         }
 
