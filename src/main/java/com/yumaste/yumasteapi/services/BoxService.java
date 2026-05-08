@@ -152,7 +152,7 @@ public class BoxService {
         if (scontoOpt.isPresent()) {
             Sconto sconto = scontoOpt.get();
             percentuale_sconto = sconto.getValore();
-            BigDecimal moltiplicatore = BigDecimal.valueOf(100 - percentuale_sconto).divide(BigDecimal.valueOf(100));
+            BigDecimal moltiplicatore = BigDecimal.valueOf(100L - percentuale_sconto).divide(BigDecimal.valueOf(100));
             prezzoScontato = prezzoOriginale.multiply(moltiplicatore).setScale(2, RoundingMode.HALF_UP);
 
         }
