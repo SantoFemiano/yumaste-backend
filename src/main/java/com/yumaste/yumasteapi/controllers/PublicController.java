@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.controllers;
 import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import com.yumaste.yumasteapi.services.BoxService;
+import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,13 @@ public class PublicController {
 
     private final BoxService boxService;
     private final BoxCompositionService boxCompositionService;
+    private final AiDescriptionService aiDescriptionService;
+
+    @GetMapping("/box/{boxId}/generate-description")
+    public ResponseEntity<String> generateBoxDescriptionWithAi(@PathVariable Long boxId) {
+        String descrizioneGenerata = aiDescriptionService.generaDescrizionePerBox(boxId);
+        return ResponseEntity.ok(descrizioneGenerata);
+    }
 
     @GetMapping("/boxes")
     public ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> getCatalog(
