@@ -37,6 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SantoFemiano_yumaste-backend
 
       - name: Set up QEMU
@@ -72,4 +73,4 @@ jobs:
           script: |
             cd ~/yumaste-deploy
             docker compose pull yumaste-backend
-            docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
