@@ -72,5 +72,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/yumaste-deploy
+            
+            sed -i '/GEMINI_API_KEY/d' ./yumaste.env
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> ./yumaste.env
+  
             docker compose pull yumaste-backend
-            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
+            docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
