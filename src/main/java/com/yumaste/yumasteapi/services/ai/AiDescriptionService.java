@@ -24,7 +24,7 @@ public class AiDescriptionService {
     private final Client geminiClient;
     private final BoxRepository boxRepository;
     private final BoxCompositionService boxCompositionService;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String generaDescrizionePerBox(Long boxId) {
         // 1. Recupera la Box
@@ -112,4 +112,4 @@ public class AiDescriptionService {
             return new AiRecommendationResponseDTO(null, "Al momento non riesco a connettermi, esplora il nostro catalogo!", "Catalogo");
         }
     }
-}}
+}
