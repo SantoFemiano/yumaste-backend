@@ -16,6 +16,7 @@ import com.yumaste.yumasteapi.DTO.response.AiRecommendationResponseDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
