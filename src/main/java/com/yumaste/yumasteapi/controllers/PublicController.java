@@ -24,8 +24,8 @@ public class PublicController {
     private final AiDescriptionService aiDescriptionService;
 
     @PostMapping("/ai/recommend")
-    public ResponseEntity<String> getAiRecommendation(@RequestBody AiRecommendationRequestDTO request) {
-        String consiglio = aiDescriptionService.consigliaBoxIntelligente(request);
+    public ResponseEntity<AiRecommendationResponseDTO> getAiRecommendation(@RequestBody AiRecommendationRequestDTO request) {
+        AiRecommendationResponseDTO consiglio = aiDescriptionService.consigliaBoxIntelligente(request);
         return ResponseEntity.ok(consiglio);
     }
 

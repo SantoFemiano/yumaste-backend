@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumaste.yumasteapi.DTO.response.AiRecommendationResponseDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ public class AiDescriptionService {
     private final Client geminiClient;
     private final BoxRepository boxRepository;
     private final BoxCompositionService boxCompositionService;
+    private final ObjectMapper objectMapper;
 
     public String generaDescrizionePerBox(Long boxId) {
         // 1. Recupera la Box
@@ -65,47 +68,48 @@ public class AiDescriptionService {
         }
     }
 
-    public String consigliaBoxIntelligente(AiRecommendationRequestDTO preferenze) {
-
-        // 1. Recupera tutte le box disponibili dal database
+    public AiRecommendationResponseDTO consigliaBoxIntelligente(AiRecommendationRequestDTO preferenze) {
         List<Box> catalogo = boxRepository.findByAttivoTrue();
 
-        // 2. Crea una stringa riassuntiva del catalogo per Gemini
+        // Includiamo l'ID nel riassunto per Gemini
         String riassuntoCatalogo = catalogo.stream()
-                .map(b -> String.format("- %s (Categoria: %s, Porzioni: %d)", b.getNome(), b.getCategoria(), b.getPorzioni()))
+                .map(b -> String.format("- ID: %d, Nome: %s (Categoria: %s)", b.getId(), b.getNome(), b.getCategoria()))
                 .collect(Collectors.joining("\n"));
 
-        // 3. Costruisci un Prompt potentissimo
         String prompt = String.format(
                 """
-                        Sei il nutrizionista virtuale e assistente alle vendite di Yumaste. \
-                        Un cliente ha appena compilato il nostro questionario con queste preferenze:
-                        - Obiettivo: %s
-                        - Stile alimentare: %s
-                        - Allergeni da evitare: %s
-                        - Calorie giornaliere target: %d kcal
-                        
-                        Questo è il nostro catalogo di Box attualmente disponibili:
-                        %s
-                        
-                        Analizza le richieste del cliente e scegli UNA box dal catalogo che sia perfetta per lui. \
-                        Scrivi un messaggio accogliente, diretto al cliente (dandogli del tu), spiegando perché gli consigli proprio quella box. \
-                        Sii persuasivo, empatico e mantieni la risposta sotto le 60 parole.""",
-                preferenze.obiettivo(),
-                preferenze.tipoDieta(),
-                String.join(", ", preferenze.allergeni()),
-                preferenze.calorieGiornaliere(),
+                Sei il nutrizionista virtuale di Yumaste. 
+                Cliente: Obiettivo %s, Dieta %s, Allergeni %s, %d kcal.
+                
+                Catalogo Box:
+                %s
+                
+                Scegli la box migliore e rispondi ESCLUSIVAMENTE con un oggetto JSON valido.
+                Non aggiungere testo prima o dopo il JSON.
+                Formato richiesto:
+                {
+                  "boxId": (numero),
+                  "messaggio": "(testo persuasivo sotto 60 parole)",
+                  "nomeBox": "(nome della box scelta)"
+                }
+                """,
+                preferenze.obiettivo(), preferenze.tipoDieta(),
+                String.join(", ", preferenze.allergeni()), preferenze.calorieGiornaliere(),
                 riassuntoCatalogo
         );
 
-        // 4. Invia al modello
         try {
-            log.info("Richiesta consiglio AI per obiettivo: {}", preferenze.obiettivo());
-            GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt,null);
-            return response.text();
+            GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt, null);
+            String jsonResponse = response.text().trim();
+
+            // Rimuovi eventuali blocchi di codice markdown se Gemini li include (es. ```json ... ```)
+            jsonResponse = jsonResponse.replace("```json", "").replace("```", "").trim();
+
+            return objectMapper.readValue(jsonResponse, AiRecommendationResponseDTO.class);
         } catch (Exception e) {
             log.error("Errore durante la raccomandazione AI", e);
-            return "Al momento il nostro Chef AI sta riposando, ma ti consigliamo di dare un'occhiata alle nostre box più popolari nel catalogo!";
+            // Ritorna un valore di fallback coerente col DTO
+            return new AiRecommendationResponseDTO(null, "Al momento non riesco a connettermi, esplora il nostro catalogo!", "Catalogo");
         }
     }
-}
+}}
