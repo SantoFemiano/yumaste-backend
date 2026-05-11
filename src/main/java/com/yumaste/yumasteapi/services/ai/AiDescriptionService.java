@@ -9,6 +9,7 @@ import com.yumaste.yumasteapi.services.BoxCompositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class AiDescriptionService {
             log.info("Chiamata a Gemini in corso per la box: {}", box.getNome());
 
             GenerateContentResponse response = geminiClient.models.generateContent(
-                    "gemini-3-flash-preview",
+                    "gemini-3.1-flash-lite",
                     prompt,
                     null
             );
@@ -61,6 +62,50 @@ public class AiDescriptionService {
         } catch (Exception e) {
             log.error("Errore durante la generazione della descrizione con Gemini", e);
             throw new RuntimeException("Impossibile generare la descrizione in questo momento.", e);
+        }
+    }
+
+    public String consigliaBoxIntelligente(AiRecommendationRequestDTO preferenze) {
+
+        // 1. Recupera tutte le box disponibili dal database
+        List<Box> catalogo = boxRepository.findByAttivoTrue();
+
+        // 2. Crea una stringa riassuntiva del catalogo per Gemini
+        String riassuntoCatalogo = catalogo.stream()
+                .map(b -> String.format("- %s (Categoria: %s, Porzioni: %d)", b.getNome(), b.getCategoria(), b.getPorzioni()))
+                .collect(Collectors.joining("\n"));
+
+        // 3. Costruisci un Prompt potentissimo
+        String prompt = String.format(
+                """
+                        Sei il nutrizionista virtuale e assistente alle vendite di Yumaste. \
+                        Un cliente ha appena compilato il nostro questionario con queste preferenze:
+                        - Obiettivo: %s
+                        - Stile alimentare: %s
+                        - Allergeni da evitare: %s
+                        - Calorie giornaliere target: %d kcal
+                        
+                        Questo è il nostro catalogo di Box attualmente disponibili:
+                        %s
+                        
+                        Analizza le richieste del cliente e scegli UNA box dal catalogo che sia perfetta per lui. \
+                        Scrivi un messaggio accogliente, diretto al cliente (dandogli del tu), spiegando perché gli consigli proprio quella box. \
+                        Sii persuasivo, empatico e mantieni la risposta sotto le 60 parole.""",
+                preferenze.obiettivo(),
+                preferenze.tipoDieta(),
+                String.join(", ", preferenze.allergeni()),
+                preferenze.calorieGiornaliere(),
+                riassuntoCatalogo
+        );
+
+        // 4. Invia al modello
+        try {
+            log.info("Richiesta consiglio AI per obiettivo: {}", preferenze.obiettivo());
+            GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt,null);
+            return response.text();
+        } catch (Exception e) {
+            log.error("Errore durante la raccomandazione AI", e);
+            return "Al momento il nostro Chef AI sta riposando, ma ti consigliamo di dare un'occhiata alle nostre box più popolari nel catalogo!";
         }
     }
 }
