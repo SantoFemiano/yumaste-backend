@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
+
 
 import java.util.List;
 
@@ -20,6 +22,12 @@ public class PublicController {
     private final BoxService boxService;
     private final BoxCompositionService boxCompositionService;
     private final AiDescriptionService aiDescriptionService;
+
+    @PostMapping("/ai/recommend")
+    public ResponseEntity<String> getAiRecommendation(@RequestBody AiRecommendationRequestDTO request) {
+        String consiglio = aiDescriptionService.consigliaBoxIntelligente(request);
+        return ResponseEntity.ok(consiglio);
+    }
 
     @GetMapping("/box/{boxId}/generate-description")
     public ResponseEntity<String> generateBoxDescriptionWithAi(@PathVariable Long boxId) {
