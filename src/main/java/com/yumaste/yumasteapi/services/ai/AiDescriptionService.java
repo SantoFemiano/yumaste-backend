@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumaste.yumasteapi.DTO.response.AiRecommendationResponseDTO;
+import com.yumaste.yumasteapi.DTO.request.ValoriNutrizionaliRequestDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,4 +114,30 @@ public class AiDescriptionService {
             return new AiRecommendationResponseDTO(null, "Al momento non riesco a connettermi, esplora il nostro catalogo!", "Catalogo");
         }
     }
+
+    public ValoriNutrizionaliRequestDTO generaValoriNutrizionali(String nomeIngrediente) {
+        String prompt = String.format(
+                "Sei un nutrizionista esperto. Fornisci i valori nutrizionali medi per 100g di '%s'. " +
+                        "Rispondi ESCLUSIVAMENTE con un oggetto JSON valido, senza testo aggiuntivo. " +
+                        "I valori devono essere numeri o decimali (senza unità di misura). " +
+                        "Usa ESATTAMENTE le seguenti chiavi: " +
+                        "{\"proteine\": 0.0, \"carboidrati\": 0.0, \"zuccheri\": 0.0, \"fibre\": 0.0, \"grassi\": 0.0, \"sale\": 0.0, \"chilocalorie\": 0.0}",
+                nomeIngrediente
+        );
+
+        try {
+            log.info("Richiesta valori nutrizionali all'IA per l'ingrediente: {}", nomeIngrediente);
+            GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt, null);
+            String jsonResponse = response.text().trim();
+
+            // Pulisce il testo da eventuali formattazioni markdown di Gemini
+            jsonResponse = jsonResponse.replace("```json", "").replace("```", "").trim();
+
+            return objectMapper.readValue(jsonResponse, ValoriNutrizionaliRequestDTO.class);
+        } catch (Exception e) {
+            log.error("Errore durante la generazione dei valori nutrizionali per {}", nomeIngrediente, e);
+            return null; // Restituisce null in caso di errore per evitare blocchi
+        }
+    }
+
 }

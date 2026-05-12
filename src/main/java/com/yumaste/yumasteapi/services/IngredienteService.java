@@ -8,6 +8,7 @@ import com.yumaste.yumasteapi.mapper.IngredienteAllergeneMapper;
 import com.yumaste.yumasteapi.mapper.IngredienteMapper;
 import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.*;
+import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,6 +29,7 @@ public class IngredienteService {
     private final IngredienteAllergeneMapper ingredienteAllergeneMapper;
     private final NutritionalValueRepository nutritionalValueRepository;
     private final AllergeneRepository allergeneRepository;
+    private final AiDescriptionService aiDescriptionService;
 
     @Transactional
     @Caching(evict = {
@@ -38,23 +40,32 @@ public class IngredienteService {
     })
     public IngredienteResponseDTO creaIngrediente(IngredienteRequestDTO request) {
 
-        // 1. SALVATAGGIO INGREDIENTE BASE
+        // SALVATAGGIO INGREDIENTE BASE
         Ingrediente nuovoIngrediente = ingredienteMapper.toEntity(request);
-        Fornitore fornitore = fornitoreRepository.findByPartitaIva((request.partitaIva())).orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato con Partita Iva: " + request.partitaIva()));
+        Fornitore fornitore = fornitoreRepository.findByPartitaIva((request.partitaIva()))
+                .orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato con Partita Iva: " + request.partitaIva()));
         nuovoIngrediente.setFornitore(fornitore);
         Ingrediente ingredienteSalvato = ingredienteRepository.save(nuovoIngrediente);
 
-        // 2. SALVATAGGIO VALORI NUTRIZIONALI
-        if (request.valoriNutrizionali() != null) {
+
+        var valoriRequest = request.valoriNutrizionali();
+
+        // Se l'utente non ha passato i valori nutrizionali, li facciamo generare a Gemini
+        if (valoriRequest == null) {
+            valoriRequest = aiDescriptionService.generaValoriNutrizionali(request.nome());
+        }
+
+        // 2. SALVATAGGIO VALORI NUTRIZIONALI (da request o generati dall'AI)
+        if (valoriRequest != null) {
             ValoriNutrizionali vn = new ValoriNutrizionali();
             vn.setIngrediente(ingredienteSalvato);
-            vn.setProteine(request.valoriNutrizionali().proteine());
-            vn.setCarboidrati(request.valoriNutrizionali().carboidrati());
-            vn.setZuccheri(request.valoriNutrizionali().zuccheri());
-            vn.setFibre(request.valoriNutrizionali().fibre());
-            vn.setGrassi(request.valoriNutrizionali().grassi());
-            vn.setSale(request.valoriNutrizionali().sale());
-            vn.setChilocalorie(request.valoriNutrizionali().chilocalorie());
+            vn.setProteine(valoriRequest.proteine());
+            vn.setCarboidrati(valoriRequest.carboidrati());
+            vn.setZuccheri(valoriRequest.zuccheri());
+            vn.setFibre(valoriRequest.fibre());
+            vn.setGrassi(valoriRequest.grassi());
+            vn.setSale(valoriRequest.sale());
+            vn.setChilocalorie(valoriRequest.chilocalorie());
 
             nutritionalValueRepository.save(vn);
         }
@@ -62,7 +73,6 @@ public class IngredienteService {
         // 3. COLLEGAMENTO ALLERGENI
         if (request.allergeniIds() != null && !request.allergeniIds().isEmpty()) {
             for (Long idAllergene : request.allergeniIds()) {
-
                 Allergene allergene = allergeneRepository.findById(idAllergene)
                         .orElseThrow(() -> new ResourceNotFoundException("Allergene non trovato ID: " + idAllergene));
 
