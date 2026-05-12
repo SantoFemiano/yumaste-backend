@@ -120,13 +120,6 @@ public class IngredienteService {
             @CacheEvict(value = "valori_nutrizionali", allEntries = true),
             @CacheEvict(value = {"ingredienti_con_valori", "box_dettagli"}, allEntries = true)
     })
-    @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "ingredienti", allEntries = true),
-            @CacheEvict(value = "ingredienti_allergeni", allEntries = true),
-            @CacheEvict(value = "valori_nutrizionali", allEntries = true),
-            @CacheEvict(value = {"ingredienti_con_valori", "box_dettagli"}, allEntries = true)
-    })
     public IngredienteResponseDTO updateIngrediente(Long id, IngredienteRequestDTO request) {
         Ingrediente ingrediente = ingredienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
