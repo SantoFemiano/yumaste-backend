@@ -120,6 +120,13 @@ public class IngredienteService {
             @CacheEvict(value = "valori_nutrizionali", allEntries = true),
             @CacheEvict(value = {"ingredienti_con_valori", "box_dettagli"}, allEntries = true)
     })
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "ingredienti", allEntries = true),
+            @CacheEvict(value = "ingredienti_allergeni", allEntries = true),
+            @CacheEvict(value = "valori_nutrizionali", allEntries = true),
+            @CacheEvict(value = {"ingredienti_con_valori", "box_dettagli"}, allEntries = true)
+    })
     public IngredienteResponseDTO updateIngrediente(Long id, IngredienteRequestDTO request) {
         Ingrediente ingrediente = ingredienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ingrediente non trovato"));
@@ -142,24 +149,33 @@ public class IngredienteService {
             ingrediente.setFornitore(fornitore);
         }
 
+        // Estrapoliamo i valori nutrizionali dalla richiesta
+        var valoriRequest = request.valoriNutrizionali();
 
-        if (request.valoriNutrizionali() != null) {
+
+        // Se l'utente ha attivato lo switch sul frontend (inviando null), ricalcoliamo con Gemini
+        if (valoriRequest == null) {
+            valoriRequest = aiDescriptionService.generaValoriNutrizionali(request.nome());
+        }
+
+        if (valoriRequest != null) {
             // Cerca i vecchi valori nutrizionali nel DB. Se l'ingrediente non li aveva, ne crea uno nuovo.
             ValoriNutrizionali vn = nutritionalValueRepository.findByIngrediente(ingrediente)
                     .orElse(new ValoriNutrizionali());
 
             vn.setIngrediente(ingrediente);
-            vn.setProteine(request.valoriNutrizionali().proteine());
-            vn.setCarboidrati(request.valoriNutrizionali().carboidrati());
-            vn.setZuccheri(request.valoriNutrizionali().zuccheri());
-            vn.setFibre(request.valoriNutrizionali().fibre());
-            vn.setGrassi(request.valoriNutrizionali().grassi());
-            vn.setSale(request.valoriNutrizionali().sale());
-            vn.setChilocalorie(request.valoriNutrizionali().chilocalorie());
+            vn.setProteine(valoriRequest.proteine());
+            vn.setCarboidrati(valoriRequest.carboidrati());
+            vn.setZuccheri(valoriRequest.zuccheri());
+            vn.setFibre(valoriRequest.fibre());
+            vn.setGrassi(valoriRequest.grassi());
+            vn.setSale(valoriRequest.sale());
+            vn.setChilocalorie(valoriRequest.chilocalorie());
 
             // Salva le modifiche nella tabella VALORI_NUTRIZIONALI
             nutritionalValueRepository.save(vn);
         }
+        
 
         return ingredienteMapper.toResponseDTO(ingredienteRepository.save(ingrediente));
     }
