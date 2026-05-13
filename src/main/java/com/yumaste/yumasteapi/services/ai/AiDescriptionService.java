@@ -1,10 +1,17 @@
 package com.yumaste.yumasteapi.services.ai;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
+import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.models.Box;
+import com.yumaste.yumasteapi.models.Fornitore;
+import com.yumaste.yumasteapi.models.Ingrediente;
+import com.yumaste.yumasteapi.repositories.AllergeneRepository;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
+import com.yumaste.yumasteapi.repositories.FornitoreRepository;
+import com.yumaste.yumasteapi.repositories.IngredienteRepository;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +34,9 @@ public class AiDescriptionService {
     private final BoxRepository boxRepository;
     private final BoxCompositionService boxCompositionService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final IngredienteRepository ingredienteRepository;
+    private final FornitoreRepository fornitoreRepository;
+    private final AllergeneRepository allergeneRepository;
 
     public String generaDescrizionePerBox(Long boxId) {
         // 1. Recupera la Box
@@ -140,4 +150,56 @@ public class AiDescriptionService {
         }
     }
 
+    public List<IngredienteRequestDTO> generaIngredientiNuovi(int quantita) {
+        // 1. Recupero nomi ingredienti esistenti per evitare duplicati
+        List<String> nomiEsistenti = ingredienteRepository.findAll().stream()
+                .map(Ingrediente::getNome)
+                .collect(Collectors.toList());
+
+        // 2. Recupero FORNITORI con Nome e P.IVA per l'associazione logica
+        List<Fornitore> fornitori = fornitoreRepository.findAll();
+        if (fornitori.isEmpty()) {
+            throw new RuntimeException("Nessun fornitore in database. Impossibile generare ingredienti.");
+        }
+
+        // Creiamo una stringa descrittiva: "Nome Fornitore (P.IVA: 12345)"
+        String listaFornitoriContesto = fornitori.stream()
+                .map(f -> f.getNome() + " (P.IVA: " + f.getPartitaIva() + ")")
+                .collect(Collectors.joining(", "));
+
+        String allergeniDisponibili = allergeneRepository.findAll().stream()
+                .map(a -> a.getId() + " (" + a.getNome() + ")")
+                .collect(Collectors.joining(", "));
+
+        // 3. Prompt aggiornato con istruzioni di accoppiamento logico
+        String prompt = String.format(
+                "Sei un assistente esperto per l'e-commerce alimentare Yumaste. Genera un array JSON di %d nuovi ingredienti.\n\n" +
+                        "REGOLE DI COERENZA:\n" +
+                        "1. ACCOPPIAMENTO FORNITORE: Per ogni ingrediente che inventi, scegli il fornitore più adatto dalla seguente lista: [%s]. " +
+                        "Ad esempio, se generi 'Mozzarella', scegli un fornitore il cui nome suggerisca prodotti caseari o alimentari generici.\n" +
+                        "2. UNICITÀ: Non usare questi nomi già esistenti: %s.\n" +
+                        "3. DATI TECNICI: Usa l'ID corretto degli allergeni da questa lista: %s.\n" +
+                        "4. FORMATO: Restituisci solo l'array JSON senza markdown.\n\n" +
+                        "Struttura richiesta per oggetto:\n" +
+                        "{\"ean\": \"13cifre\", \"partitaIva\": \"P.IVA_DEL_FORNITORE_SCELTO\", \"nome\": \"...\", \"descrizione\": \"...\", " +
+                        "\"unitaMisura\": \"g\", \"pesoPerPezzo\": 0.0, \"prezzoPerUnita\": 0.0, \"attivo\": true, \"allergeniIds\": [], " +
+                        "\"valoriNutrizionali\": {...}}",
+                quantita,
+                listaFornitoriContesto,
+                nomiEsistenti.isEmpty() ? "nessuno" : String.join(", ", nomiEsistenti),
+                allergeniDisponibili
+        );
+
+        try {
+            log.info("Richiesta generazione ingredienti con accoppiamento fornitori intelligente...");
+            GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt, null);
+            String jsonResponse = response.text().trim().replace("```json", "").replace("```", "");
+
+            return objectMapper.readValue(jsonResponse, new TypeReference<List<IngredienteRequestDTO>>() {});
+        } catch (Exception e) {
+            log.error("Errore nella generazione AI", e);
+            throw new RuntimeException("Errore generazione ingredienti");
+        }
+    }
 }
+
