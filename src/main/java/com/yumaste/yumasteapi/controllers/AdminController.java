@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.controllers;
 import com.yumaste.yumasteapi.DTO.request.*;
 import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.*;
+import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,7 +32,25 @@ public class AdminController {
     private final UserService userService;
     private final CartService cartService;
     private final DashboardService dashboardService;
+    private final AiDescriptionService aiDescriptionService;
 
+
+    @PostMapping("/ai/genera-inserisci-ingredienti")
+    public ResponseEntity<List<IngredienteResponseDTO>> generateAndInsertIngredientiAi(
+            @RequestParam(defaultValue = "1") int quantita) {
+
+        // 1. Chiedi all'IA di elaborare i DTO
+        List<IngredienteRequestDTO> requestsGenerati = aiDescriptionService.generaIngredientiNuovi(quantita);
+
+        List<IngredienteResponseDTO> responseList = new ArrayList<>();
+
+        // 2. Riutilizziamo la tua logica di business blindata e transazionale
+        for (IngredienteRequestDTO req : requestsGenerati) {
+            responseList.add(ingredienteService.creaIngrediente(req));
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseList);
+    }
 
     @PostMapping("/addBox")
     public ResponseEntity<BoxResponseDTO> addBox(@Valid @RequestBody BoxRequestDTO boxRequestDTO) {
