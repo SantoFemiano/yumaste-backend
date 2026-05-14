@@ -14,5 +14,6 @@ public record IngredienteResponseDTO(
         String unitaMisura,
         BigDecimal pesoPerPezzo,
         BigDecimal prezzoPerUnita,
-        Boolean attivo
+        Boolean attivo,
+        NutritionalValueDTO valoriNutrizionali
 )implements Serializable {}
