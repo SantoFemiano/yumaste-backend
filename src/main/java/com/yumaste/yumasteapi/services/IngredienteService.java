@@ -40,37 +40,39 @@ public class IngredienteService {
     })
     public IngredienteResponseDTO creaIngrediente(IngredienteRequestDTO request) {
 
-        // SALVATAGGIO INGREDIENTE BASE
+        // 1. CREAZIONE INGREDIENTE BASE (Il mapper mappa in automatico i valori se ci sono nel JSON)
         Ingrediente nuovoIngrediente = ingredienteMapper.toEntity(request);
         Fornitore fornitore = fornitoreRepository.findByPartitaIva((request.partitaIva()))
                 .orElseThrow(() -> new ResourceNotFoundException("Fornitore non trovato con Partita Iva: " + request.partitaIva()));
         nuovoIngrediente.setFornitore(fornitore);
+
+        // 2. GESTIONE VALORI AI (Facciamo questo PRIMA di salvare)
+        // Se non ci sono valori nutrizionali nel DTO (quindi getValoriNutrizionali è null)
+        if (nuovoIngrediente.getValoriNutrizionali() == null) {
+
+            var valoriGenerati = aiDescriptionService.generaValoriNutrizionali(request.nome());
+
+            if (valoriGenerati != null) {
+                ValoriNutrizionali vn = new ValoriNutrizionali();
+                vn.setProteine(valoriGenerati.proteine());
+                vn.setCarboidrati(valoriGenerati.carboidrati());
+                vn.setZuccheri(valoriGenerati.zuccheri());
+                vn.setFibre(valoriGenerati.fibre());
+                vn.setGrassi(valoriGenerati.grassi());
+                vn.setSale(valoriGenerati.sale());
+                vn.setChilocalorie(valoriGenerati.chilocalorie());
+
+                // Usiamo il nostro setter speciale per collegare i due oggetti!
+                nuovoIngrediente.setValoriNutrizionali(vn);
+            }
+        }
+
+        // 3. IL SALVATAGGIO MAGICO
+        // Questo singolo comando salva l'Ingrediente e, in automatico, inserisce
+        // i ValoriNutrizionali nella loro tabella senza fare duplicati.
         Ingrediente ingredienteSalvato = ingredienteRepository.save(nuovoIngrediente);
 
-
-        var valoriRequest = request.valoriNutrizionali();
-
-        // Se l'utente non ha passato i valori nutrizionali, li facciamo generare a Gemini
-        if (valoriRequest == null) {
-            valoriRequest = aiDescriptionService.generaValoriNutrizionali(request.nome());
-        }
-
-        // 2. SALVATAGGIO VALORI NUTRIZIONALI (da request o generati dall'AI)
-        if (valoriRequest != null) {
-            ValoriNutrizionali vn = new ValoriNutrizionali();
-            vn.setIngrediente(ingredienteSalvato);
-            vn.setProteine(valoriRequest.proteine());
-            vn.setCarboidrati(valoriRequest.carboidrati());
-            vn.setZuccheri(valoriRequest.zuccheri());
-            vn.setFibre(valoriRequest.fibre());
-            vn.setGrassi(valoriRequest.grassi());
-            vn.setSale(valoriRequest.sale());
-            vn.setChilocalorie(valoriRequest.chilocalorie());
-
-            nutritionalValueRepository.save(vn);
-        }
-
-        // 3. COLLEGAMENTO ALLERGENI
+        // 4. COLLEGAMENTO ALLERGENI
         if (request.allergeniIds() != null && !request.allergeniIds().isEmpty()) {
             for (Long idAllergene : request.allergeniIds()) {
                 Allergene allergene = allergeneRepository.findById(idAllergene)
