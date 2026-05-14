@@ -62,4 +62,14 @@ public class Ingrediente {
     @OneToMany(mappedBy = "ingrediente", fetch = FetchType.LAZY)
     private List<IngredienteAllergene> allergeni;
 
+    @OneToOne(mappedBy = "ingrediente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ValoriNutrizionali valoriNutrizionali;
+
+
+    public void setValoriNutrizionali(ValoriNutrizionali valoriNutrizionali) {
+        this.valoriNutrizionali = valoriNutrizionali;
+        if (valoriNutrizionali != null) {
+            valoriNutrizionali.setIngrediente(this); // Collega il figlio al padre
+        }
+    }
 }
