@@ -2,7 +2,9 @@ package com.yumaste.yumasteapi.services.ai;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.genai.Client;
+import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
+import com.google.genai.types.ThinkingConfig;
 import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.models.Box;
@@ -171,7 +173,7 @@ public class AiDescriptionService {
                 .map(a -> a.getId() + " (" + a.getNome() + ")")
                 .collect(Collectors.joining(", "));
 
-        // 3. Prompt aggiornato con istruzioni di accoppiamento logico
+        // Prompt
         String prompt = String.format(
                 "Sei un assistente esperto per l'e-commerce alimentare Yumaste. Genera un array JSON di %d nuovi ingredienti.\n\n" +
                         "REGOLE DI COERENZA:\n" +
@@ -179,11 +181,11 @@ public class AiDescriptionService {
                         "Ad esempio, se generi 'Mozzarella', scegli un fornitore il cui nome suggerisca prodotti caseari o alimentari generici.\n" +
                         "2. UNICITÀ: Non usare questi nomi già esistenti: %s.\n" +
                         "3. DATI TECNICI: Usa l'ID corretto degli allergeni da questa lista: %s.\n" +
-                        "4. FORMATO: Restituisci solo l'array JSON senza markdown.\n\n" +
+                        "4. FORMATO E CHIAVI: Restituisci solo l'array JSON senza markdown. Usa ESATTAMENTE e SOLO le chiavi JSON fornite nell'esempio. NON aggiungere chiavi inventate come 'energia'.\n\n" +
                         "Struttura richiesta per oggetto:\n" +
                         "{\"ean\": \"13cifre\", \"partitaIva\": \"P.IVA_DEL_FORNITORE_SCELTO\", \"nome\": \"...\", \"descrizione\": \"...\", " +
                         "\"unitaMisura\": \"g\", \"pesoPerPezzo\": 0.0, \"prezzoPerUnita\": 0.0, \"attivo\": true, \"allergeniIds\": [], " +
-                        "\"valoriNutrizionali\": {...}}",
+                        "\"valoriNutrizionali\": {\"carboidrati\": 0.0, \"proteine\": 0.0, \"grassi\": 0.0, \"chilocalorie\": 0.0, \"sale\": 0.0, \"zuccheri\": 0.0, \"fibre\": 0.0}}",
                 quantita,
                 listaFornitoriContesto,
                 nomiEsistenti.isEmpty() ? "nessuno" : String.join(", ", nomiEsistenti),
