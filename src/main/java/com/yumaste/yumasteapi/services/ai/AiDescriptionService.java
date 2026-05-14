@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumaste.yumasteapi.DTO.response.AiRecommendationResponseDTO;
 import com.yumaste.yumasteapi.DTO.request.ValoriNutrizionaliRequestDTO;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 
@@ -152,19 +154,19 @@ public class AiDescriptionService {
         }
     }
 
+
     public List<IngredienteRequestDTO> generaIngredientiNuovi(int quantita) {
         // 1. Recupero nomi ingredienti esistenti per evitare duplicati
         List<String> nomiEsistenti = ingredienteRepository.findAll().stream()
                 .map(Ingrediente::getNome)
                 .collect(Collectors.toList());
 
-        // 2. Recupero FORNITORI con Nome e P.IVA per l'associazione logica
+        // 2. Recupero FORNITORI
         List<Fornitore> fornitori = fornitoreRepository.findAll();
         if (fornitori.isEmpty()) {
             throw new RuntimeException("Nessun fornitore in database. Impossibile generare ingredienti.");
         }
 
-        // Creiamo una stringa descrittiva: "Nome Fornitore (P.IVA: 12345)"
         String listaFornitoriContesto = fornitori.stream()
                 .map(f -> f.getNome() + " (P.IVA: " + f.getPartitaIva() + ")")
                 .collect(Collectors.joining(", "));
@@ -173,19 +175,19 @@ public class AiDescriptionService {
                 .map(a -> a.getId() + " (" + a.getNome() + ")")
                 .collect(Collectors.joining(", "));
 
-        // Prompt
+        // 3. PROMPT AGGIORNATO: Istruzioni rigide su nutrizione e formattazione
         String prompt = String.format(
                 "Sei un assistente esperto per l'e-commerce alimentare Yumaste. Genera un array JSON di %d nuovi ingredienti.\n\n" +
                         "REGOLE DI COERENZA:\n" +
-                        "1. ACCOPPIAMENTO FORNITORE: Per ogni ingrediente che inventi, scegli il fornitore più adatto dalla seguente lista: [%s]. " +
-                        "Ad esempio, se generi 'Mozzarella', scegli un fornitore il cui nome suggerisca prodotti caseari o alimentari generici.\n" +
-                        "2. UNICITÀ: Non usare questi nomi già esistenti: %s.\n" +
-                        "3. DATI TECNICI: Usa l'ID corretto degli allergeni da questa lista: %s.\n" +
-                        "4. FORMATO E CHIAVI: Restituisci solo l'array JSON senza markdown. Usa ESATTAMENTE e SOLO le chiavi JSON fornite nell'esempio. NON aggiungere chiavi inventate come 'energia'.\n\n" +
-                        "Struttura richiesta per oggetto:\n" +
-                        "{\"ean\": \"13cifre\", \"partitaIva\": \"P.IVA_DEL_FORNITORE_SCELTO\", \"nome\": \"...\", \"descrizione\": \"...\", " +
-                        "\"unitaMisura\": \"g\", \"pesoPerPezzo\": 0.0, \"prezzoPerUnita\": 0.0, \"attivo\": true, \"allergeniIds\": [], " +
-                        "\"valoriNutrizionali\": {\"carboidrati\": 0.0, \"proteine\": 0.0, \"grassi\": 0.0, \"chilocalorie\": 0.0, \"sale\": 0.0, \"zuccheri\": 0.0, \"fibre\": 0.0}}",
+                        "1. ACCOPPIAMENTO FORNITORE: Scegli il fornitore coerente da questa lista: [%s].\n" +
+                        "2. UNICITÀ: Non usare assolutamente questi nomi già esistenti: %s.\n" +
+                        "3. ALLERGENI: Usa solo gli ID da questa lista: %s.\n" +
+                        "4. VALORI NUTRIZIONALI: INVENTA valori nutrizionali realistici e logici per 100g di prodotto (es. la carne avrà molte proteine, la pasta molti carboidrati). Non mettere tutto a 0.\n" +
+                        "5. FORMATO RIGIDO: Restituisci SOLO l'array JSON. Usa ESATTAMENTE le chiavi mostrate nell'esempio. L'EAN lascialo vuoto.\n\n" +
+                        "Struttura JSON per ogni oggetto (usa valori numerici reali al posto dei placeholder testuali per i valori nutrizionali):\n" +
+                        "{\"ean\": \"\", \"partitaIva\": \"P.IVA_DEL_FORNITORE\", \"nome\": \"...\", \"descrizione\": \"...\", " +
+                        "\"unitaMisura\": \"g\", \"pesoPerPezzo\": 250.0, \"prezzoPerUnita\": 2.50, \"attivo\": true, \"allergeniIds\": [], " +
+                        "\"valoriNutrizionali\": {\"carboidrati\": 50.5, \"proteine\": 12.0, \"grassi\": 3.5, \"chilocalorie\": 350.0, \"sale\": 1.2, \"zuccheri\": 2.0, \"fibre\": 4.0}}",
                 quantita,
                 listaFornitoriContesto,
                 nomiEsistenti.isEmpty() ? "nessuno" : String.join(", ", nomiEsistenti),
@@ -193,15 +195,50 @@ public class AiDescriptionService {
         );
 
         try {
-            log.info("Richiesta generazione ingredienti con accoppiamento fornitori intelligente...");
+            log.info("Richiesta generazione ingredienti con accoppiamento fornitori e nutrizione intelligente...");
             GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt, null);
             String jsonResponse = response.text().trim().replace("```json", "").replace("```", "");
 
-            return objectMapper.readValue(jsonResponse, new TypeReference<List<IngredienteRequestDTO>>() {});
+            List<IngredienteRequestDTO> ingredientiGenerati = objectMapper.readValue(jsonResponse, new TypeReference<List<IngredienteRequestDTO>>() {});
+
+            // 4. GENERAZIONE EAN LATO BACKEND (Gestione Record Immutabili)
+            List<IngredienteRequestDTO> listaDefinitiva = new ArrayList<>();
+
+            for (IngredienteRequestDTO ingrediente : ingredientiGenerati) {
+                // Creiamo una nuova istanza del record copiando i dati ma inserendo l'EAN generato
+                IngredienteRequestDTO ingredienteConEan = new IngredienteRequestDTO(
+                        generaEanUnivocoCasuale(),
+                        ingrediente.partitaIva(),
+                        ingrediente.nome(),
+                        ingrediente.descrizione(),
+                        ingrediente.unitaMisura(),
+                        ingrediente.pesoPerPezzo(),
+                        ingrediente.prezzoPerUnita(),
+                        ingrediente.attivo(),
+                        ingrediente.allergeniIds(),
+                        ingrediente.valoriNutrizionali()
+                );
+                listaDefinitiva.add(ingredienteConEan);
+            }
+
+            return listaDefinitiva;
+
         } catch (Exception e) {
             log.error("Errore nella generazione AI", e);
             throw new RuntimeException("Errore generazione ingredienti");
         }
+    }
+
+    // Metodo di supporto per generare un finto EAN-13 casuale
+    private String generaEanUnivocoCasuale() {
+        Random random = new Random();
+        StringBuilder ean = new StringBuilder();
+        // I codici EAN sono lunghi 13 cifre. Il primo numero non è solitamente 0.
+        ean.append(random.nextInt(9) + 1);
+        for (int i = 0; i < 12; i++) {
+            ean.append(random.nextInt(10));
+        }
+        return ean.toString();
     }
 }
 
