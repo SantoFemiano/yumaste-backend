@@ -183,7 +183,8 @@ public class AiDescriptionService {
                         "2. UNICITÀ: Non usare assolutamente questi nomi già esistenti: %s.\n" +
                         "3. ALLERGENI: Usa solo gli ID da questa lista: %s.\n" +
                         "4. VALORI NUTRIZIONALI: INVENTA valori nutrizionali realistici e logici per 100g di prodotto (es. la carne avrà molte proteine, la pasta molti carboidrati). Non mettere tutto a 0.\n" +
-                        "5. FORMATO RIGIDO: Restituisci SOLO l'array JSON. Usa ESATTAMENTE le chiavi mostrate nell'esempio. L'EAN lascialo vuoto.\n\n" +
+                        "5. UNITÀ DI MISURA: Scegli un'unità di misura logica per il prodotto in questione, selezionando ESCLUSIVAMENTE uno di questi valori: 'g', 'pz', 'kg', 'l'.\n" +
+                        "6. FORMATO RIGIDO: Restituisci SOLO l'array JSON. Usa ESATTAMENTE le chiavi mostrate nell'esempio. L'EAN lascialo vuoto.\n\n" +
                         "Struttura JSON per ogni oggetto (usa valori numerici reali al posto dei placeholder testuali per i valori nutrizionali):\n" +
                         "{\"ean\": \"\", \"partitaIva\": \"P.IVA_DEL_FORNITORE\", \"nome\": \"...\", \"descrizione\": \"...\", " +
                         "\"unitaMisura\": \"g\", \"pesoPerPezzo\": 250.0, \"prezzoPerUnita\": 2.50, \"attivo\": true, \"allergeniIds\": [], " +
