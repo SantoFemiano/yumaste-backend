@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.controllers;
 import com.yumaste.yumasteapi.DTO.request.*;
 import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.*;
+import com.yumaste.yumasteapi.services.ai.AiBoxGenerationService;
 import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,14 @@ public class AdminController {
     private final CartService cartService;
     private final DashboardService dashboardService;
     private final AiDescriptionService aiDescriptionService;
+    private final AiBoxGenerationService aiBoxGenerationService;
+
+    @PostMapping("/ai/genera-box")
+    public ResponseEntity<AiGenerateBoxResponseDTO> generateBoxAi(@RequestBody(required = false) AiGenerateBoxRequestDTO request) {
+        if (request == null) request = new AiGenerateBoxRequestDTO(null);
+        return ResponseEntity.ok(aiBoxGenerationService.generaBoxAutomatica(request));
+    }
+
 
 
     @PostMapping("/ai/genera-inserisci-ingredienti")
