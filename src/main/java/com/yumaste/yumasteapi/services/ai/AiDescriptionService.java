@@ -178,17 +178,18 @@ public class AiDescriptionService {
         // 3. PROMPT AGGIORNATO: Istruzioni rigide su nutrizione e formattazione
         String prompt = String.format(
                 "Sei un assistente esperto per l'e-commerce alimentare Yumaste. Genera un array JSON di %d nuovi ingredienti.\n\n" +
-                        "REGOLE DI COERENZA:\n" +
+                        "REGOLE DI COERENZA OBBLIGATORIE:\n" +
                         "1. ACCOPPIAMENTO FORNITORE: Scegli il fornitore coerente da questa lista: [%s].\n" +
                         "2. UNICITÀ: Non usare assolutamente questi nomi già esistenti: %s.\n" +
                         "3. ALLERGENI: Usa solo gli ID da questa lista: %s.\n" +
-                        "4. VALORI NUTRIZIONALI: INVENTA valori nutrizionali realistici e logici per 100g di prodotto (es. la carne avrà molte proteine, la pasta molti carboidrati). Non mettere tutto a 0.\n" +
-                        "5. UNITÀ DI MISURA: Scegli un'unità di misura logica per il prodotto in questione, selezionando ESCLUSIVAMENTE uno di questi valori: 'g', 'pz', 'kg', 'l'.\n" +
-                        "6. FORMATO RIGIDO: Restituisci SOLO l'array JSON. Usa ESATTAMENTE le chiavi mostrate nell'esempio. L'EAN lascialo vuoto.\n\n" +
-                        "Struttura JSON per ogni oggetto (usa valori numerici reali al posto dei placeholder testuali per i valori nutrizionali):\n" +
+                        "4. VALORI NUTRIZIONALI: INVENTA valori nutrizionali realistici per 100g di prodotto. Non mettere tutto a 0.\n" +
+                        "5. UNITÀ DI MISURA (RIGOROSA): L'unità di misura DEVE avere senso per il prodotto. Usa 'kg' per carne, salumi (es. prosciutto, capocollo), pesce, formaggi, farine e verdure. Usa 'l' per liquidi come olio, latte o salse. Usa 'pz' per uova o prodotti singoli. Usa 'g' SOLO ED ESCLUSIVAMENTE per spezie leggere (es. zafferano, pepe).\n" +
+                        "6. PREZZO DI MERCATO (CRITICO): Il campo 'prezzoPerUnita' DEVE essere realistico in base all'unità scelta. Se scegli 'kg' per la carne, il prezzo sarà circa 15.00-30.00. Se scegli 'l' per l'olio, sarà circa 10.00. ERRORE GRAVE: non mettere prezzi come 3.50 associati a 'g' (significherebbe 3500 euro al chilo!).\n" +
+                        "7. FORMATO RIGIDO: Restituisci SOLO l'array JSON. Usa ESATTAMENTE le chiavi mostrate nell'esempio. L'EAN lascialo vuoto.\n\n" +
+                        "Struttura JSON per ogni oggetto (usa valori numerici reali al posto dei placeholder):\n" +
                         "{\"ean\": \"\", \"partitaIva\": \"P.IVA_DEL_FORNITORE\", \"nome\": \"...\", \"descrizione\": \"...\", " +
-                        "\"unitaMisura\": \"g\", \"pesoPerPezzo\": 250.0, \"prezzoPerUnita\": 2.50, \"attivo\": true, \"allergeniIds\": [], " +
-                        "\"valoriNutrizionali\": {\"carboidrati\": 50.5, \"proteine\": 12.0, \"grassi\": 3.5, \"chilocalorie\": 350.0, \"sale\": 1.2, \"zuccheri\": 2.0, \"fibre\": 4.0}}",
+                        "\"unitaMisura\": \"kg\", \"pesoPerPezzo\": 0.0, \"prezzoPerUnita\": 15.50, \"attivo\": true, \"allergeniIds\": [], " +
+                        "\"valoriNutrizionali\": {\"carboidrati\": 0.0, \"proteine\": 20.0, \"grassi\": 5.0, \"chilocalorie\": 120.0, \"sale\": 1.0, \"zuccheri\": 0.0, \"fibre\": 0.0}}",
                 quantita,
                 listaFornitoriContesto,
                 nomiEsistenti.isEmpty() ? "nessuno" : String.join(", ", nomiEsistenti),
