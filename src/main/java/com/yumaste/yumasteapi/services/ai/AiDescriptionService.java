@@ -94,21 +94,21 @@ public class AiDescriptionService {
 
         String prompt = String.format(
                 """
-                Sei il nutrizionista virtuale di Yumaste. 
-                Cliente: Obiettivo %s, Dieta %s, Allergeni %s, %d kcal.
-                
-                Catalogo Box:
-                %s
-                
-                Scegli la box migliore e rispondi ESCLUSIVAMENTE con un oggetto JSON valido.
-                Non aggiungere testo prima o dopo il JSON.
-                Formato richiesto:
-                {
-                  "boxId": (numero),
-                  "messaggio": "(testo persuasivo sotto 60 parole)",
-                  "nomeBox": "(nome della box scelta)"
-                }
-                """,
+                        Sei il nutrizionista virtuale di Yumaste. 
+                        Cliente: Obiettivo %s, Dieta %s, Allergeni %s, %d kcal.
+                        
+                        Catalogo Box:
+                        %s
+                        
+                        Scegli la box migliore e rispondi ESCLUSIVAMENTE con un oggetto JSON valido.
+                        Non aggiungere testo prima o dopo il JSON.
+                        Formato richiesto:
+                        {
+                          "boxId": (numero),
+                          "messaggio": "(testo persuasivo sotto 60 parole)",
+                          "nomeBox": "(nome della box scelta)"
+                        }
+                        """,
                 preferenze.obiettivo(), preferenze.tipoDieta(),
                 String.join(", ", preferenze.allergeni()), preferenze.calorieGiornaliere(),
                 riassuntoCatalogo
@@ -201,7 +201,8 @@ public class AiDescriptionService {
             GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt, null);
             String jsonResponse = response.text().trim().replace("```json", "").replace("```", "");
 
-            List<IngredienteRequestDTO> ingredientiGenerati = objectMapper.readValue(jsonResponse, new TypeReference<List<IngredienteRequestDTO>>() {});
+            List<IngredienteRequestDTO> ingredientiGenerati = objectMapper.readValue(jsonResponse, new TypeReference<List<IngredienteRequestDTO>>() {
+            });
 
             // 4. GENERAZIONE EAN LATO BACKEND (Gestione Record Immutabili)
             List<IngredienteRequestDTO> listaDefinitiva = new ArrayList<>();
@@ -242,5 +243,5 @@ public class AiDescriptionService {
         }
         return ean.toString();
     }
-}
 
+}
