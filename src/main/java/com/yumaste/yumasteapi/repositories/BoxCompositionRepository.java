@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface BoxCompositionRepository extends JpaRepository<ComposizioneBox,Long> {
     List<ComposizioneBox> findByBox(Box box);
     Optional<ComposizioneBox> findByBoxAndIngrediente(Box box, Ingrediente ingrediente);
+
+    List<ComposizioneBox> findByBoxId(Long boxId);
 }

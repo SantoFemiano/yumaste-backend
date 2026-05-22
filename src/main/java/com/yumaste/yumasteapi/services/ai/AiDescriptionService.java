@@ -1,50 +1,51 @@
 package com.yumaste.yumasteapi.services.ai;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.genai.Client;
-import com.google.genai.types.GenerateContentConfig;
-import com.google.genai.types.GenerateContentResponse;
-import com.google.genai.types.ThinkingConfig;
-import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+
+import com.yumaste.yumasteapi.DTO.request.ValoriNutrizionaliRequestDTO;
 import com.yumaste.yumasteapi.models.Box;
-import com.yumaste.yumasteapi.models.Fornitore;
-import com.yumaste.yumasteapi.models.Ingrediente;
-import com.yumaste.yumasteapi.repositories.AllergeneRepository;
+import com.yumaste.yumasteapi.models.ComposizioneBox;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
-import com.yumaste.yumasteapi.repositories.FornitoreRepository;
-import com.yumaste.yumasteapi.repositories.IngredienteRepository;
-import com.yumaste.yumasteapi.services.BoxCompositionService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.yumaste.yumasteapi.repositories.BoxCompositionRepository;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumaste.yumasteapi.DTO.response.AiRecommendationResponseDTO;
-import com.yumaste.yumasteapi.DTO.request.ValoriNutrizionaliRequestDTO;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
-
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class AiDescriptionService {
-
 
     @Autowired
     private YumasteMarketingAgent marketingAgent;
 
-    public String generaDescrizionePerBox(String nomeBox, String listaIngredienti) {
-        // Chiama LangChain4j chiedendo una descrizione di circa 60 parole
-        return marketingAgent.generaDescrizioneBox(nomeBox, listaIngredienti, 60);
+    @Autowired
+    private BoxRepository boxRepository;
+
+    @Autowired
+    private BoxCompositionRepository boxCompositionRepository; // Collegamento al repository della tabella di associazione
+
+    public String generaDescrizionePerBox(Long boxId) {
+        // 1. Verifichiamo che la box esista a sistema
+        Box box = boxRepository.findById(boxId)
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata"));
+
+        // 2. Recuperiamo tutte le righe di scomposizione associate a questa specifica box
+        List<ComposizioneBox> composizioni = boxCompositionRepository.findByBoxId(boxId);
+
+        // 3. Estraiamo il nome di ciascun ingrediente dalla relazione intermedia
+        String ingredienti = composizioni.stream()
+                .map(c -> c.getIngrediente().getNome())
+                .collect(Collectors.joining(", "));
+
+        // 4. Passiamo i dati puliti all'Agente LangChain4j per la stesura del testo
+        return marketingAgent.generaDescrizioneBox(box.getNome(), ingredienti, 60);
     }
 
     public String generaDescrizionePerIngrediente(String nomeIngrediente) {
         return marketingAgent.generaDescrizioneIngrediente(nomeIngrediente);
     }
 
+    public ValoriNutrizionaliRequestDTO generaValoriNutrizionali(String nomeIngrediente) {
+        return marketingAgent.stimaValoriNutrizionali(nomeIngrediente);
+    }
 }

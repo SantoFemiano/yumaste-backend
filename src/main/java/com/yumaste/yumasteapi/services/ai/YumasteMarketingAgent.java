@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.services.ai;
 
+import com.yumaste.yumasteapi.DTO.request.ValoriNutrizionaliRequestDTO;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
@@ -21,4 +22,13 @@ public interface YumasteMarketingAgent {
 
     @UserMessage("Scrivi una breve ed elegante frase commerciale (max 20 parole) per valorizzare questo ingrediente: {nomeIngrediente}.")
     String generaDescrizioneIngrediente(@V("nomeIngrediente") String nomeIngrediente);
+
+    @UserMessage("""
+        Agisci come un nutrizionista. 
+        Stima i valori nutrizionali (per 100g) per questo ingrediente: {nomeIngrediente}.
+        Restituisci ESATTAMENTE un oggetto JSON valido compilando i campi (chilocalorie, proteine, carboidrati, grassi, ecc.).
+        NON aggiungere markdown o testo fuori dal JSON.
+    """)
+    ValoriNutrizionaliRequestDTO stimaValoriNutrizionali(@V("nomeIngrediente") String nomeIngrediente);
+
 }
