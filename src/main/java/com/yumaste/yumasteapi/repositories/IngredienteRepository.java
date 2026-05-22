@@ -11,4 +11,6 @@ public interface IngredienteRepository extends JpaRepository<Ingrediente, Long> 
     List<Ingrediente> findByAttivoTrue();
 
     List<Ingrediente> findByAttivoFalse();
+
+    List<Ingrediente> findByNomeContainingIgnoreCase(String parolaChiave);
 }
