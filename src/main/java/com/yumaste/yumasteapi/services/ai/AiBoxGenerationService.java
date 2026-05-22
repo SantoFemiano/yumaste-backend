@@ -46,8 +46,8 @@ public class AiBoxGenerationService {
             
             VINCOLI DA RISPETTARE SCRUPOLOSAMENTE:
             1. UNICITÀ: Non creare nulla di simile a queste box già a catalogo: [%s].
-            2. CATEGORIE CONSENTITE: Scegli una tra: "Carne", "Pesce", "Vegano", "Gluten Free","Ketogenico","Dolci","Panificati","Giapponese","Coreano","Made in Napoli","Pasta".
-            3. PREZZO E PORZIONI: Scegli un numero di porzioni logico (es. 2 o 4 o 6) e un prezzo di vendita sensato (es. tra 15.00 e 40.00).
+            2. CATEGORIE CONSENTITE: Scegli una tra: "Carne", "Pesce", "Vegano", "Vegetariano", "Gluten Free".
+            3. PREZZO E PORZIONI: Scegli un numero di porzioni logico (es. 2 o 4) e un prezzo di vendita sensato (es. tra 15.00 e 40.00).
             4. IMMAGINE: Genera un URL placeholder realistico descrittivo in questo formato: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" (puoi variare l'ID se conosci immagini di cibo, o usare un placeholder semantico).
             5. INGREDIENTI (CRITICO): Puoi usare ESCLUSIVAMENTE gli ingredienti in questa lista:
             [%s]

@@ -155,7 +155,7 @@ public class AiDescriptionService {
     }
 
 
-    public List<IngredienteRequestDTO> generaIngredientiNuovi(int quantita, String suggerimento) {
+    public List<IngredienteRequestDTO> generaIngredientiNuovi(int quantita) {
         // 1. Recupero nomi ingredienti esistenti per evitare duplicati
         List<String> nomiEsistenti = ingredienteRepository.findAll().stream()
                 .map(Ingrediente::getNome)
@@ -179,7 +179,6 @@ public class AiDescriptionService {
         String prompt = String.format(
                 "Sei un assistente esperto per l'e-commerce alimentare Yumaste. Genera un array JSON di %d nuovi ingredienti.\n\n" +
                         "REGOLE DI COERENZA OBBLIGATORIE:\n" +
-                        "0. CRITERIO PER CUI SCEGLI L'INGREDIENTE: IL TEMA È %s.\n"+
                         "1. ACCOPPIAMENTO FORNITORE: Scegli il fornitore coerente da questa lista: [%s].\n" +
                         "2. UNICITÀ: Non usare assolutamente questi nomi già esistenti: %s.\n" +
                         "3. ALLERGENI: Usa solo gli ID da questa lista: %s.\n" +
@@ -192,7 +191,6 @@ public class AiDescriptionService {
                         "\"unitaMisura\": \"kg\", \"pesoPerPezzo\": 0.0, \"prezzoPerUnita\": 15.50, \"attivo\": true, \"allergeniIds\": [], " +
                         "\"valoriNutrizionali\": {\"carboidrati\": 0.0, \"proteine\": 20.0, \"grassi\": 5.0, \"chilocalorie\": 120.0, \"sale\": 1.0, \"zuccheri\": 0.0, \"fibre\": 0.0}}",
                 quantita,
-                suggerimento.isEmpty() ? "nessun suggerimento" : suggerimento,
                 listaFornitoriContesto,
                 nomiEsistenti.isEmpty() ? "nessuno" : String.join(", ", nomiEsistenti),
                 allergeniDisponibili
