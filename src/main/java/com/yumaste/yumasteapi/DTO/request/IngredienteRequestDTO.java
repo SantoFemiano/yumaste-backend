@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record IngredienteRequestDTO(
         @NotBlank(message = "L'EAN è obbligatorio")
@@ -13,7 +14,7 @@ public record IngredienteRequestDTO(
         String ean,
 
         @NotNull(message = "L'ID del fornitore è obbligatorio")
-        Long fornitoreId, // Ci serve per fare il collegamento!
+        String partitaIva,
 
         @NotBlank(message = "Il nome è obbligatorio")
         String nome,
@@ -21,11 +22,17 @@ public record IngredienteRequestDTO(
         String descrizione,
         String unitaMisura,
 
+        @Positive(message = "Il peso per pezzo deve essere positivo")
+        BigDecimal pesoPerPezzo, // <-- NUOVO CAMPO AGGIUNTO
+
         @NotNull(message = "Il prezzo è obbligatorio")
         @Positive(message = "Il prezzo deve essere positivo")
         BigDecimal prezzoPerUnita,
 
-        Boolean attivo
+        Boolean attivo,
+
+        List<Long> allergeniIds, // Lista degli ID degli allergeni spuntati nel frontend
+        ValoriNutrizionaliRequestDTO valoriNutrizionali
 ) {
     // Costruttore compatto per i default (così ignoriamo i @ColumnDefault di Hibernate)
     public IngredienteRequestDTO {

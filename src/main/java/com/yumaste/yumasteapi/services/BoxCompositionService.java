@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.DTO.request.AddIngredienteToBoxRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.BoxCompositionMapper;
 import com.yumaste.yumasteapi.mapper.DettaglioBoxMapper;
 import com.yumaste.yumasteapi.models.Box;
@@ -16,6 +17,9 @@ import com.yumaste.yumasteapi.repositories.NutritionalValueRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,11 +39,16 @@ public class BoxCompositionService {
 
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "ingredienti_box", key = "#boxId"),
+            @CacheEvict(value = "ingredienti_con_valori", key = "#boxId"),
+            @CacheEvict(value = "box_dettagli", key = "#boxId")
+    })
     public BoxIngredientDTO addBoxIngredient(Long boxId, AddIngredienteToBoxRequestDTO request) {
         Box box = boxRepository.findById(boxId).orElseThrow(() -> new RuntimeException("Box non trovato con id: " + boxId));
 
         Ingrediente ingrediente = ingredienteRepository.findById(request.ingredienteId())
-                .orElseThrow(() -> new RuntimeException("Ingrediente non trovato con id: " + request.ingredienteId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato con id: " + request.ingredienteId()));
         Optional<ComposizioneBox> composizioneEsistente = boxCompositionRepository.findByBoxAndIngrediente(box, ingrediente);
         ComposizioneBox composizione;
         if(composizioneEsistente.isPresent()){
@@ -58,16 +67,19 @@ public class BoxCompositionService {
         return boxCompositionMapper.toDto(salvato);
     }
 
+
+    @Cacheable(value ="ingredienti_box",key = "#boxId")
     public List<BoxIngredientDTO> getBoxIngredients(Long boxId) {
-        Box box = boxRepository.findById(boxId).orElseThrow(() -> new RuntimeException("Box non trovato con id: " + boxId));
+        Box box = boxRepository.findById(boxId).orElseThrow(() -> new ResourceNotFoundException("Box non trovato con id: " + boxId));
         List<ComposizioneBox> composizioni = boxCompositionRepository.findByBox(box);
         return composizioni.stream().map(boxCompositionMapper::toDto).toList();
     }
 
+    @Cacheable(value ="ingredienti_con_valori",key = "#boxId")
     public List<IngredientiConValoriDTO> getIngredientiConValoriDellaBox(Long boxId) {
 
         Box box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
 
         List<ComposizioneBox> composizioni = boxCompositionRepository.findByBox(box);
 
@@ -94,4 +106,25 @@ public class BoxCompositionService {
 
         return risultati;
     }
+
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "ingredienti_box", key = "#boxId"),
+            @CacheEvict(value = "ingredienti_con_valori", key = "#boxId")
+    })
+    public void removeIngredienteFromBox(Long boxId, Long ingredienteId) {
+        Box box = boxRepository.findById(boxId)
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata"));
+        Ingrediente ingrediente = ingredienteRepository.findById(ingredienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente non trovato"));
+
+        ComposizioneBox composizione = boxCompositionRepository.findByBoxAndIngrediente(box, ingrediente)
+                .orElseThrow(() -> new ResourceNotFoundException("Associazione non trovata"));
+
+        boxCompositionRepository.delete(composizione);
+    }
+
+
+
 }

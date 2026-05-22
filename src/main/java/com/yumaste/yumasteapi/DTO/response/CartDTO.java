@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,4 +10,4 @@ public record CartDTO(
     Integer totalQuantity,
     BigDecimal totalPrice
 
-) {}
+) implements Serializable {}

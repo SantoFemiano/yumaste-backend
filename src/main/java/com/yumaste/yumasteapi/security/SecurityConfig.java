@@ -10,20 +10,46 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // Questi due componenti li creeremo a breve, Spring li inietterà in automatico grazie a Lombok
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        //porte di React e Angular in locale per test e sviluppo
+        configuration.setAllowedOrigins(List.of("http://localhost:9000", "http://localhost:4200"
+        ,"https://yumaste-shop-admin.vercel.app","https://yumaste-shop.vercel.app"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+
+
+
+
+
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 //Disabilitiamo CSRF
+                .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
 
                 //Definiamo le regole di accesso agli endpoint
@@ -31,12 +57,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()       // Login e Registrazione liberi
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/user/**").hasRole("USER") // Solo user autenticati
-                        .requestMatchers("/api/user/**").hasRole("ADMIN") // Solo user autenticati
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") //solo user e admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo amministratori
                         .requestMatchers("/v3/api-docs/**").permitAll() // Permetti l'accesso alla documentazione API
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()                      // Tutto il resto richiede il token
                 )
 

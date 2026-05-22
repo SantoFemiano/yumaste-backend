@@ -6,7 +6,8 @@ import com.yumaste.yumasteapi.models.Ingrediente;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+
+@Mapper(componentModel = "spring", uses = {NutritionalValueMapper.class})
 public interface IngredienteMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -17,6 +18,7 @@ public interface IngredienteMapper {
 
     @Mapping(source = "fornitore.id", target = "fornitoreId")
     @Mapping(source = "fornitore.nome", target = "nomeFornitore")
+    @Mapping(source = "fornitore.partitaIva", target = "partitaIvaFornitore")
     IngredienteResponseDTO toResponseDTO(Ingrediente ingrediente);
 
 

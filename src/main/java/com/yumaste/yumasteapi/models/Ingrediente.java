@@ -40,6 +40,9 @@ public class Ingrediente {
     @Column(name = "unita_misura", nullable = false, length = 10)
     private String unitaMisura;
 
+    @Column(name = "peso_per_pezzo", precision = 7, scale = 2)
+    private BigDecimal pesoPerPezzo;
+
     @Column(name = "prezzo_per_unita", nullable = false, precision = 7, scale = 4)
     private BigDecimal prezzoPerUnita;
 
@@ -59,4 +62,14 @@ public class Ingrediente {
     @OneToMany(mappedBy = "ingrediente", fetch = FetchType.LAZY)
     private List<IngredienteAllergene> allergeni;
 
+    @OneToOne(mappedBy = "ingrediente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ValoriNutrizionali valoriNutrizionali;
+
+
+    public void setValoriNutrizionali(ValoriNutrizionali valoriNutrizionali) {
+        this.valoriNutrizionali = valoriNutrizionali;
+        if (valoriNutrizionali != null) {
+            valoriNutrizionali.setIngrediente(this); // Collega il figlio al padre
+        }
+    }
 }

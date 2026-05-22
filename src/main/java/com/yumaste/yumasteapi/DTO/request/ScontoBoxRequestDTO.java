@@ -1,7 +1,6 @@
 package com.yumaste.yumasteapi.DTO.request;
 
-import com.yumaste.yumasteapi.models.Box;
-import com.yumaste.yumasteapi.models.Sconto;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 

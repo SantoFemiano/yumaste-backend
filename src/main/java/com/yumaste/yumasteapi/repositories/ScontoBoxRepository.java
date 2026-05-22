@@ -5,4 +5,5 @@ import com.yumaste.yumasteapi.models.ScontoBoxId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ScontoBoxRepository extends JpaRepository<ScontoBox, ScontoBoxId> {
+    boolean existsBySconto_Id(Long scontoId);
 }

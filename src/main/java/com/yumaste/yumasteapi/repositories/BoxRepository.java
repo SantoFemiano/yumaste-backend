@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BoxRepository extends JpaRepository<Box,Long> {
@@ -19,10 +20,21 @@ public interface BoxRepository extends JpaRepository<Box,Long> {
     //Metodo per trovare una box attiva per id con paginazione
     Page<Box> findById(Long id, Pageable pageable);
 
+
     @Override
     @NonNull
     Optional<Box> findById(Long id);
 
+    // 1. Cerca SOLO per nome (es. l'utente è in "Tutte" e cerca "Pollo")
+    Page<Box> findByNomeContainingIgnoreCaseAndAttivoTrue(String nome, Pageable pageable);
 
+    // 2. Cerca per Categoria E per nome (es. l'utente è in "Asiatica" e cerca "Pollo")
+    Page<Box> findByCategoriaAndNomeContainingIgnoreCaseAndAttivoTrue(String categoria, String nome, Pageable pageable);
 
+    Page<Box> findByAttivoFalse(Pageable pageable);
+
+    // Conta solo le box attualmente attive
+    Long countByAttivoTrue();
+
+    List<Box> findByAttivoTrue();
 }

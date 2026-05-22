@@ -1,7 +1,9 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
+import com.yumaste.yumasteapi.DTO.request.AggiornaQuantitaDTO;
 import com.yumaste.yumasteapi.DTO.response.CartDTO;
+import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.models.Carrello;
 import com.yumaste.yumasteapi.models.Sconto;
@@ -9,6 +11,7 @@ import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.CartRepository;
 import com.yumaste.yumasteapi.repositories.ScontoRepository;
+import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ public class CartService {
     private final CartRepository carrelloRepository;
     private final ScontoRepository scontoRepository;
     private final BoxRepository BoxRepository;
+    private final UtenteRepository utenteRepository;
 
     private DatiSconto calcolaSconto(Box box) {
         BigDecimal prezzoOriginale = box.getPrezzo();
@@ -38,7 +42,7 @@ public class CartService {
             Sconto sconto = scontoOpt.get();
             percentuale = sconto.getValore();
 
-            BigDecimal moltiplicatore = BigDecimal.valueOf(100 - percentuale).divide(BigDecimal.valueOf(100));
+            BigDecimal moltiplicatore = BigDecimal.valueOf(100L - percentuale).divide(BigDecimal.valueOf(100));
             prezzoScontato = prezzoOriginale.multiply(moltiplicatore).setScale(2, RoundingMode.HALF_UP);
         }
 
@@ -77,7 +81,6 @@ public class CartService {
                 .mapToInt(CartItemDTO::quantita)
                 .sum();
 
-        // Il calcolo del totale ora è PERFETTO perché prezzoUnitario è già scontato!
         BigDecimal totalPrice = items.stream()
                 .map(i -> i.prezzoScontato().multiply(BigDecimal.valueOf(i.quantita())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -94,7 +97,7 @@ public class CartService {
         }
 
         Box box = BoxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
 
         // Controllo di Sicurezza extra aggiunto: la Box deve essere in vendita!
         if (Boolean.FALSE.equals(box.getAttivo())) {
@@ -116,6 +119,38 @@ public class CartService {
         }
 
         return getCarrelloDellUtente(utente);
+    }
+
+
+    @Transactional
+    public void aggiornaQuantita(Utente utente, AggiornaQuantitaDTO request) {
+        // 1. Cerca la riga del carrello specifica per quell'utente e quella box
+        Carrello riga = carrelloRepository.findByUtenteAndBoxId(utente, request.boxId())
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato nel carrello"));
+
+        // 2. Aggiorna la quantità
+        riga.setQuantita(request.quantita());
+
+        // 3. Salva la modifica
+        carrelloRepository.save(riga);
+    }
+
+    @Transactional
+    public void rimuoviProdotto(Utente utente, Long boxId) {
+        // 1. Cerca la riga del carrello (così verifichiamo anche che appartenga a quell'utente!)
+        Carrello riga = carrelloRepository.findByUtenteAndBoxId(utente, boxId)
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato nel carrello"));
+
+        // 2. Elimina la riga dal database
+        carrelloRepository.delete(riga);
+    }
+
+
+    public CartDTO getCarrelloUtenteById(Long utente_id){
+        Utente utente_corrente = utenteRepository.findById(utente_id)
+                .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato"));
+
+        return getCarrelloDellUtente(utente_corrente);
     }
 
 }

@@ -1,17 +1,17 @@
 package com.yumaste.yumasteapi.controllers;
 
-import com.yumaste.yumasteapi.DTO.response.BoxDetailDTO;
-import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
-import com.yumaste.yumasteapi.DTO.response.CatalogBoxDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import com.yumaste.yumasteapi.services.BoxService;
-import com.yumaste.yumasteapi.services.testService;
+import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
+import com.yumaste.yumasteapi.services.ai.AiRecommendationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
+
 
 import java.util.List;
 
@@ -20,25 +20,43 @@ import java.util.List;
 @RequestMapping("/api/public")
 public class PublicController {
 
-    private final testService testService;
+
     private final BoxService boxService;
     private final BoxCompositionService boxCompositionService;
+    private final AiDescriptionService aiDescriptionService;
+
+    @Autowired
+    private AiRecommendationService aiRecommendationService;
+
+    @PostMapping("/ai/recommend")
+    public ResponseEntity<AiRecommendationResponseDTO> getAiRecommendation(@RequestBody AiRecommendationRequestDTO request) {
+        return ResponseEntity.ok(aiRecommendationService.ottieniRaccomandazione(request));
+    }
+
+    @GetMapping("/box/{boxId}/generate-description")
+    public ResponseEntity<String> generateBoxDescriptionWithAi(@PathVariable Long boxId) {
+        String descrizioneGenerata = aiDescriptionService.generaDescrizionePerBox(boxId);
+        return ResponseEntity.ok(descrizioneGenerata);
+    }
 
     @GetMapping("/boxes")
-    public ResponseEntity<Page<CatalogBoxDTO>> getCatalog(
-            @RequestParam(required=false) String categoria, Pageable pageable){
+    public ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> getCatalog(
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
 
-        Page<CatalogBoxDTO> catolog = boxService.getAllActiveBoxes(categoria,pageable);
-        if(catolog.isEmpty()){
+        PagedResponseDTO<CatalogBoxDTO> catalogo = boxService.getAllActiveBoxes(categoria, search, pageable);
+
+        if(catalogo.content().isEmpty()){
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(catolog);
+        return ResponseEntity.ok(catalogo);
     }
 
     @GetMapping("/box/{id}")
     public ResponseEntity<CatalogBoxDTO> getBoxById(@PathVariable Long id){
-        Page<CatalogBoxDTO> box= boxService.getBoxById(id,Pageable.unpaged());
-    return ResponseEntity.ok(box.getContent().stream().findFirst().orElse(null));
+        CatalogBoxDTO box = boxService.getBoxById(id);
+        return ResponseEntity.ok(box);
     }
 
     @GetMapping("/box/ingredienti/{idBox}")
@@ -59,5 +77,6 @@ public class PublicController {
         BoxDetailDTO boxDetail = boxService.getDettaglioBox(boxId);
         return ResponseEntity.ok(boxDetail);
     }
+
 
 }

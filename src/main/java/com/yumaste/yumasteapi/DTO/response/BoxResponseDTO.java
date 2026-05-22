@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.DTO.response;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record BoxResponseDTO(
@@ -14,4 +15,4 @@ public record BoxResponseDTO(
         Integer percentualeSconto,
         String immagineUrl,
         Boolean attivo
-) {}
+)implements Serializable {}

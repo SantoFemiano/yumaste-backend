@@ -19,10 +19,10 @@ import java.util.function.Function;
 public class JwtService {
 
 
-    @Value("${application.security.jwt.secret-key}")
+    @Value("${application.security.jwt.secret-key}") //variabile globale in IDE
     private String secretKey;
 
-    @Value("${application.security.jwt.expiration}") // 1 giorno in millisecondi (24 * 60 * 60 * 1000)
+    @Value("${application.security.jwt.expiration}") //variabile globale in IDE
     private long jwtExpiration;
 
     // 1. Estrae l'username (email) dal token

@@ -80,7 +80,7 @@ public class Utente implements UserDetails {
 
     /**
      * Spring Security ha bisogno di sapere qual è la password criptata da confrontare.
-     * Mappiamo la tua colonna "passwordC".
+     * Mappiamo la colonna "passwordC".
      */
     @Override
     public String getPassword() {
@@ -102,7 +102,7 @@ public class Utente implements UserDetails {
      */
     @Override
     public boolean isAccountNonExpired() {
-        return true; // Per ora lo lasciamo sempre a true (non scade mai)
+        return true;
     }
 
     /**
@@ -110,7 +110,7 @@ public class Utente implements UserDetails {
      */
     @Override
     public boolean isAccountNonLocked() {
-        return true; // Mettiamo true. Un domani potresti legarlo a una colonna "bloccato" nel DB
+        return true;
     }
 
     /**
@@ -126,6 +126,6 @@ public class Utente implements UserDetails {
      */
     @Override
     public boolean isEnabled() {
-        return true; // Mettiamo true. Potresti legarlo a una verifica email (es. utente confermato)
+        return true;
     }
 }
