@@ -46,10 +46,10 @@ public class AdminController {
 
     @PostMapping("/ai/genera-inserisci-ingredienti")
     public ResponseEntity<List<IngredienteResponseDTO>> generateAndInsertIngredientiAi(
-            @RequestParam(defaultValue = "1") int quantita, @RequestParam(defaultValue = "") String suggerimento) {
+            @RequestParam(defaultValue = "1") int quantita) {
 
         // 1. Chiedi all'IA di elaborare i DTO
-        List<IngredienteRequestDTO> requestsGenerati = aiDescriptionService.generaIngredientiNuovi(quantita,suggerimento);
+        List<IngredienteRequestDTO> requestsGenerati = aiDescriptionService.generaIngredientiNuovi(quantita);
 
         List<IngredienteResponseDTO> responseList = new ArrayList<>();
 
