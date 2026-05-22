@@ -4,7 +4,9 @@ import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import com.yumaste.yumasteapi.services.BoxService;
 import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
+import com.yumaste.yumasteapi.services.ai.AiRecommendationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +25,12 @@ public class PublicController {
     private final BoxCompositionService boxCompositionService;
     private final AiDescriptionService aiDescriptionService;
 
+    @Autowired
+    private AiRecommendationService aiRecommendationService;
+
     @PostMapping("/ai/recommend")
     public ResponseEntity<AiRecommendationResponseDTO> getAiRecommendation(@RequestBody AiRecommendationRequestDTO request) {
-        AiRecommendationResponseDTO consiglio = aiDescriptionService.consigliaBoxIntelligente(request);
-        return ResponseEntity.ok(consiglio);
+        return ResponseEntity.ok(aiRecommendationService.ottieniRaccomandazione(request));
     }
 
     @GetMapping("/box/{boxId}/generate-description")
