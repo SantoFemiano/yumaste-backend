@@ -5,7 +5,6 @@ import com.yumaste.yumasteapi.DTO.response.*;
 import com.yumaste.yumasteapi.services.*;
 import com.yumaste.yumasteapi.services.ai.AiBoxGenerationService;
 import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
-import com.yumaste.yumasteapi.services.ai.AiIngredientiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +35,6 @@ public class AdminController {
     private final DashboardService dashboardService;
     private final AiDescriptionService aiDescriptionService;
     private final AiBoxGenerationService aiBoxGenerationService;
-    private final AiIngredientiService  aiIngredientiService;
 
     @PostMapping("/ai/genera-box")
     public ResponseEntity<AiGenerateBoxResponseDTO> generateBoxAi(@RequestBody(required = false) AiGenerateBoxRequestDTO request) {
@@ -47,18 +45,17 @@ public class AdminController {
 
 
     @PostMapping("/ai/genera-inserisci-ingredienti")
-    public ResponseEntity<List<IngredienteResponseDTO>> generateAndInsertIngredienti(
-            @RequestParam int quantita,
-            @RequestParam String descrizione) {
+    public ResponseEntity<List<IngredienteResponseDTO>> generateAndInsertIngredientiAi(
+            @RequestParam(defaultValue = "1") int quantita, @RequestParam(defaultValue = "") String suggerimento) {
 
-        // 1. L'IA genera i DTO "grezzi" in base alla descrizione
-        List<IngredienteRequestDTO> ingredientiGenerati = aiIngredientiService.generaNuoviIngredienti(quantita, descrizione);
+        // 1. Chiedi all'IA di elaborare i DTO
+        List<IngredienteRequestDTO> requestsGenerati = aiDescriptionService.generaIngredientiNuovi(quantita,suggerimento);
 
         List<IngredienteResponseDTO> responseList = new ArrayList<>();
 
-        // 2. Il tuo sistema "tradizionale" li salva nel database in modo sicuro
-        for (IngredienteRequestDTO req : ingredientiGenerati) {
-            responseList.add(ingredienteService.creaIngrediente(req)); // Il tuo metodo transazionale
+        // 2. Riutilizziamo la tua logica di business blindata e transazionale
+        for (IngredienteRequestDTO req : requestsGenerati) {
+            responseList.add(ingredienteService.creaIngrediente(req));
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseList);
