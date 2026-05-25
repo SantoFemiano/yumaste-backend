@@ -1,13 +1,12 @@
 package com.yumaste.yumasteapi.services.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.genai.Client;
-import com.google.genai.types.GenerateContentResponse;
 import com.yumaste.yumasteapi.DTO.request.AiGenerateBoxRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.AiGenerateBoxResponseDTO;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.IngredienteRepository;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AiBoxGenerationService {
 
-    private final Client geminiClient;
+    private  final ChatLanguageModel chatLanguageModel;
     private final BoxRepository boxRepository;
     private final IngredienteRepository ingredienteRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -76,10 +75,9 @@ public class AiBoxGenerationService {
 
         try {
             log.info("Richiesta generazione Box all'IA in corso...");
-            GenerateContentResponse response = geminiClient.models.generateContent("gemini-3.1-flash-lite", prompt, null);
+            String jsonResponse = chatLanguageModel.generate(prompt).trim()
+                    .replace("```json", "").replace("```", "");
 
-            // Pulizia standard per estrarre il JSON puro
-            String jsonResponse = response.text().trim().replace("```json", "").replace("```", "");
 
             return objectMapper.readValue(jsonResponse, AiGenerateBoxResponseDTO.class);
         } catch (Exception e) {

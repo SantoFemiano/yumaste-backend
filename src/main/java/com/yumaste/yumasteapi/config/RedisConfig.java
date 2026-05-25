@@ -1,4 +1,4 @@
-package com.yumaste.yumasteapi.config.redis;
+package com.yumaste.yumasteapi.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
