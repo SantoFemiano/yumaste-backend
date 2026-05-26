@@ -6,11 +6,13 @@ import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.services.CartService;
 import com.yumaste.yumasteapi.services.OrderService;
 import com.yumaste.yumasteapi.services.UserService;
+import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +28,19 @@ public class UserController {
     private final CartService cartservice;
     private final UserService userService;
     private final OrderService orderService;
+    private final AiDescriptionService aiDescriptionService;
 
     @Getter
     private final PasswordEncoder passwordEncoder;
 
+    @GetMapping("/raccomandazione/ordini")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<AiRecommendationResponseDTO> consigliaBoxDaOrdini(
+            @AuthenticationPrincipal Utente utente) {
+        return ResponseEntity.ok(
+                aiDescriptionService.consigliaBoxDaOrdini(utente.getId())
+        );
+    }
 
 
     @GetMapping("cart")

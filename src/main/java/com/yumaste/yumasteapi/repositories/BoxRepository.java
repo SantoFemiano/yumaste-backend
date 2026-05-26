@@ -37,4 +37,6 @@ public interface BoxRepository extends JpaRepository<Box,Long> {
     Long countByAttivoTrue();
 
     List<Box> findByAttivoTrue();
+
+    List<Box> findByAttivoTrueAndIdNotIn(List<Long> boxGiaOrdinate);
 }
