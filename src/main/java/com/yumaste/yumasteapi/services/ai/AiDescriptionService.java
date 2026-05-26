@@ -8,12 +8,10 @@ import com.yumaste.yumasteapi.DTO.request.ValoriNutrizionaliRequestDTO;
 import com.yumaste.yumasteapi.DTO.response.AiRecommendationResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.models.Box;
+import com.yumaste.yumasteapi.models.DettaglioOrdine;
 import com.yumaste.yumasteapi.models.Fornitore;
 import com.yumaste.yumasteapi.models.Ingrediente;
-import com.yumaste.yumasteapi.repositories.AllergeneRepository;
-import com.yumaste.yumasteapi.repositories.BoxRepository;
-import com.yumaste.yumasteapi.repositories.FornitoreRepository;
-import com.yumaste.yumasteapi.repositories.IngredienteRepository;
+import com.yumaste.yumasteapi.repositories.*;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +35,7 @@ public class AiDescriptionService {
     private final IngredienteRepository ingredienteRepository;
     private final FornitoreRepository fornitoreRepository;
     private final AllergeneRepository allergeneRepository;
+    private final DettaglioOrdineRepository dettaglioOrdineRepository;
 
     // ✅ FUNZIONE 1: Genera descrizione box
     public String generaDescrizionePerBox(Long boxId) {
@@ -182,6 +181,88 @@ public class AiDescriptionService {
         } catch (Exception e) {
             log.error("Errore nella generazione AI", e);
             throw new RuntimeException("Errore generazione ingredienti");
+        }
+    }
+
+
+    public AiRecommendationResponseDTO consigliaBoxDaOrdini(Long utenteId) {
+
+        // 1. Ultimi 10 acquisti dell'utente
+        List<DettaglioOrdine> ultimi = dettaglioOrdineRepository
+                .findUltimiDettagliByUtenteId(utenteId, 10);
+
+        // Fallback: nessun ordine precedente
+        if (ultimi.isEmpty()) {
+            List<Box> catalogo = boxRepository.findByAttivoTrue();
+            if (catalogo.isEmpty()) throw new RuntimeException("Nessuna box disponibile.");
+            Box fallback = catalogo.get(0);
+            return new AiRecommendationResponseDTO(
+                    fallback.getId(),
+                    "Benvenuto! Questa è una delle nostre box più amate, perfetta per iniziare!",
+                    fallback.getNome()
+            );
+        }
+
+        // 2. Box già ordinate → da escludere
+        List<Long> boxGiaOrdinate = dettaglioOrdineRepository
+                .findBoxIdOrdinateByUtenteId(utenteId);
+
+        // 3. Box disponibili non ancora ordinate
+        List<Box> boxDisponibili = boxRepository.findByAttivoTrueAndIdNotIn(boxGiaOrdinate);
+        if (boxDisponibili.isEmpty()) {
+            // Ha ordinato tutto — consiglia comunque dal catalogo completo
+            boxDisponibili = boxRepository.findByAttivoTrue();
+        }
+
+        // 4. Costruisci contesto ordini precedenti
+        String ordiniPrecedenti = ultimi.stream()
+                .map(d -> String.format("- %s (categoria: %s, €%s)",
+                        d.getBox().getNome(),
+                        d.getBox().getCategoria(),
+                        d.getPrezzoUnitario()))
+                .collect(Collectors.joining("\n"));
+
+        // 5. Costruisci catalogo disponibile
+        String catalogoDisponibile = boxDisponibili.stream()
+                .map(b -> String.format("- ID: %d, Nome: %s (Categoria: %s, €%s)",
+                        b.getId(), b.getNome(), b.getCategoria(), b.getPrezzo()))
+                .collect(Collectors.joining("\n"));
+
+        // 6. Prompt — stesso stile delle altre funzioni
+        String prompt = String.format("""
+            Sei il nutrizionista virtuale di Yumaste.
+            
+            Il cliente ha ordinato in passato:
+            %s
+            
+            Box disponibili che non ha ancora ordinato:
+            %s
+            
+            Scegli la box più adatta ai suoi gusti e rispondi ESCLUSIVAMENTE con un oggetto JSON valido.
+            Non aggiungere testo prima o dopo il JSON.
+            Formato richiesto:
+            {
+              "boxId": (numero intero),
+              "messaggio": "(testo persuasivo sotto 60 parole, in italiano)",
+              "nomeBox": "(nome esatto della box scelta)"
+            }
+            """,
+                ordiniPrecedenti,
+                catalogoDisponibile
+        );
+
+        try {
+            log.info("Raccomandazione box da ordini per utente ID: {}", utenteId);
+            String jsonResponse = chatLanguageModel.generate(prompt).trim()
+                    .replace("```json", "").replace("```", "").trim();
+            return objectMapper.readValue(jsonResponse, AiRecommendationResponseDTO.class);
+        } catch (Exception e) {
+            log.error("Errore raccomandazione box da ordini per utente {}", utenteId, e);
+            return new AiRecommendationResponseDTO(
+                    null,
+                    "Al momento non riesco a connettermi, esplora il nostro catalogo!",
+                    "Catalogo"
+            );
         }
     }
 
