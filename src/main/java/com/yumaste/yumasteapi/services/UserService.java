@@ -21,6 +21,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -33,6 +34,25 @@ public class UserService {
     private final UtenteMapper utenteMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "profilo", key = "#utente.email"),
+            @CacheEvict(value = "indirizzi_utente", key = "#utente.email"),
+            @CacheEvict(value = "clienti", allEntries = true)
+    })
+    public UtenteAggDTO putProfile(Utente utente, UserUpdateDTO request) {
+        Utente utentecorrente = getUtenteLoggato(utente.getEmail());
+
+        utentecorrente.setEmail(request.email());
+        utentecorrente.setNome(request.nome());
+        utentecorrente.setCognome(request.cognome());
+
+        // Consente l'aggiornamento dei campi opzionali per l'estensione del profilo
+        utentecorrente.setDataAggiornamento(Instant.now());
+
+        Utente nuovoutente = utenteRepository.save(utentecorrente);
+        return utenteMapper.toDto(nuovoutente);
+    }
 
     // Metodo privato di supporto per estrarre l'utente in modo sicuro
     private Utente getUtenteLoggato(String email) {
@@ -106,24 +126,7 @@ public class UserService {
     }
 
 
-    @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "profilo", key = "#utente.email"),
-            @CacheEvict(value = "indirizzi_utente", key = "#utente.email"),
-            @CacheEvict(value = "clienti", allEntries = true)
-    })
-    public UtenteAggDTO putProfile(Utente utente , UserUpdateDTO request) {
-        Utente utentecorrente = getUtenteLoggato(utente.getEmail());
 
-        utentecorrente.setEmail(request.email());
-        utentecorrente.setNome(request.nome());
-        utentecorrente.setCognome(request.cognome());
-
-
-        Utente nuovoutente =  utenteRepository.save(utentecorrente);
-        return utenteMapper.toDto(nuovoutente);
-
-    }
 
     @Transactional
     public UtenteAggDTO putProfilePass(Utente utente, CambioPasswordDTO request) {
