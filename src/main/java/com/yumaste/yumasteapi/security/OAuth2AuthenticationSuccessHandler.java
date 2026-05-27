@@ -21,7 +21,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtService jwtService;
     private final UtenteRepository utenteRepository;
 
-    @Value("${frontend.url:https://yumaste-shop.vercel.app}")
+    // Chiave allineata con application.properties: app.frontend.url
+    @Value("${app.frontend.url:https://yumaste-shop.vercel.app}")
     private String frontendUrl;
 
     @Override
