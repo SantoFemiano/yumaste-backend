@@ -27,7 +27,8 @@ public class Utente implements UserDetails {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "cf", nullable = false, length = 16)
+    // Modificato in nullable = true per accogliere utenti OAuth
+    @Column(name = "cf", nullable = true, length = 16)
     private String cf;
 
     @Column(name = "nome", nullable = false, length = 50)
@@ -36,21 +37,29 @@ public class Utente implements UserDetails {
     @Column(name = "cognome", nullable = false, length = 50)
     private String cognome;
 
-    @Column(name = "data_nascita", nullable = false)
+    // Modificato in nullable = true
+    @Column(name = "data_nascita", nullable = true)
     private LocalDate dataNascita;
 
-    @Column(name = "telefono", nullable = false, length = 15)
+    // Modificato in nullable = true
+    @Column(name = "telefono", nullable = true, length = 15)
     private String telefono;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_c", nullable = false)
+    // Modificato in nullable = true (gli utenti OAuth non hanno una password locale)
+    @Column(name = "password_c", nullable = true)
     private String passwordC;
 
     @ColumnDefault("'USER'")
     @Column(name = "ruolo", length = 20)
     private String ruolo;
+
+    // Nuovo campo per tracciare il tipo di login (es. "LOCAL", "GITHUB")
+    @ColumnDefault("'LOCAL'")
+    @Column(name = "provider", nullable = false, length = 20)
+    private String provider = "LOCAL";
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "data_registrazione")
@@ -60,72 +69,34 @@ public class Utente implements UserDetails {
     @Column(name = "data_aggiornamento")
     private Instant dataAggiornamento;
 
-    // =========================================================================
-    // METODI DELL'INTERFACCIA USERDETAILS DI SPRING SECURITY
-    // =========================================================================
-
-    /**
-     * Restituisce i ruoli (permessi) concessi all'utente.
-     */
     @Override
     @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Spring Security si aspetta che i ruoli inizino con "ROLE_".
-        // Se nel DB salvi solo "USER" o "ADMIN", qui aggiungiamo il prefisso al volo.
         String rolePrefix = (this.ruolo != null && this.ruolo.startsWith("ROLE_")) ? "" : "ROLE_";
         String authority = rolePrefix + (this.ruolo != null ? this.ruolo : "USER");
-
         return List.of(new SimpleGrantedAuthority(authority));
     }
 
-    /**
-     * Spring Security ha bisogno di sapere qual è la password criptata da confrontare.
-     * Mappiamo la colonna "passwordC".
-     */
     @Override
     public String getPassword() {
         return this.passwordC;
     }
 
-    /**
-     * Spring Security usa "Username" come identificatore univoco.
-     * Nel nostro caso, l'identificatore è l'email.
-     */
     @Override
     @NonNull
     public String getUsername() {
         return this.email;
     }
 
-    /**
-     * Indica se l'account dell'utente è scaduto.
-     */
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
-    /**
-     * Indica se l'utente è bloccato o meno.
-     */
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
-    /**
-     * Indica se le credenziali (password) dell'utente sono scadute.
-     */
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
-    /**
-     * Indica se l'utente è abilitato o disabilitato.
-     */
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 }
