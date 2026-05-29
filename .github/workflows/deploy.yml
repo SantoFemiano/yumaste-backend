@@ -75,6 +75,12 @@ jobs:
             
             sed -i '/GEMINI_API_KEY/d' ./yumaste.env
             echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> ./yumaste.env
-  
+            
+            sed -i '/GH_OAUTH_CLIENT_ID/d' ./yumaste.env
+            echo "GH_OAUTH_CLIENT_ID=${{ secrets.GH_OAUTH_CLIENT_ID }}" >> ./yumaste.env
+            
+            sed -i '/GH_OAUTH_CLIENT_SECRET/d' ./yumaste.env
+            echo "GH_OAUTH_CLIENT_SECRET=${{ secrets.GH_OAUTH_CLIENT_SECRET }}" >> ./yumaste.env
+            
             docker compose pull yumaste-backend
             docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
