@@ -6,11 +6,13 @@ import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
 import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.OrdiniDettagliDTO;
 import com.yumaste.yumasteapi.events.OrderCreatedEvent;
+import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
+import com.yumaste.yumasteapi.exceptions.UnauthorizedException;
 import com.yumaste.yumasteapi.mapper.OrderDettagliMapper;
 import com.yumaste.yumasteapi.models.*;
 import com.yumaste.yumasteapi.repositories.*;
-import com.yumaste.yumasteapi.services.email.emailService;
+import com.yumaste.yumasteapi.services.email.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -38,7 +40,7 @@ public class OrderService {
     private final FatturaRepository fatturaRepository;
     private final IndirizzoUtenteRepository indirizzoRepository;
     private final OrderDettagliMapper orderDettagliMapper;
-    private final emailService emailService;
+    private final EmailService emailService;
 
     private final org.springframework.kafka.core.KafkaTemplate<String,Object> kafkaTemplate;
 
@@ -53,7 +55,7 @@ public class OrderService {
 
         //controllo se carrello è vuoto
         if(carrello.items().isEmpty()){
-            throw new RuntimeException("Impossibile effettuare l'ordine: il carrello è vuoto.");
+            throw new BusinessException("Impossibile effettuare l'ordine: il carrello è vuoto.");
         }
 
         //recupero indirizzo utente da id_utente richiesta e controllo
@@ -195,12 +197,12 @@ public class OrderService {
 
         if (!ordine.getUtente().getId().equals(utenteCorrente.getId())) {
             // Se non coincidono, blocchiamo tutto! L'utente sta provando a spiare un ordine altrui.
-            throw new RuntimeException("Accesso negato: non sei autorizzato a visualizzare questo ordine.");
+            throw new UnauthorizedException("Accesso negato: non sei autorizzato a visualizzare questo ordine.");
         }
 
         Spedizione spedizione = spedizioneRepository.findByOrdine(ordine).orElseThrow(() -> new ResourceNotFoundException("Spedizione non trovata!"));
 
-        Fattura fattura = fatturaRepository.findByOrdine(ordine).orElseThrow(() -> new ResourceNotFoundException("Spedizione non trovata!"));
+            Fattura fattura = fatturaRepository.findByOrdine(ordine).orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata!"));
         List<DettaglioOrdine> dettaglioOrdine = dettaglioOrdineRepository.findByOrdine_Id(idOrdine);
 
         return dettaglioOrdine.stream()

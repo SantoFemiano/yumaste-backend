@@ -6,6 +6,7 @@ import com.yumaste.yumasteapi.DTO.request.UserUpdateDTO;
 import com.yumaste.yumasteapi.DTO.response.IndirizzoResponseDTO;
 import com.yumaste.yumasteapi.DTO.response.UtenteAggDTO;
 import com.yumaste.yumasteapi.DTO.response.UtenteProfileDTO;
+import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.IndirizzoMapper;
 import com.yumaste.yumasteapi.mapper.UtenteMapper;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -115,6 +117,27 @@ public class UserService {
         return indirizzoMapper.toDTO(salvato);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "profilo", key = "#utente.email"),
+            @CacheEvict(value = "indirizzi_utente", key = "#utente.email"),
+            @CacheEvict(value = "clienti", allEntries = true)
+    })
+    public void deleteIndirizzo(Long id, Utente utente){
+
+        // Cerca l'indirizzo e verifica la proprietà in una query sola
+        IndirizzoUtente indirizzo = indirizzoUtenteRepository
+                .findByIdAndUtenteId(id, utente.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Indirizzo non trovato o non appartiene all'utente"));
+
+        // Soft delete
+        indirizzo.setStato("inattivo");
+        indirizzoUtenteRepository.save(indirizzo);
+    }
+
+
+
+
     @Cacheable(value = "indirizzi_utente", key = "#email")
     public List<IndirizzoResponseDTO> getIndirizziAttivi(String email) {
         Utente utente = getUtenteLoggato(email);
@@ -136,7 +159,7 @@ public class UserService {
         // 1. CONTROLLO SICUREZZA: La vecchia password coincide?
         // Usa il getter corretto della password della tua entità (es. getPassword() o getPasswordC())
         if (!passwordEncoder.matches(request.vecchiaPassword(), utentecorrente.getPassword())) {
-            throw new IllegalArgumentException("La vecchia password non è corretta");
+            throw new BusinessException("La vecchia password non è corretta");
         }
 
         // 2. Se è corretta, criptiamo la nuova e la salviamo

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class emailService {
+public class EmailService {
 
     private final JavaMailSender mailSender;
     private final InvoicePdfService invoicePdfService; // ← inietta il nuovo service
