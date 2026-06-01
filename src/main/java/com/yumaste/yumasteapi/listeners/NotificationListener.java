@@ -5,7 +5,7 @@ import com.yumaste.yumasteapi.models.Fattura;
 import com.yumaste.yumasteapi.models.Ordine;
 import com.yumaste.yumasteapi.repositories.FatturaRepository;
 import com.yumaste.yumasteapi.repositories.OrdineRepository;
-import com.yumaste.yumasteapi.services.email.emailService;
+import com.yumaste.yumasteapi.services.email.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationListener {
 
-    private final emailService emailService;
+    private final EmailService emailService;
     private final OrdineRepository ordineRepository;
     private final FatturaRepository fatturaRepository;
 

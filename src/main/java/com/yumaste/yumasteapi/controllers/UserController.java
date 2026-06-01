@@ -43,6 +43,14 @@ public class UserController {
     }
 
 
+    @DeleteMapping("/indirizzo/{id}")
+    public ResponseEntity<Void> deleteIndirizzo(
+            @AuthenticationPrincipal Utente utente,
+            @PathVariable Long id) {
+        userService.deleteIndirizzo(id, utente);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("cart")
     public ResponseEntity<CartDTO> getCart(@AuthenticationPrincipal Utente user) {
         CartDTO cartDTO = cartservice.getCarrelloDellUtente(user);

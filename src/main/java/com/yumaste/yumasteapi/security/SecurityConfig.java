@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()   // Endpoint OpenAPI di documentazione strutturale
                         .requestMatchers("/swagger-ui/**").permitAll()     // Interfaccia grafica di Swagger
                         .requestMatchers("/swagger-ui.html").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()       // Endpoint metriche Prometheus e monitoraggio sanitario
+                        .requestMatchers("/actuator/**").hasRole("ADMIN") // Endpoint metriche Prometheus e monitoraggio sanitario
                         .anyRequest().authenticated()                      // Qualsiasi altra risorsa richiede esplicitamente il token
                 )
 
