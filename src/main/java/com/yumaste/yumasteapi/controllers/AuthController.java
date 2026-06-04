@@ -1,11 +1,14 @@
 package com.yumaste.yumasteapi.controllers;
+
 import com.yumaste.yumasteapi.DTO.request.LoginRequest;
 import com.yumaste.yumasteapi.DTO.request.RegisterRequest;
+import com.yumaste.yumasteapi.DTO.request.RefreshTokenRequest;
 import com.yumaste.yumasteapi.DTO.response.AuthResponse;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import com.yumaste.yumasteapi.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,17 +60,17 @@ public class AuthController {
         // 5. Salviamo l'utente nel database MySQL
         utenteRepository.save(utente);
 
-        // 6. Generiamo subito un token JWT, così l'utente risulta già loggato dopo la registrazione
+        // 6. Generiamo entrambi i token JWT
         String jwtToken = jwtService.generateToken(utente);
+        String refreshToken = jwtService.generateRefreshToken(utente);
 
-        // 7. Restituiamo il token al client
-        return ResponseEntity.ok(new AuthResponse(jwtToken));
+        // 7. Restituiamo i token al client usando il costruttore aggiornato di AuthResponse
+        return ResponseEntity.ok(new AuthResponse(jwtToken, refreshToken));
     }
-    
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         // 1. Diciamo a Spring Security di autenticare l'utente con l'email e la password fornite.
-        // Se la password è sbagliata o l'email non esiste, Spring lancerà un'eccezione (403 Forbidden o 401 Unauthorized) automaticamente.
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -75,15 +78,52 @@ public class AuthController {
                 )
         );
 
-        // 2. Se arriviamo a questa riga, significa che l'autenticazione è andata a buon fine.
-        // Recuperiamo l'utente dal database per poter generare il token.
+        // 2. Recuperiamo l'utente dal database per poter generare il token.
         Utente utente = utenteRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato nel database"));
 
-        // 3. Generiamo il token JWT usando il nostro servizio.
+        // 3. Generiamo entrambi i token JWT usando il nostro servizio.
         String jwtToken = jwtService.generateToken(utente);
+        String refreshToken = jwtService.generateRefreshToken(utente);
 
-        // 4. Restituiamo il token al client in formato JSON.
-        return ResponseEntity.ok(new AuthResponse(jwtToken));
+        // 4. Restituiamo i token al client in formato JSON.
+        return ResponseEntity.ok(new AuthResponse(jwtToken, refreshToken));
+    }
+
+    // -------------------------------------------------------------------------
+    // NUOVO ENDPOINT: GENERAZIONE NUOVO ACCESS TOKEN TRAMITE REFRESH TOKEN
+    // -------------------------------------------------------------------------
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest().body("Refresh token mancante nella richiesta.");
+        }
+
+        try {
+            // Estraiamo l'email decodificando il refresh token
+            String userEmail = jwtService.extractUsername(refreshToken);
+
+            if (userEmail != null) {
+                // Cerchiamo l'utente sul DB
+                Utente utente = utenteRepository.findByEmail(userEmail)
+                        .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato"));
+
+                // Verifichiamo che il refresh token sia ancora valido per questo utente
+                if (jwtService.isTokenValid(refreshToken, utente)) {
+                    // Se è valido, generiamo un nuovo Access Token (scadenza breve)
+                    String newAccessToken = jwtService.generateToken(utente);
+
+                    // Restituiamo il nuovo access token e prolunghiamo la vita mantenendo lo stesso refresh token
+                    return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken));
+                }
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Refresh token non valido o scaduto. Effettua nuovamente il login.");
+
+        } catch (Exception e) {
+            // Se il token non è parsabile o è scaduto, JJWT lancia un'eccezione
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Refresh token scaduto o malformato. Effettua nuovamente il login.");
+        }
     }
 }
