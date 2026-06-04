@@ -82,5 +82,14 @@ jobs:
             sed -i '/GH_OAUTH_CLIENT_SECRET/d' ./yumaste.env
             echo "GH_OAUTH_CLIENT_SECRET=${{ secrets.GH_OAUTH_CLIENT_SECRET }}" >> ./yumaste.env
             
+            sed -i '/JWT_SECRET_KEY/d' ./yumaste.env
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./yumaste.env
+            
+            sed -i '/JWT_EXPIRATION/d' ./yumaste.env
+            echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> ./yumaste.env
+            
+            sed -i '/JWT_REFRESH_EXPIRATION/d' ./yumaste.env
+            echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> ./yumaste.env
+            
             docker compose pull yumaste-backend
             docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend

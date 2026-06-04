@@ -25,6 +25,9 @@ public class JwtService {
     @Value("${application.security.jwt.expiration}") //variabile globale in IDE
     private long jwtExpiration;
 
+    @Value("${JWT_REFRESH_EXPIRATION}")
+    private long refreshExpiration;
+
     // 1. Estrae l'username (email) dal token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -84,5 +87,15 @@ public class JwtService {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts
+                .builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 }

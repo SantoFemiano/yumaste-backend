@@ -1,17 +1,14 @@
-package com.yumaste.yumasteapi.DTO.response;
+package com.yumaste.yumasteapi.DTO.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthResponse implements Serializable {
-    private String token;
+public class RefreshTokenRequest {
     private String refreshToken;
 }
