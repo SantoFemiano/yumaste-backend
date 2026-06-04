@@ -36,11 +36,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         Utente utente = utenteRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
-        // Genera il token JWT utilizzando la logica già presente nel sistema
+        // Genera entrambi i token utilizzando la logica aggiornata del sistema
         String token = jwtService.generateToken(utente);
+        String refreshToken = jwtService.generateRefreshToken(utente);
 
-        // Reindirizza al frontend passando il token come query parameter
-        String targetUrl = frontendUrl + "/oauth2/redirect?token=" + token;
+        // Reindirizza al frontend passando entrambi i token come query parameter
+        String targetUrl = frontendUrl + "/oauth2/redirect?token=" + token + "&refreshToken=" + refreshToken;
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
