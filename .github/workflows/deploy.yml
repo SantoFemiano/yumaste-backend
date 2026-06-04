@@ -18,6 +18,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'maven'
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -25,6 +26,13 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache SonarCloud packages
+          uses: actions/cache@v3
+          with:
+            path: ~/.sonar/cache
+            key: ${{ runner.os }}-sonar
+            restore-keys: ${{ runner.os }}-sonar
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -59,6 +67,8 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/yumaste-backend:latest
           platforms: linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     needs: build-and-push
