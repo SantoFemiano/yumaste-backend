@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -51,6 +52,13 @@ public class SecurityConfig {
                 // Abilitazione CORS e disattivazione CSRF (essendo un'architettura stateless basata su token)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // Blocca i redirect HTML e forza la restituzione dell'errore 401
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Non autorizzato: Token mancante o scaduto");
+                        })
+                )
 
                 // Regole di autorizzazione delle richieste (struttura originale protetta al 100%)
                 .authorizeHttpRequests(auth -> auth
