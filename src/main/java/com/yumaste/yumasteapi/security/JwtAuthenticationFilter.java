@@ -46,6 +46,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 4. Estraggo l'email dal token (ci serve il JwtService per farlo)
         userEmail = jwtService.extractUsername(jwt);
+        String tokenType = jwtService.extractTokenType(jwt);
+
+        if (!"access".equals(tokenType)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 5. Se l'email c'è, ma l'utente non è ancora "loggato" nel contesto attuale di questa specifica richiesta
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
