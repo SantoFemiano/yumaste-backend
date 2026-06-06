@@ -33,30 +33,32 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public String extractTokenType(String token) {
+        return extractClaim(token, claims -> claims.get("token_type", String.class));
+    }
+
     // 2. Metodo generico per estrarre qualsiasi informazione dal token
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // 3. Genera un token base solo con i dettagli dell'utente
+    // richiamato da AuthController con 1 parametro)
     public String generateToken(UserDetails userDetails) {
+        // Chiama il metodo qui sotto passando una mappa vuota
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    // 4. Genera un token permettendo di aggiungere "extra claims" (es. il ruolo o l'ID dell'utente)
-    public String generateToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ) {
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        extraClaims.put("token_type", "access");
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername()) // Imposta l'email come "Subject"
-                .setIssuedAt(new Date(System.currentTimeMillis())) // Data di creazione
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration)) // Data di scadenza
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256) // Firma il token con l'algoritmo HS256 e la chiave
-                .compact(); // Assembla il tutto in una stringa
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // 5. Valida se il token appartiene all'utente e non è scaduto
@@ -90,8 +92,12 @@ public class JwtService {
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("token_type", "refresh");
+
         return Jwts
                 .builder()
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
