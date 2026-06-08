@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.security.auth.login.LoginException;
 
 @Configuration
 @RequiredArgsConstructor
@@ -44,7 +43,11 @@ public class ApplicationConfig {
 
     // 4. L'AuthenticationManager è quello che usiamo nell'AuthController per fare materialmente il login
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
+        try {
+            return config.getAuthenticationManager();
+        } catch (Exception e) {
+            throw new IllegalStateException("Impossibile configurare l'AuthenticationManager", e);
+        }
     }
 }

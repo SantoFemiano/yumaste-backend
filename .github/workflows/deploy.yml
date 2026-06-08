@@ -6,29 +6,28 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted          # ← usa il runner Oracle ARM
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0           # necessario per SonarCloud
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'maven'
-
+          cache: 'maven'           # cache dipendenze Maven
 
       - name: Build, Test and Analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        # Ottimizzato con l'esecuzione in parallelo (-T 2C) e inserito 'clean' per sicurezza
         run: |
           mvn -B -T 2C clean verify \
           org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar \
@@ -50,51 +49,40 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/yumaste-backend:latest
-          platforms: linux/arm64
+          # Niente platforms: il runner è già ARM64 nativo
           cache-from: type=gha
-          cache-to: type=gha
+          cache-to: type=gha,mode=max    # ← mode=max per cachare tutti i layer
 
   deploy:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: self-hosted          # ← stesso server, niente SSH esterno
+
     steps:
-      - name: Deploy to Oracle Server via Native SSH
-        env:
-          # Passiamo la chiave come variabile d'ambiente per preservare i "vada a capo" (\n)
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Update env file
         run: |
-          # 1. Crea la cartella .ssh se non esiste
-          mkdir -p ~/.ssh
-          
-          # 2. Scrive la chiave nel file id_rsa leggendola dalla variabile d'ambiente
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          
-          # 3. Imposta i permessi restrittivi obbligatori per le chiavi SSH
-          chmod 600 ~/.ssh/id_rsa
-          
-          # 4. Connessione ed esecuzione dei comandi sul server
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/yumaste-deploy
-          
-            sed -i '/GEMINI_API_KEY/d' ./yumaste.env
-            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> ./yumaste.env
-          
-            sed -i '/GH_OAUTH_CLIENT_ID/d' ./yumaste.env
-            echo "GH_OAUTH_CLIENT_ID=${{ secrets.GH_OAUTH_CLIENT_ID }}" >> ./yumaste.env
-          
-            sed -i '/GH_OAUTH_CLIENT_SECRET/d' ./yumaste.env
-            echo "GH_OAUTH_CLIENT_SECRET=${{ secrets.GH_OAUTH_CLIENT_SECRET }}" >> ./yumaste.env
-          
-            sed -i '/JWT_SECRET_KEY/d' ./yumaste.env
-            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./yumaste.env
-          
-            sed -i '/JWT_EXPIRATION/d' ./yumaste.env
-            echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> ./yumaste.env
-          
-            sed -i '/JWT_REFRESH_EXPIRATION/d' ./yumaste.env
-            echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> ./yumaste.env
-          
-            # Forziamo il pull leggendo l'env-file per evitare i warning su GEMINI_API_KEY
-            docker compose --env-file ./yumaste.env pull yumaste-backend
-            docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
-          EOF
+          cd ~/yumaste-deploy
+
+          sed -i '/GEMINI_API_KEY/d' ./yumaste.env
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> ./yumaste.env
+
+          sed -i '/GH_OAUTH_CLIENT_ID/d' ./yumaste.env
+          echo "GH_OAUTH_CLIENT_ID=${{ secrets.GH_OAUTH_CLIENT_ID }}" >> ./yumaste.env
+
+          sed -i '/GH_OAUTH_CLIENT_SECRET/d' ./yumaste.env
+          echo "GH_OAUTH_CLIENT_SECRET=${{ secrets.GH_OAUTH_CLIENT_SECRET }}" >> ./yumaste.env
+
+          sed -i '/JWT_SECRET_KEY/d' ./yumaste.env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./yumaste.env
+
+          sed -i '/JWT_EXPIRATION/d' ./yumaste.env
+          echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> ./yumaste.env
+
+          sed -i '/JWT_REFRESH_EXPIRATION/d' ./yumaste.env
+          echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> ./yumaste.env
+
+      - name: Deploy container
+        run: |
+          cd ~/yumaste-deploy
+          # Non serve più il pull: l'immagine è già stata pushata
+          # dallo stesso server ed è presente nella cache locale di Docker
+          docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend

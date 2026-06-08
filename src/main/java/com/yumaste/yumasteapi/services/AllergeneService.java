@@ -22,7 +22,7 @@ public class AllergeneService {
             List<Allergene> allergeni = allergeneRepository.findAll();
             return allergeni.stream()
                     .map(allergeneMapper::toDto)
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
 

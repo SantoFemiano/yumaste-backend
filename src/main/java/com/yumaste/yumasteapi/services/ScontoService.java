@@ -4,6 +4,7 @@ import com.yumaste.yumasteapi.dto.request.ScontoBoxRequestDTO;
 import com.yumaste.yumasteapi.dto.request.ScontoRequestDTO;
 import com.yumaste.yumasteapi.dto.response.ScontoBoxResponseDTO;
 import com.yumaste.yumasteapi.dto.response.ScontoResponseDTO;
+import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.ScontoBoxMapper;
 import com.yumaste.yumasteapi.mapper.ScontoMapper;
@@ -23,9 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,22 +42,22 @@ public class ScontoService {
 
     @Cacheable(value = "sconti")
     public List<ScontoResponseDTO> getSconti(){
-        List<Sconto> lista_sconti;
-        lista_sconti = scontoRepository.findAll();
-        return lista_sconti.stream().map(scontoMapper::toDto).toList();
+        List<Sconto> listaSconti;
+        listaSconti = scontoRepository.findAll();
+        return listaSconti.stream().map(scontoMapper::toDto).toList();
     }
 
     @Cacheable(value = "sconti_validi")
     public List<ScontoResponseDTO> getScontiValidi() {
         // Calcola la data di oggi nel momento esatto in cui viene chiamata l'API
-        LocalDate oggi = LocalDate.now();
+        LocalDate oggi = LocalDate.now(ZoneOffset.UTC);
 
         List<Sconto> scontiValidi = scontoRepository.findScontiAttiviEValidiOggi(oggi);
 
 
         return scontiValidi.stream()
                 .map(scontoMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @CacheEvict(value = {"sconti", "sconti_validi"}, allEntries = true)
@@ -126,7 +127,7 @@ public class ScontoService {
             scontoBoxRepository.deleteById(idComposto);
             log.info("Rimosso sconto {} dalla box {}", scontoId, boxId);
         } else {
-            throw new RuntimeException("Associazione Sconto-Box non trovata");
+            throw new ResourceNotFoundException("Associazione Sconto-Box non trovata");
         }
     }
 
@@ -159,8 +160,7 @@ public class ScontoService {
     @CacheEvict(value = {"sconti", "sconti_validi"}, allEntries = true)
     public void deleteSconto(Long id) {
         if (scontoBoxRepository.existsBySconto_Id(id)) {
-            throw new RuntimeException("Impossibile eliminare: lo sconto è ancora associato a una o più Box.");
-        }
+            throw new BusinessException("Impossibile eliminare: lo sconto è ancora associato a una o più Box.");        }
 
         Sconto sconto = scontoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Sconto non trovato"));

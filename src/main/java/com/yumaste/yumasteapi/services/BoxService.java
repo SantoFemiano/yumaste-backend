@@ -32,6 +32,7 @@ public class BoxService {
     private final IngredienteAllergeneRepository ingredienteAllergeneRepository;
     private final ScontoRepository scontoRepository;
 
+    private static final String BOX_NON_TROVATA = "Box non trovata con ID: ";
 
     @Cacheable(value = "catalogo_box", key = "{#categoria, #search, #pageable.pageNumber, #pageable.pageSize,#pageable.sort}")
     public PagedResponseDTO<CatalogBoxDTO> getAllActiveBoxes(String categoria, String search, Pageable pageable) {
@@ -64,7 +65,7 @@ public class BoxService {
     @Cacheable(value = "box", key="#id")
     public CatalogBoxDTO getBoxById(Long id) {
         Box box = boxRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(BOX_NON_TROVATA + id));
 
         return mapToCatalogBoxDTOConSconto(box);
     }
@@ -84,7 +85,7 @@ public class BoxService {
 
         //Prendo la Box base dal Database
         Box box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new RuntimeException(BOX_NON_TROVATA + boxId));
 
         //Prendo gli ingredienti, con loro anche i valori nutrizionali
         List<IngredientiConValoriDTO> ingredientiBox = boxCompositionService.getIngredientiConValoriDellaBox(boxId);
@@ -121,7 +122,7 @@ public class BoxService {
         //ricaviamo la lista degli allergeni.
         List<String> allergeniDellaBox = ingredienteAllergeneRepository.findNomiAllergeniByBoxId(boxId);
 
-        Dati_Sconto datiScontobox = calcolaSconto(box);
+        datiSconto datiScontobox = calcolaSconto(box);
 
         return new BoxDetailDTO(
                 box.getId(),
@@ -140,10 +141,10 @@ public class BoxService {
 
 
 
-    private Dati_Sconto calcolaSconto(Box box) {
+    private datiSconto calcolaSconto(Box box) {
         BigDecimal prezzoOriginale = box.getPrezzo();
         BigDecimal prezzoScontato = prezzoOriginale;
-        Integer percentuale_sconto = 0;
+        Integer percentualeSconto = 0;
 
 
       Optional<Sconto> scontoOpt = scontoRepository.findMigliorScontoAttivoPerBox(box.getId(), box.getCategoria());
@@ -151,13 +152,13 @@ public class BoxService {
 
         if (scontoOpt.isPresent()) {
             Sconto sconto = scontoOpt.get();
-            percentuale_sconto = sconto.getValore();
-            BigDecimal moltiplicatore = BigDecimal.valueOf(100L - percentuale_sconto).divide(BigDecimal.valueOf(100));
+            percentualeSconto = sconto.getValore();
+            BigDecimal moltiplicatore = BigDecimal.valueOf(100L - percentualeSconto).divide(BigDecimal.valueOf(100));
             prezzoScontato = prezzoOriginale.multiply(moltiplicatore).setScale(2, RoundingMode.HALF_UP);
 
         }
 
-        return  new Dati_Sconto(box.getPrezzo(),prezzoScontato,percentuale_sconto);
+        return  new datiSconto(box.getPrezzo(),prezzoScontato,percentualeSconto);
     }
 
     @Cacheable(value = "box_inattive", key = "{#pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
@@ -166,13 +167,13 @@ public class BoxService {
         return new PagedResponseDTO<>(boxes.map(this::mapToCatalogBoxDTOConSconto));
     }
 
-    private record Dati_Sconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
+    private record datiSconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
 
 
     private CatalogBoxDTO mapToCatalogBoxDTOConSconto(Box box) {
 
 
-        Dati_Sconto sconto = calcolaSconto(box);
+        datiSconto sconto = calcolaSconto(box);
 
         //DTO per catalogo con sconti
         return new CatalogBoxDTO(
@@ -199,7 +200,7 @@ public class BoxService {
     })
     public BoxResponseDTO updateBox(Long id, BoxRequestDTO request) {
         Box box = boxRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(BOX_NON_TROVATA + id));
 
         box.setEan(request.ean());
         box.setNome(request.nome());
@@ -222,7 +223,7 @@ public class BoxService {
     })
     public void deleteBox(Long id) {
         Box box = boxRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(BOX_NON_TROVATA + id));
         box.setAttivo(false);
         boxRepository.save(box);
     }

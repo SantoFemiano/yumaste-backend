@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,7 +69,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ErrorResponseDTO> buildResponse(
             HttpStatus status, String error, String message, HttpServletRequest request) {
         ErrorResponseDTO body = new ErrorResponseDTO(
-                LocalDateTime.now(),
+                LocalDateTime.now(ZoneOffset.UTC),
                 status.value(),
                 error,
                 message,

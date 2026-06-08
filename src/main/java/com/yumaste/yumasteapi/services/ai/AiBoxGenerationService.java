@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services.ai;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumaste.yumasteapi.dto.request.AiGenerateBoxRequestDTO;
 import com.yumaste.yumasteapi.dto.response.AiGenerateBoxResponseDTO;
+import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.IngredienteRepository;
@@ -23,6 +24,9 @@ public class AiBoxGenerationService {
     private final IngredienteRepository ingredienteRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String JSON_MARKDOWN_TAG = "```json";
+    private static final String MARKDOWN_END_TAG = "```";
+
     public AiGenerateBoxResponseDTO generaBoxAutomatica(AiGenerateBoxRequestDTO request) {
         // 1. Recupero contesto: Evitare duplicati
         String boxEsistenti = boxRepository.findAll().stream()
@@ -35,7 +39,7 @@ public class AiBoxGenerationService {
                 .collect(Collectors.joining(",\n"));
 
         if (ingredientiDisponibili.isEmpty()) {
-            throw new RuntimeException("Nessun ingrediente in database per comporre la box.");
+            throw new BusinessException("Nessun ingrediente in database per comporre la box.");
         }
 
         // 3. Prompt Engineering Avanzato per rispetto dei vincoli
@@ -76,13 +80,14 @@ public class AiBoxGenerationService {
         try {
             log.info("Richiesta generazione Box all'IA in corso...");
             String jsonResponse = chatLanguageModel.generate(prompt).trim()
-                    .replace("```json", "").replace("```", "");
+                    .replace(JSON_MARKDOWN_TAG, "")
+                    .replace(MARKDOWN_END_TAG, "");
 
 
             return objectMapper.readValue(jsonResponse, AiGenerateBoxResponseDTO.class);
         } catch (Exception e) {
             log.error("Errore fatale nella generazione della Box tramite IA", e);
-            throw new RuntimeException("Impossibile generare la Box con l'IA al momento.", e);
+            throw new BusinessException("Impossibile generare la Box con l'IA al momento.");
         }
     }
 }

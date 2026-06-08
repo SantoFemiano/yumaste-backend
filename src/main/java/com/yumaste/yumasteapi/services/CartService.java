@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.dto.request.AggiornaQuantitaDTO;
 import com.yumaste.yumasteapi.dto.response.CartDTO;
 import com.yumaste.yumasteapi.dto.response.CartItemDTO;
+import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.models.Carrello;
@@ -20,7 +21,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,10 +28,10 @@ public class CartService {
 
     private final CartRepository carrelloRepository;
     private final ScontoRepository scontoRepository;
-    private final BoxRepository BoxRepository;
+    private final BoxRepository boxRepository;
     private final UtenteRepository utenteRepository;
 
-    private DatiSconto calcolaSconto(Box box) {
+    private datiSconto calcolaSconto(Box box) {
         BigDecimal prezzoOriginale = box.getPrezzo();
         BigDecimal prezzoScontato = prezzoOriginale;
         Integer percentuale = 0;
@@ -46,15 +46,15 @@ public class CartService {
             prezzoScontato = prezzoOriginale.multiply(moltiplicatore).setScale(2, RoundingMode.HALF_UP);
         }
 
-        return new DatiSconto(prezzoOriginale, prezzoScontato, percentuale);
+        return new datiSconto(prezzoOriginale, prezzoScontato, percentuale);
     }
 
-    private record DatiSconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
+    private record datiSconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
 
 
     private CartItemDTO mapToCartItemDTO(Carrello carrello) {
         Box box = carrello.getBox();
-        DatiSconto sconto = calcolaSconto(box);
+        datiSconto sconto = calcolaSconto(box);
 
         return new CartItemDTO(
                 carrello.getId(),
@@ -74,7 +74,7 @@ public class CartService {
 
         List<CartItemDTO> items = carrelloList.stream()
                 .map(this::mapToCartItemDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         int totalItems = items.size();
         int totalQuantity = items.stream()
@@ -96,12 +96,12 @@ public class CartService {
             throw new IllegalArgumentException("La quantità deve essere maggiore di zero");
         }
 
-        Box box = BoxRepository.findById(boxId)
+        Box box = boxRepository.findById(boxId)
                 .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
 
         // Controllo di Sicurezza extra aggiunto: la Box deve essere in vendita!
         if (Boolean.FALSE.equals(box.getAttivo())) {
-            throw new RuntimeException("Questa Box non è attualmente disponibile.");
+            throw new BusinessException("Questa Box non è attualmente disponibile.");
         }
 
         Optional<Carrello> rigaEsistente = carrelloRepository.findByUtenteAndBox(utente, box);
@@ -126,8 +126,7 @@ public class CartService {
     public void aggiornaQuantita(Utente utente, AggiornaQuantitaDTO request) {
         // 1. Cerca la riga del carrello specifica per quell'utente e quella box
         Carrello riga = carrelloRepository.findByUtenteAndBoxId(utente, request.boxId())
-                .orElseThrow(() -> new RuntimeException("Prodotto non trovato nel carrello"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato nel carrello"));
         // 2. Aggiorna la quantità
         riga.setQuantita(request.quantita());
 
@@ -139,18 +138,17 @@ public class CartService {
     public void rimuoviProdotto(Utente utente, Long boxId) {
         // 1. Cerca la riga del carrello (così verifichiamo anche che appartenga a quell'utente!)
         Carrello riga = carrelloRepository.findByUtenteAndBoxId(utente, boxId)
-                .orElseThrow(() -> new RuntimeException("Prodotto non trovato nel carrello"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato nel carrello"));
         // 2. Elimina la riga dal database
         carrelloRepository.delete(riga);
     }
 
 
-    public CartDTO getCarrelloUtenteById(Long utente_id){
-        Utente utente_corrente = utenteRepository.findById(utente_id)
+    public CartDTO getCarrelloUtenteById(Long utenteId){
+        Utente utenteCorrente = utenteRepository.findById(utenteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato"));
 
-        return getCarrelloDellUtente(utente_corrente);
+        return getCarrelloDellUtente(utenteCorrente);
     }
 
 }

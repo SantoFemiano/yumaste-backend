@@ -1,24 +1,34 @@
-# Stage 1: Estrazione dei layer del JAR compilato
-FROM eclipse-temurin:21-jre-alpine AS extractor
+# ─── Stage 1: Build ───────────────────────────────────────────
+FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
-COPY target/*.jar app.jar
-RUN java -Djarmode=layertools -jar app.jar extract
 
-# Stage 2: Costruzione dell'immagine finale minimale
+# Copia solo pom.xml prima per cachare le dipendenze Maven
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+
+# Scarica tutte le dipendenze (layer che cambia raramente)
+RUN ./mvnw dependency:go-offline -B
+
+# Ora copia il sorgente e builda
+COPY src ./src
+RUN ./mvnw package -DskipTests
+
+# Estrae il JAR in layer separati
+RUN java -Djarmode=layertools -jar target/*.jar extract
+
+# ─── Stage 2: Runtime ─────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Copiamo il truststore direttamente dal codice sorgente
-COPY src/main/resources/client.truststore.jks /app/client.truststore.jks
+# Ogni COPY è un layer Docker separato:
+# - dependencies: librerie esterne (cambia raramente)
+# - spring-boot-loader: il loader di Spring Boot (cambia raramente)
+# - snapshot-dependencies: dipendenze SNAPSHOT (cambia a volte)
+# - application: solo il tuo codice (cambia spesso)
+COPY --from=builder /app/dependencies/ ./
+COPY --from=builder /app/spring-boot-loader/ ./
+COPY --from=builder /app/snapshot-dependencies/ ./
+COPY --from=builder /app/application/ ./
 
-# Copiamo i singoli layer estratti dallo stage precedente
-# Docker metterà in cache le dipendenze; se cambia solo il tuo codice, scaricherà solo l'application layer!
-COPY --from=extractor /app/dependencies/ ./
-COPY --from=extractor /app/spring-boot-loader/ ./
-COPY --from=extractor /app/snapshot-dependencies/ ./
-COPY --from=extractor /app/application/ ./
-
-EXPOSE 8084
-
-# Comando di avvio ottimizzato per l'esecuzione tramite JarLauncher
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]

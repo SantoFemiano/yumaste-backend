@@ -1,0 +1,6 @@
+.git
+.github
+target
+*.md
+*.png
+.mvn/wrapper/maven-wrapper.jar

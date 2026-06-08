@@ -8,7 +8,6 @@ import com.yumaste.yumasteapi.services.OrderService;
 import com.yumaste.yumasteapi.services.UserService;
 import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.List;
@@ -30,7 +30,7 @@ public class UserController {
     private final OrderService orderService;
     private final AiDescriptionService aiDescriptionService;
 
-    @Getter
+
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/raccomandazione/ordini")
@@ -116,22 +116,22 @@ public class UserController {
 
 
     @PutMapping("/update/profilo/password")
-    public ResponseEntity<?> aggiornaProfiloPassword(
+    public ResponseEntity<UtenteAggDTO> aggiornaProfiloPassword(
             @AuthenticationPrincipal Utente utente, @Valid @RequestBody CambioPasswordDTO request) {
         try {
             UtenteAggDTO utenteaggiornato = userService.putProfilePass(utente, request);
-            return ResponseEntity.ok(utenteaggiornato); // 200 OK
+            return ResponseEntity.ok(utenteaggiornato);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @GetMapping("/ordine/{id}/dettagli")
     public ResponseEntity<List<OrdiniDettagliDTO>> getDettagli(@AuthenticationPrincipal Utente utente, @PathVariable Long id) {
 
-    List<OrdiniDettagliDTO> dettagli_ordine = orderService.getDettagliOrdini(utente, id);
+    List<OrdiniDettagliDTO> dettagliOrdine = orderService.getDettagliOrdini(utente, id);
 
-    return ResponseEntity.ok(dettagli_ordine);
+    return ResponseEntity.ok(dettagliOrdine);
 
     }
 

@@ -1,6 +1,7 @@
 package com.yumaste.yumasteapi.services.email;
 
 import com.lowagie.text.DocumentException;
+import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.models.Fattura;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -39,7 +40,7 @@ public class EmailService {
             );
 
         } catch (MessagingException | DocumentException e) {
-            throw new RuntimeException("Errore invio email", e);
+            throw new BusinessException("Errore invio email");
         }
         mailSender.send(message);
     }
