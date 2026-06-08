@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.CheckoutRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.CartDTO;
+import com.yumaste.yumasteapi.dto.request.CheckoutRequestDTO;
+import com.yumaste.yumasteapi.dto.response.CartDTO;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.*;
 import org.junit.jupiter.api.Test;

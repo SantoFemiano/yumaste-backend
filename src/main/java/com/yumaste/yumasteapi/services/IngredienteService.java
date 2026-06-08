@@ -1,8 +1,8 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredienteAllergeneResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredienteResponseDTO;
+import com.yumaste.yumasteapi.dto.request.IngredienteRequestDTO;
+import com.yumaste.yumasteapi.dto.response.IngredienteAllergeneResponseDTO;
+import com.yumaste.yumasteapi.dto.response.IngredienteResponseDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.IngredienteAllergeneMapper;
 import com.yumaste.yumasteapi.mapper.IngredienteMapper;

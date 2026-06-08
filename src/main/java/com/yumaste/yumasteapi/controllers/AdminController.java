@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.controllers;
 
-import com.yumaste.yumasteapi.DTO.request.*;
-import com.yumaste.yumasteapi.DTO.response.*;
+import com.yumaste.yumasteapi.dto.request.*;
+import com.yumaste.yumasteapi.dto.response.*;
 import com.yumaste.yumasteapi.services.*;
 import com.yumaste.yumasteapi.services.ai.AiBoxGenerationService;
 import com.yumaste.yumasteapi.services.ai.AiDescriptionService;

@@ -1,0 +1,15 @@
+package com.yumaste.yumasteapi.dto.response;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+public record CartItemDTO(
+        Long idRigaCarrello,
+        Long boxId,
+        String nomeBox,
+        Integer quantita,
+        String immagineUrl,
+        BigDecimal prezzoOriginale,
+        BigDecimal prezzoScontato,
+        Integer percentualeSconto
+) implements Serializable {}

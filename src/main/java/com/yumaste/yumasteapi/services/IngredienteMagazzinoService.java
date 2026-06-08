@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.IngredienteMagazzinoRequest;
-import com.yumaste.yumasteapi.DTO.response.IngredienteMagazzinoResponse;
+import com.yumaste.yumasteapi.dto.request.IngredienteMagazzinoRequest;
+import com.yumaste.yumasteapi.dto.response.IngredienteMagazzinoResponse;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.IngredienteMagazzinoMapper;
 import com.yumaste.yumasteapi.models.Ingrediente;

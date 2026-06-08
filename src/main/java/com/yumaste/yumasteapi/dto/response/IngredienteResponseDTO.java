@@ -1,0 +1,19 @@
+package com.yumaste.yumasteapi.dto.response;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+public record IngredienteResponseDTO(
+        Long id,
+        String ean,
+        String partitaIvaFornitore,
+        Long fornitoreId,
+        String nomeFornitore,
+        String nome,
+        String descrizione,
+        String unitaMisura,
+        BigDecimal pesoPerPezzo,
+        BigDecimal prezzoPerUnita,
+        Boolean attivo,
+        NutritionalValueDTO valoriNutrizionali
+)implements Serializable {}

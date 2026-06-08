@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.request.IndirizzoRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.IndirizzoResponseDTO;
+import com.yumaste.yumasteapi.dto.request.IndirizzoRequestDTO;
+import com.yumaste.yumasteapi.dto.response.IndirizzoResponseDTO;
 import com.yumaste.yumasteapi.models.IndirizzoUtente;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.request.MagazzinoRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.MagazzinoResponseDTO;
+import com.yumaste.yumasteapi.dto.request.MagazzinoRequestDTO;
+import com.yumaste.yumasteapi.dto.response.MagazzinoResponseDTO;
 import com.yumaste.yumasteapi.models.Magazzino;
 import org.mapstruct.Mapper;
 

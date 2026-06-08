@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.request.ScontoRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.ScontoResponseDTO;
+import com.yumaste.yumasteapi.dto.request.ScontoRequestDTO;
+import com.yumaste.yumasteapi.dto.response.ScontoResponseDTO;
 import com.yumaste.yumasteapi.models.Sconto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

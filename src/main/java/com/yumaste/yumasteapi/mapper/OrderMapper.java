@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.mapper;
 
 
-import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
+import com.yumaste.yumasteapi.dto.response.OrdineResponseDTO;
 import com.yumaste.yumasteapi.models.Ordine;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

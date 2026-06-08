@@ -1,6 +1,6 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.response.IngredienteMagazzinoResponse;
+import com.yumaste.yumasteapi.dto.response.IngredienteMagazzinoResponse;
 import com.yumaste.yumasteapi.models.IngredienteMagazzino;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

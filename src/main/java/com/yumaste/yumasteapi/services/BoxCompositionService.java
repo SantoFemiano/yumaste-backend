@@ -1,8 +1,8 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.AddIngredienteToBoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.BoxIngredientDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.dto.request.AddIngredienteToBoxRequestDTO;
+import com.yumaste.yumasteapi.dto.response.BoxIngredientDTO;
+import com.yumaste.yumasteapi.dto.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.BoxCompositionMapper;
 import com.yumaste.yumasteapi.mapper.DettaglioBoxMapper;

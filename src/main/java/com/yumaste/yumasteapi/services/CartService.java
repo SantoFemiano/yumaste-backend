@@ -1,8 +1,8 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.AggiornaQuantitaDTO;
-import com.yumaste.yumasteapi.DTO.response.CartDTO;
-import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
+import com.yumaste.yumasteapi.dto.request.AggiornaQuantitaDTO;
+import com.yumaste.yumasteapi.dto.response.CartDTO;
+import com.yumaste.yumasteapi.dto.response.CartItemDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.models.Carrello;

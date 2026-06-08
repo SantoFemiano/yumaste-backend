@@ -1,0 +1,18 @@
+package com.yumaste.yumasteapi.dto.response;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.Instant;
+
+public record OrdineResponseDTO(
+        Long id,
+        String codiceOrdine,
+        Instant dataOrdine,
+        BigDecimal totalePrezzo,
+        String statoOrdine,
+        String statoSpedizione,
+        Long utenteId,
+        String nomeCliente,
+        String cognomeCliente
+)implements Serializable {
+}

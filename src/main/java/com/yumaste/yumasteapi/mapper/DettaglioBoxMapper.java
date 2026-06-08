@@ -1,6 +1,6 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.dto.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.models.ComposizioneBox;
 import com.yumaste.yumasteapi.models.ValoriNutrizionali;
 import org.mapstruct.Mapper;
