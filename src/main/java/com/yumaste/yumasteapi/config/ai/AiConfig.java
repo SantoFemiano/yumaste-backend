@@ -1,4 +1,4 @@
-package com.yumaste.yumasteapi.config.Ai;
+package com.yumaste.yumasteapi.config.ai;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
