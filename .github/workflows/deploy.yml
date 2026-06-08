@@ -22,12 +22,6 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Cache SonarQube packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
 
       - name: Build, Test and Analyze with SonarCloud
         env:
@@ -58,7 +52,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/yumaste-backend:latest
           platforms: linux/arm64
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha
 
   deploy:
     needs: build-and-push
