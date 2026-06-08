@@ -64,32 +64,43 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Oracle Server via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
+      - name: Deploy to Oracle Server via Native SSH
+        env:
+          # Passiamo la chiave come variabile d'ambiente per preservare i "vada a capo" (\n)
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          # 1. Crea la cartella .ssh se non esiste
+          mkdir -p ~/.ssh
+          
+          # 2. Scrive la chiave nel file id_rsa leggendola dalla variabile d'ambiente
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          
+          # 3. Imposta i permessi restrittivi obbligatori per le chiavi SSH
+          chmod 600 ~/.ssh/id_rsa
+          
+          # 4. Connessione ed esecuzione dei comandi sul server
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/yumaste-deploy
-            
+          
             sed -i '/GEMINI_API_KEY/d' ./yumaste.env
             echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> ./yumaste.env
-            
+          
             sed -i '/GH_OAUTH_CLIENT_ID/d' ./yumaste.env
             echo "GH_OAUTH_CLIENT_ID=${{ secrets.GH_OAUTH_CLIENT_ID }}" >> ./yumaste.env
-            
+          
             sed -i '/GH_OAUTH_CLIENT_SECRET/d' ./yumaste.env
             echo "GH_OAUTH_CLIENT_SECRET=${{ secrets.GH_OAUTH_CLIENT_SECRET }}" >> ./yumaste.env
-            
+          
             sed -i '/JWT_SECRET_KEY/d' ./yumaste.env
             echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./yumaste.env
-            
+          
             sed -i '/JWT_EXPIRATION/d' ./yumaste.env
             echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> ./yumaste.env
-            
+          
             sed -i '/JWT_REFRESH_EXPIRATION/d' ./yumaste.env
             echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> ./yumaste.env
-            
-            docker compose pull yumaste-backend
+          
+            # Forziamo il pull leggendo l'env-file per evitare i warning su GEMINI_API_KEY
+            docker compose --env-file ./yumaste.env pull yumaste-backend
             docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
+          EOF
