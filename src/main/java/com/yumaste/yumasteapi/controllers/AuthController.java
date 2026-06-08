@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 
@@ -94,11 +95,11 @@ public class AuthController {
     // NUOVO ENDPOINT: GENERAZIONE NUOVO ACCESS TOKEN TRAMITE REFRESH TOKEN
     // -------------------------------------------------------------------------
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
 
         if (refreshToken == null || refreshToken.isBlank()) {
-            return ResponseEntity.badRequest().body("Refresh token mancante nella richiesta.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token mancante nella richiesta.");
         }
 
         try {
@@ -119,11 +120,9 @@ public class AuthController {
                     return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken));
                 }
             }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Refresh token non valido o scaduto. Effettua nuovamente il login.");
-
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Refresh token non valido o scaduto. Effettua nuovamente il login.");
         } catch (Exception e) {
             // Se il token non è parsabile o è scaduto, JJWT lancia un'eccezione
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Refresh token scaduto o malformato. Effettua nuovamente il login.");
-        }
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Refresh token scaduto o malformato. Effettua nuovamente il login.");        }
     }
 }

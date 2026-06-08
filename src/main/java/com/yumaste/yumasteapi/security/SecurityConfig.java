@@ -27,6 +27,9 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_USER = "USER";
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -47,49 +50,53 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                // Abilitazione CORS e disattivazione CSRF (essendo un'architettura stateless basata su token)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+        try {
+            http
+                    // Abilitazione CORS e disattivazione CSRF (essendo un'architettura stateless basata su token)
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                    .csrf(AbstractHttpConfigurer::disable)
 
-                // Blocca i redirect HTML e forza la restituzione dell'errore 401
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Non autorizzato: Token mancante o scaduto");
-                        })
-                )
+                    // Blocca i redirect HTML e forza la restituzione dell'errore 401
+                    .exceptionHandling(exception -> exception
+                            .authenticationEntryPoint((request, response, authException) ->
+                                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Non autorizzato: Token mancante o scaduto")
+                            )
+                    )
 
-                // Regole di autorizzazione delle richieste (struttura originale protetta al 100%)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()       // Endpoint di Login e Registrazione classici (liberi)
-                        .requestMatchers("/api/public/**").permitAll()     // Controller pubblico per consultazione box/ingredienti
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // Accesso concesso a utenti e admin autenticati
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Pannello di controllo CRUD riservato esclusivamente agli admin
-                        .requestMatchers("/v3/api-docs/**").permitAll()   // Endpoint OpenAPI di documentazione strutturale
-                        .requestMatchers("/swagger-ui/**").permitAll()     // Interfaccia grafica di Swagger
-                        .requestMatchers("/swagger-ui.html").permitAll()
-                        .requestMatchers("/actuator/**").hasRole("ADMIN") // Endpoint metriche Prometheus e monitoraggio sanitario
-                        .anyRequest().authenticated()                      // Qualsiasi altra risorsa richiede esplicitamente il token
-                )
+                    // Regole di autorizzazione delle richieste (struttura originale protetta al 100%)
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/api/auth/**").permitAll()       // Endpoint di Login e Registrazione classici (liberi)
+                            .requestMatchers("/api/public/**").permitAll()     // Controller pubblico per consultazione box/ingredienti
+                            .requestMatchers("/error").permitAll()
+                            .requestMatchers("/api/user/**").hasAnyRole("ROLE_USER", "ROLE_ADMIN") // Accesso concesso a utenti e admin autenticati
+                            .requestMatchers("/api/admin/**").hasRole("ROLE_ADMIN") // Pannello di controllo CRUD riservato esclusivamente agli admin
+                            .requestMatchers("/v3/api-docs/**").permitAll()   // Endpoint OpenAPI di documentazione strutturale
+                            .requestMatchers("/swagger-ui/**").permitAll()     // Interfaccia grafica di Swagger
+                            .requestMatchers("/swagger-ui.html").permitAll()
+                            .requestMatchers("/actuator/**").hasRole("ROLE_ADMIN") // Endpoint metriche Prometheus e monitoraggio sanitario
+                            .anyRequest().authenticated()                      // Qualsiasi altra risorsa richiede esplicitamente il token
+                    )
 
-                // Flusso di cattura dell'autenticazione delegata a terze parti (OAuth2 con GitHub)
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)      // Carica o registra l'utente parziale nel DB MySQL
-                        )
-                        .successHandler(oAuth2AuthenticationSuccessHandler) // Genera il token JWT finale e lo trasmette al frontend
-                )
+                    // Flusso di cattura dell'autenticazione delegata a terze parti (OAuth2 con GitHub)
+                    .oauth2Login(oauth2 -> oauth2
+                            .userInfoEndpoint(userInfo -> userInfo
+                                    .userService(customOAuth2UserService)      // Carica o registra l'utente parziale nel DB MySQL
+                            )
+                            .successHandler(oAuth2AuthenticationSuccessHandler) // Genera il token JWT finale e lo trasmette al frontend
+                    )
 
-                // Politica di gestione delle sessioni (Stateless: l'applicazione non memorizza lo stato lato server)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                    // Politica di gestione delle sessioni (Stateless: l'applicazione non memorizza lo stato lato server)
+                    .sessionManagement(session -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
 
-                // Configurazione dei provider di persistenza e catena dei filtri interceptor
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                    // Configurazione dei provider di persistenza e catena dei filtri interceptor
+                    .authenticationProvider(authenticationProvider)
+                    .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
+            return http.build();
+        } catch (Exception e) {
+            throw new IllegalStateException("Errore fatale nella configurazione della sicurezza", e);
+        }
     }
 }

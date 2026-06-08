@@ -7,6 +7,8 @@ import com.yumaste.yumasteapi.dto.request.IngredienteRequestDTO;
 import com.yumaste.yumasteapi.dto.request.ValoriNutrizionaliRequestDTO;
 import com.yumaste.yumasteapi.dto.response.AiRecommendationResponseDTO;
 import com.yumaste.yumasteapi.dto.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.exceptions.BusinessException;
+import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.models.DettaglioOrdine;
 import com.yumaste.yumasteapi.models.Fornitore;
@@ -37,10 +39,14 @@ public class AiDescriptionService {
     private final AllergeneRepository allergeneRepository;
     private final DettaglioOrdineRepository dettaglioOrdineRepository;
 
+
+    private static final String JSON_BLOCK_START = "```json";
+    private static final String MARKDOWN_FENCE = "```";
+
     // ✅ FUNZIONE 1: Genera descrizione box
     public String generaDescrizionePerBox(Long boxId) {
         Box box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new RuntimeException("Box non trovata con ID: " + boxId));
+                .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
 
         List<IngredientiConValoriDTO> ingredienti = boxCompositionService.getIngredientiConValoriDellaBox(boxId);
         String nomiIngredienti = ingredienti.stream()
@@ -61,7 +67,7 @@ public class AiDescriptionService {
             return chatLanguageModel.generate(prompt);
         } catch (Exception e) {
             log.error("Errore durante la generazione della descrizione", e);
-            throw new RuntimeException("Impossibile generare la descrizione in questo momento.", e);
+            throw new BusinessException("Impossibile generare la descrizione in questo momento.");
         }
     }
 
@@ -95,7 +101,7 @@ public class AiDescriptionService {
 
         try {
             String jsonResponse = chatLanguageModel.generate(prompt).trim()
-                    .replace("```json", "").replace("```", "").trim();
+                    .replace(JSON_BLOCK_START, "").replace(MARKDOWN_FENCE, "");
             return objectMapper.readValue(jsonResponse, AiRecommendationResponseDTO.class);
         } catch (Exception e) {
             log.error("Errore durante la raccomandazione AI", e);
@@ -117,7 +123,7 @@ public class AiDescriptionService {
         try {
             log.info("Richiesta valori nutrizionali per: {}", nomeIngrediente);
             String jsonResponse = chatLanguageModel.generate(prompt).trim()
-                    .replace("```json", "").replace("```", "").trim();
+                    .replace(JSON_BLOCK_START, "").replace(MARKDOWN_FENCE, "");
             return objectMapper.readValue(jsonResponse, ValoriNutrizionaliRequestDTO.class);
         } catch (Exception e) {
             log.error("Errore generazione valori nutrizionali per {}", nomeIngrediente, e);
@@ -128,10 +134,10 @@ public class AiDescriptionService {
     // ✅ FUNZIONE 4: Genera ingredienti nuovi (rimane identica nel prompt)
     public List<IngredienteRequestDTO> generaIngredientiNuovi(int quantita, String suggerimento) {
         List<String> nomiEsistenti = ingredienteRepository.findAll().stream()
-                .map(Ingrediente::getNome).collect(Collectors.toList());
+                .map(Ingrediente::getNome).toList();
 
         List<Fornitore> fornitori = fornitoreRepository.findAll();
-        if (fornitori.isEmpty()) throw new RuntimeException("Nessun fornitore in database.");
+        if (fornitori.isEmpty()) throw new BusinessException("Nessun fornitore in database.");
 
         String listaFornitoriContesto = fornitori.stream()
                 .map(f -> f.getNome() + " (P.IVA: " + f.getPartitaIva() + ")")
@@ -166,7 +172,7 @@ public class AiDescriptionService {
 
         try {
             String jsonResponse = chatLanguageModel.generate(prompt).trim()
-                    .replace("```json", "").replace("```", "");
+                    .replace(JSON_BLOCK_START, "").replace(MARKDOWN_FENCE, "");
             List<IngredienteRequestDTO> ingredientiGenerati = objectMapper.readValue(jsonResponse, new TypeReference<>() {});
 
             List<IngredienteRequestDTO> listaDefinitiva = new ArrayList<>();
@@ -180,7 +186,7 @@ public class AiDescriptionService {
             return listaDefinitiva;
         } catch (Exception e) {
             log.error("Errore nella generazione AI", e);
-            throw new RuntimeException("Errore generazione ingredienti");
+            throw new BusinessException("Errore generazione ingredienti");
         }
     }
 
@@ -254,7 +260,7 @@ public class AiDescriptionService {
         try {
             log.info("Raccomandazione box da ordini per utente ID: {}", utenteId);
             String jsonResponse = chatLanguageModel.generate(prompt).trim()
-                    .replace("```json", "").replace("```", "").trim();
+                    .replace(JSON_BLOCK_START, "").replace(MARKDOWN_FENCE, "");
             return objectMapper.readValue(jsonResponse, AiRecommendationResponseDTO.class);
         } catch (Exception e) {
             log.error("Errore raccomandazione box da ordini per utente {}", utenteId, e);
@@ -266,11 +272,12 @@ public class AiDescriptionService {
         }
     }
 
+    private static final Random RANDOM = new Random();
+
     private String generaEanUnivocoCasuale() {
-        Random random = new Random();
         StringBuilder ean = new StringBuilder();
-        ean.append(random.nextInt(9) + 1);
-        for (int i = 0; i < 12; i++) ean.append(random.nextInt(10));
+        ean.append(RANDOM.nextInt(9) + 1);
+        for (int i = 0; i < 12; i++) ean.append(RANDOM.nextInt(10));
         return ean.toString();
     }
 }

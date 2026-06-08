@@ -13,5 +13,5 @@ public interface IngredienteMagazzinoMapper {
     @Mapping(source = "magazzino.nome", target = "nomeMagazzino")
     @Mapping(source = "ingrediente.nome", target = "nomeIngrediente")
     @Mapping(source = "ingrediente.unitaMisura", target ="unitaMisura")
-    IngredienteMagazzinoResponse ToDto(IngredienteMagazzino ingredienteMagazzino);
+    IngredienteMagazzinoResponse toDto(IngredienteMagazzino ingredienteMagazzino);
 }

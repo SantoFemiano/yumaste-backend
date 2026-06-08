@@ -12,6 +12,6 @@ import org.mapstruct.Mapper;
 public interface UtenteMapper {
     UtenteAggDTO toDto(Utente utente);
 
-    UtenteProfileDTO toDTO(Utente utente);
+    UtenteProfileDTO toDtoUp(Utente utente);
 
 }

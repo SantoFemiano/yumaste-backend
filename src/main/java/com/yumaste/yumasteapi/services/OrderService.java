@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -130,7 +131,7 @@ public class OrderService {
         fattura.setOrdine(ordinesalvato);
         fattura.setMetodoPagamento(requestDTO.metodoPagamento());
         fattura.setImporto(carrello.totalPrice());
-        fattura.setDataPagamento(LocalDate.now());
+        fattura.setDataPagamento(LocalDate.now(ZoneOffset.UTC));
 
         fatturaRepository.save(fattura);
 
@@ -187,7 +188,7 @@ public class OrderService {
 
         return dettaglioOrdine.stream()
                 .map(singoloDettaglio -> orderDettagliMapper.toDto(ordine, singoloDettaglio, fattura, spedizione))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Cacheable(value = "dettaglio_ordine", key="#idOrdine")
@@ -207,7 +208,7 @@ public class OrderService {
 
         return dettaglioOrdine.stream()
                 .map(singoloDettaglio -> orderDettagliMapper.toDto(ordine, singoloDettaglio, fattura, spedizione))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

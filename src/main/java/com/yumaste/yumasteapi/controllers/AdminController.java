@@ -25,7 +25,7 @@ public class AdminController {
     private final BoxCompositionService boxCompositionService;
     private final AllergeneService allergeneService;
     private final NutritionalValueService nutritionalValueService;
-    private final ScontoService ScontoService;
+    private final ScontoService scontoService;
     private final FornitoreService fornitoreService;
     private final MagazzinoService magazzinoService;
     private final IngredienteMagazzinoService ingredienteMagazzinoService;
@@ -101,24 +101,24 @@ public class AdminController {
 
     @PostMapping("/add/sconto")
     public ResponseEntity<ScontoResponseDTO> addDiscount(@Valid @RequestBody ScontoRequestDTO scontoRequestDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ScontoService.addSconto(scontoRequestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scontoService.addSconto(scontoRequestDTO));
     }
 
     @GetMapping("/sconti")
     public ResponseEntity<List<ScontoResponseDTO>> getSconto()
     {
-        return ResponseEntity.ok(ScontoService.getSconti());
+        return ResponseEntity.ok(scontoService.getSconti());
     }
 
     @GetMapping("/scontiattivi")
     public ResponseEntity<List<ScontoResponseDTO>> getScontiattivi() {
-        List<ScontoResponseDTO> sconti = ScontoService.getScontiValidi();
+        List<ScontoResponseDTO> sconti = scontoService.getScontiValidi();
         return ResponseEntity.ok(sconti);
     }
 
     @PostMapping("/add/scontobox")
     public ResponseEntity<List<ScontoBoxResponseDTO>> collegaScontoBox(@Valid @RequestBody ScontoBoxRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ScontoService.addScontoBox(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scontoService.addScontoBox(request));
     }
 
     @PostMapping("/add/fornitore")
@@ -230,7 +230,7 @@ public class AdminController {
 
     @DeleteMapping("/sconto/{scontoId}/box/{boxId}")
     public ResponseEntity<Void> removeScontoFromBox(@PathVariable Long scontoId, @PathVariable Long boxId) {
-        ScontoService.removeScontoBox(scontoId, boxId);
+        scontoService.removeScontoBox(scontoId, boxId);
         return ResponseEntity.noContent().build();
     }
 
@@ -241,17 +241,17 @@ public class AdminController {
 
     @GetMapping("/sconto/sconto-box")
     public ResponseEntity<List<ScontoBoxResponseDTO>> getAssociazioniScontoBox() {
-        return ResponseEntity.ok(ScontoService.getAllScontoBox());
+        return ResponseEntity.ok(scontoService.getAllScontoBox());
     }
 
     @PutMapping("/sconto/{id}")
     public ResponseEntity<ScontoResponseDTO> updateSconto(@PathVariable Long id, @Valid @RequestBody ScontoRequestDTO request) {
-        return ResponseEntity.ok(ScontoService.updateSconto(id, request));
+        return ResponseEntity.ok(scontoService.updateSconto(id, request));
     }
 
     @DeleteMapping("/delete/sconto/{id}")
     public ResponseEntity<Void> deleteSconto(@PathVariable Long id) {
-        ScontoService.deleteSconto(id);
+        scontoService.deleteSconto(id);
         return ResponseEntity.noContent().build();
     }
 

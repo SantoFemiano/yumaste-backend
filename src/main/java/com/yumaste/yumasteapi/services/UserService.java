@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,10 @@ public class UserService {
     private final IndirizzoMapper indirizzoMapper;
     private final UtenteMapper utenteMapper;
     private final PasswordEncoder passwordEncoder;
+
+
+    @Lazy
+    private final UserService self;
 
     @Transactional
     @Caching(evict = {
@@ -65,7 +70,7 @@ public class UserService {
     @Cacheable(value = "profilo", key = "#email")
     public UtenteProfileDTO getProfilo(String email) {
         Utente utente = getUtenteLoggato(email);
-        List<IndirizzoResponseDTO> indirizziAttivi = getIndirizziAttivi(email);
+        List<IndirizzoResponseDTO> indirizziAttivi = self.getIndirizziAttivi(email);
 
         return new UtenteProfileDTO(
                 utente.getId(),

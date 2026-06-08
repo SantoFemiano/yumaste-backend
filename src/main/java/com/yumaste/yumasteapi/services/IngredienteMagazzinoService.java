@@ -36,14 +36,14 @@ public class IngredienteMagazzinoService {
 
         Magazzino magazzino = magazzinoRepository.findById(request.magazzinoId()).orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato!"));
 
-        Optional<IngredienteMagazzino> giacenzaesistente = ingredienteMagazzinoRepository.findByMagazzinoAndIngredienteAndLotto(magazzino,ingrediente, request.lotto());
+        Optional<IngredienteMagazzino> giacenzaEsistente = ingredienteMagazzinoRepository.findByMagazzinoAndIngredienteAndLotto(magazzino,ingrediente, request.lotto());
 
-        IngredienteMagazzino riga_salvata;
+        IngredienteMagazzino rigaSalvata;
 
-        if(giacenzaesistente.isPresent()){
-            IngredienteMagazzino riga = giacenzaesistente.get();
+        if(giacenzaEsistente.isPresent()){
+            IngredienteMagazzino riga = giacenzaEsistente.get();
             riga.setQuantita(riga.getQuantita().add(request.quantita()));
-            riga_salvata = ingredienteMagazzinoRepository.save(riga);
+            rigaSalvata = ingredienteMagazzinoRepository.save(riga);
         }else{
             IngredienteMagazzino nuovaRiga = new IngredienteMagazzino();
             nuovaRiga.setMagazzino(magazzino);
@@ -51,15 +51,15 @@ public class IngredienteMagazzinoService {
             nuovaRiga.setLotto(request.lotto());
             nuovaRiga.setQuantita(request.quantita());
             nuovaRiga.setDataIngresso(request.dataIngresso());
-            riga_salvata = ingredienteMagazzinoRepository.save(nuovaRiga);
+            rigaSalvata = ingredienteMagazzinoRepository.save(nuovaRiga);
         }
 
-        return ingredienteMagazzinoMapper.ToDto(riga_salvata);
+        return ingredienteMagazzinoMapper.toDto(rigaSalvata);
 
     }
 
     @Cacheable(value= "ingredientiMagazzino" )
     public List<IngredienteMagazzinoResponse> getAllIngredienteMagazzino(){
-        return ingredienteMagazzinoRepository.findAll().stream().map(ingredienteMagazzinoMapper::ToDto).toList();
+        return ingredienteMagazzinoRepository.findAll().stream().map(ingredienteMagazzinoMapper::toDto).toList();
     }
 }
