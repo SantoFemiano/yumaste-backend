@@ -1,0 +1,17 @@
+package com.yumaste.yumasteapi.dto.response;
+
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+public record NutritionalValueDTO(
+        Long id,
+        String nome_Ingrediente,
+        BigDecimal proteine,
+        BigDecimal carboidrati,
+        BigDecimal zuccheri,
+        BigDecimal fibre,
+        BigDecimal grassi,
+        BigDecimal sale,
+        Integer chilocalorie
+)implements Serializable {}

@@ -2,11 +2,11 @@ package com.yumaste.yumasteapi.services.ai;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
-import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
-import com.yumaste.yumasteapi.DTO.request.ValoriNutrizionaliRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.AiRecommendationResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredientiConValoriDTO;
+import com.yumaste.yumasteapi.dto.request.AiRecommendationRequestDTO;
+import com.yumaste.yumasteapi.dto.request.IngredienteRequestDTO;
+import com.yumaste.yumasteapi.dto.request.ValoriNutrizionaliRequestDTO;
+import com.yumaste.yumasteapi.dto.response.AiRecommendationResponseDTO;
+import com.yumaste.yumasteapi.dto.response.IngredientiConValoriDTO;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.models.DettaglioOrdine;
 import com.yumaste.yumasteapi.models.Fornitore;

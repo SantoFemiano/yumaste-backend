@@ -1,11 +1,11 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.CambioPasswordDTO;
-import com.yumaste.yumasteapi.DTO.request.IndirizzoRequestDTO;
-import com.yumaste.yumasteapi.DTO.request.UserUpdateDTO;
-import com.yumaste.yumasteapi.DTO.response.IndirizzoResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.UtenteAggDTO;
-import com.yumaste.yumasteapi.DTO.response.UtenteProfileDTO;
+import com.yumaste.yumasteapi.dto.request.CambioPasswordDTO;
+import com.yumaste.yumasteapi.dto.request.IndirizzoRequestDTO;
+import com.yumaste.yumasteapi.dto.request.UserUpdateDTO;
+import com.yumaste.yumasteapi.dto.response.IndirizzoResponseDTO;
+import com.yumaste.yumasteapi.dto.response.UtenteAggDTO;
+import com.yumaste.yumasteapi.dto.response.UtenteProfileDTO;
 import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.IndirizzoMapper;

@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.request.BoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.BoxResponseDTO;
+import com.yumaste.yumasteapi.dto.request.BoxRequestDTO;
+import com.yumaste.yumasteapi.dto.response.BoxResponseDTO;
 import com.yumaste.yumasteapi.models.Box;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

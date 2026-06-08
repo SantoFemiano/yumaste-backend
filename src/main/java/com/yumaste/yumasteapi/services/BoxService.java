@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.BoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.*;
+import com.yumaste.yumasteapi.dto.request.BoxRequestDTO;
+import com.yumaste.yumasteapi.dto.response.*;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.BoxMapper;
 import com.yumaste.yumasteapi.models.Box;

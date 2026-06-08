@@ -1,6 +1,6 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.response.OrdiniDettagliDTO;
+import com.yumaste.yumasteapi.dto.response.OrdiniDettagliDTO;
 import com.yumaste.yumasteapi.models.DettaglioOrdine;
 import com.yumaste.yumasteapi.models.Fattura;
 import com.yumaste.yumasteapi.models.Ordine;

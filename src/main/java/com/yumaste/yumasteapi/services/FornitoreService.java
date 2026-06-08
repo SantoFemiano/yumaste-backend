@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.FornitoreRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.FornitoreResponseDTO;
+import com.yumaste.yumasteapi.dto.request.FornitoreRequestDTO;
+import com.yumaste.yumasteapi.dto.response.FornitoreResponseDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.FornitoreMapper;
 import com.yumaste.yumasteapi.models.Fornitore;

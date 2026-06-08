@@ -1,7 +1,7 @@
 package com.yumaste.yumasteapi.mapper;
 
-import com.yumaste.yumasteapi.DTO.request.IngredienteRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.IngredienteResponseDTO;
+import com.yumaste.yumasteapi.dto.request.IngredienteRequestDTO;
+import com.yumaste.yumasteapi.dto.response.IngredienteResponseDTO;
 import com.yumaste.yumasteapi.models.Ingrediente;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,9 +1,9 @@
 package com.yumaste.yumasteapi.controllers;
 
-import com.yumaste.yumasteapi.DTO.request.LoginRequest;
-import com.yumaste.yumasteapi.DTO.request.RegisterRequest;
-import com.yumaste.yumasteapi.DTO.request.RefreshTokenRequest;
-import com.yumaste.yumasteapi.DTO.response.AuthResponse;
+import com.yumaste.yumasteapi.dto.request.LoginRequest;
+import com.yumaste.yumasteapi.dto.request.RegisterRequest;
+import com.yumaste.yumasteapi.dto.request.RefreshTokenRequest;
+import com.yumaste.yumasteapi.dto.response.AuthResponse;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import com.yumaste.yumasteapi.security.JwtService;

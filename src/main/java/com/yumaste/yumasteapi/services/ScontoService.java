@@ -1,9 +1,9 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.ScontoBoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.request.ScontoRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.ScontoBoxResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.ScontoResponseDTO;
+import com.yumaste.yumasteapi.dto.request.ScontoBoxRequestDTO;
+import com.yumaste.yumasteapi.dto.request.ScontoRequestDTO;
+import com.yumaste.yumasteapi.dto.response.ScontoBoxResponseDTO;
+import com.yumaste.yumasteapi.dto.response.ScontoResponseDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.mapper.ScontoBoxMapper;
 import com.yumaste.yumasteapi.mapper.ScontoMapper;

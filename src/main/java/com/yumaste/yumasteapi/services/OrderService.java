@@ -1,10 +1,10 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.request.CheckoutRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.CartDTO;
-import com.yumaste.yumasteapi.DTO.response.CartItemDTO;
-import com.yumaste.yumasteapi.DTO.response.OrdineResponseDTO;
-import com.yumaste.yumasteapi.DTO.response.OrdiniDettagliDTO;
+import com.yumaste.yumasteapi.dto.request.CheckoutRequestDTO;
+import com.yumaste.yumasteapi.dto.response.CartDTO;
+import com.yumaste.yumasteapi.dto.response.CartItemDTO;
+import com.yumaste.yumasteapi.dto.response.OrdineResponseDTO;
+import com.yumaste.yumasteapi.dto.response.OrdiniDettagliDTO;
 import com.yumaste.yumasteapi.events.OrderCreatedEvent;
 import com.yumaste.yumasteapi.exceptions.BusinessException;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;

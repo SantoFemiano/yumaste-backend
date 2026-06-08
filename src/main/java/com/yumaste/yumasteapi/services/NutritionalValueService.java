@@ -1,6 +1,6 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.response.NutritionalValueDTO;
+import com.yumaste.yumasteapi.dto.response.NutritionalValueDTO;
 import com.yumaste.yumasteapi.mapper.NutritionalValueMapper;
 import com.yumaste.yumasteapi.repositories.NutritionalValueRepository;
 import lombok.RequiredArgsConstructor;

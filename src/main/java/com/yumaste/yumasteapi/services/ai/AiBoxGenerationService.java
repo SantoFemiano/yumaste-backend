@@ -1,8 +1,8 @@
 package com.yumaste.yumasteapi.services.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumaste.yumasteapi.DTO.request.AiGenerateBoxRequestDTO;
-import com.yumaste.yumasteapi.DTO.response.AiGenerateBoxResponseDTO;
+import com.yumaste.yumasteapi.dto.request.AiGenerateBoxRequestDTO;
+import com.yumaste.yumasteapi.dto.response.AiGenerateBoxResponseDTO;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.IngredienteRepository;

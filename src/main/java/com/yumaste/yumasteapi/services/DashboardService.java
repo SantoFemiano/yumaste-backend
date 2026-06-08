@@ -1,6 +1,6 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.response.DashboardStatsDTO;
+import com.yumaste.yumasteapi.dto.response.DashboardStatsDTO;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.OrdineRepository;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;

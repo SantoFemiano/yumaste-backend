@@ -1,6 +1,6 @@
 package com.yumaste.yumasteapi.controllers;
 
-import com.yumaste.yumasteapi.DTO.response.*;
+import com.yumaste.yumasteapi.dto.response.*;
 import com.yumaste.yumasteapi.services.BoxCompositionService;
 import com.yumaste.yumasteapi.services.BoxService;
 import com.yumaste.yumasteapi.services.ai.AiDescriptionService;
@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.yumaste.yumasteapi.DTO.request.AiRecommendationRequestDTO;
+import com.yumaste.yumasteapi.dto.request.AiRecommendationRequestDTO;
 
 
 import java.util.List;

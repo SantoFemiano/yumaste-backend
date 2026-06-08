@@ -1,6 +1,6 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.DTO.response.AllergeneDTO;
+import com.yumaste.yumasteapi.dto.response.AllergeneDTO;
 import com.yumaste.yumasteapi.mapper.AllergeneMapper;
 import com.yumaste.yumasteapi.models.Allergene;
 import com.yumaste.yumasteapi.repositories.AllergeneRepository;
