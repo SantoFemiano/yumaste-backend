@@ -42,6 +42,7 @@ public class SecurityConfig {
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -85,10 +86,11 @@ public class SecurityConfig {
                             .successHandler(oAuth2AuthenticationSuccessHandler) // Genera il token JWT finale e lo trasmette al frontend
                     )
 
-                    // Politica di gestione delle sessioni (Stateless: l'applicazione non memorizza lo stato lato server)
-                    .sessionManagement(session -> session
-                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    )
+                // IF_REQUIRED: stateless per le API REST, ma permette la sessione temporanea
+                // necessaria al flusso OAuth2 (state parameter, redirect URI tracking)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
 
                     // Configurazione dei provider di persistenza e catena dei filtri interceptor
                     .authenticationProvider(authenticationProvider)
