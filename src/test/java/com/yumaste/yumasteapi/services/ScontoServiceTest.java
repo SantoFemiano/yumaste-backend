@@ -1,10 +1,13 @@
 package com.yumaste.yumasteapi.services;
 
+import com.yumaste.yumasteapi.dto.response.ScontoResponseDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
+import com.yumaste.yumasteapi.mapper.ScontoBoxMapper;
+import com.yumaste.yumasteapi.mapper.ScontoMapper;
 import com.yumaste.yumasteapi.models.Sconto;
-import com.yumaste.yumasteapi.repositories.ScontoRepository;
+import com.yumaste.yumasteapi.repositories.BoxRepository;
 import com.yumaste.yumasteapi.repositories.ScontoBoxRepository;
-import com.yumaste.yumasteapi.repositories.ScontoCategoriaRepository;
+import com.yumaste.yumasteapi.repositories.ScontoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,53 +27,61 @@ class ScontoServiceTest {
 
     @Mock private ScontoRepository scontoRepository;
     @Mock private ScontoBoxRepository scontoBoxRepository;
-    @Mock private ScontoCategoriaRepository scontoCategoriaRepository;
+    @Mock private BoxRepository boxRepository;
+    @Mock private ScontoMapper scontoMapper;
+    @Mock private ScontoBoxMapper scontoBoxMapper;
     @InjectMocks private ScontoService scontoService;
 
     private Sconto sconto;
+    private ScontoResponseDTO scontoDTO;
 
     @BeforeEach
     void setUp() {
         sconto = new Sconto();
         sconto.setId(1L);
         sconto.setValore(10);
+        scontoDTO = mock(ScontoResponseDTO.class);
     }
 
     @Test
-    @DisplayName("getAllSconti - restituisce lista")
-    void getAllSconti() {
+    @DisplayName("getSconti - restituisce lista DTO")
+    void getSconti() {
         when(scontoRepository.findAll()).thenReturn(List.of(sconto));
-        assertThat(scontoService.getAllSconti()).hasSize(1);
+        when(scontoMapper.toDto(sconto)).thenReturn(scontoDTO);
+
+        List<ScontoResponseDTO> result = scontoService.getSconti();
+
+        assertThat(result).hasSize(1);
+        verify(scontoRepository).findAll();
     }
 
     @Test
-    @DisplayName("getScontoById - trovato")
-    void getScontoById_found() {
+    @DisplayName("deleteSconto - trovato e senza box associate, elimina")
+    void deleteSconto_found() {
+        when(scontoBoxRepository.existsBySconto_Id(1L)).thenReturn(false);
         when(scontoRepository.findById(1L)).thenReturn(Optional.of(sconto));
-        assertThat(scontoService.getScontoById(1L)).isEqualTo(sconto);
-    }
 
-    @Test
-    @DisplayName("getScontoById - non trovato lancia ResourceNotFoundException")
-    void getScontoById_notFound() {
-        when(scontoRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> scontoService.getScontoById(99L))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
+        scontoService.deleteSconto(1L);
 
-    @Test
-    @DisplayName("eliminaSconto - trovato, elimina")
-    void eliminaSconto_found() {
-        when(scontoRepository.findById(1L)).thenReturn(Optional.of(sconto));
-        scontoService.eliminaSconto(1L);
         verify(scontoRepository).delete(sconto);
     }
 
     @Test
-    @DisplayName("eliminaSconto - non trovato lancia ResourceNotFoundException")
-    void eliminaSconto_notFound() {
+    @DisplayName("deleteSconto - non trovato lancia ResourceNotFoundException")
+    void deleteSconto_notFound() {
+        when(scontoBoxRepository.existsBySconto_Id(99L)).thenReturn(false);
         when(scontoRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> scontoService.eliminaSconto(99L))
+
+        assertThatThrownBy(() -> scontoService.deleteSconto(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("deleteSconto - con box associate lancia BusinessException")
+    void deleteSconto_withBoxAssociate() {
+        when(scontoBoxRepository.existsBySconto_Id(1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> scontoService.deleteSconto(1L))
+                .isInstanceOf(com.yumaste.yumasteapi.exceptions.BusinessException.class);
     }
 }

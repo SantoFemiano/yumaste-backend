@@ -32,16 +32,30 @@ class AllergeneServiceTest {
         allergene = new Allergene();
         allergene.setId(1L);
         allergene.setNome("Glutine");
-        allergeneDTO = new AllergeneDTO(1L, "Glutine");
+        // AllergeneDTO(Long id, String nome, String descrizione)
+        allergeneDTO = new AllergeneDTO(1L, "Glutine", "Cereali contenenti glutine");
     }
 
     @Test
-    @DisplayName("getAllAllergeni - restituisce lista DTO")
-    void getAllAllergeni() {
+    @DisplayName("getAllAllergeni - restituisce lista DTO mappata")
+    void getAllAllergeni_returnsMappedList() {
         when(allergeneRepository.findAll()).thenReturn(List.of(allergene));
         when(allergeneMapper.toDto(allergene)).thenReturn(allergeneDTO);
+
         List<AllergeneDTO> result = allergeneService.getAllAllergeni();
+
         assertThat(result).hasSize(1);
         assertThat(result.get(0).nome()).isEqualTo("Glutine");
+        verify(allergeneRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("getAllAllergeni - repository vuoto restituisce lista vuota")
+    void getAllAllergeni_emptyList() {
+        when(allergeneRepository.findAll()).thenReturn(List.of());
+
+        List<AllergeneDTO> result = allergeneService.getAllAllergeni();
+
+        assertThat(result).isEmpty();
     }
 }
