@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Fornitore;
 import com.yumaste.yumasteapi.repositories.FornitoreRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,52 +23,57 @@ class FornitoreServiceTest {
     @Mock private FornitoreRepository fornitoreRepository;
     @InjectMocks private FornitoreService fornitoreService;
 
-    @Test
-    @DisplayName("getAllFornitori - restituisce lista")
-    void getAllFornitori() {
-        Fornitore f = new Fornitore(); f.setId(1L);
-        when(fornitoreRepository.findAll()).thenReturn(List.of(f));
-        assertThat(fornitoreService.getAllFornitori()).hasSize(1);
+    private Fornitore fornitore;
+
+    @BeforeEach
+    void setUp() {
+        fornitore = new Fornitore();
+        fornitore.setId(1L);
+        fornitore.setNome("Fornitore Test");
     }
 
     @Test
-    @DisplayName("getFornitoreById - trovato")
-    void getFornitoreById_found() {
-        Fornitore f = new Fornitore(); f.setId(1L);
-        when(fornitoreRepository.findById(1L)).thenReturn(Optional.of(f));
-        assertThat(fornitoreService.getFornitoreById(1L)).isEqualTo(f);
+    @DisplayName("getAll - restituisce lista fornitori")
+    void getAll() {
+        when(fornitoreRepository.findAll()).thenReturn(List.of(fornitore));
+        assertThat(fornitoreService.getAll()).hasSize(1);
     }
 
     @Test
-    @DisplayName("getFornitoreById - non trovato lancia ResourceNotFoundException")
-    void getFornitoreById_notFound() {
+    @DisplayName("getById - trovato")
+    void getById_found() {
+        when(fornitoreRepository.findById(1L)).thenReturn(Optional.of(fornitore));
+        assertThat(fornitoreService.getById(1L)).isEqualTo(fornitore);
+    }
+
+    @Test
+    @DisplayName("getById - non trovato lancia ResourceNotFoundException")
+    void getById_notFound() {
         when(fornitoreRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> fornitoreService.getFornitoreById(99L))
+        assertThatThrownBy(() -> fornitoreService.getById(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    @DisplayName("creaFornitore - salva e restituisce fornitore")
-    void creaFornitore() {
-        Fornitore f = new Fornitore(); f.setNome("Fornitore SpA");
-        when(fornitoreRepository.save(f)).thenReturn(f);
-        assertThat(fornitoreService.creaFornitore(f)).isEqualTo(f);
+    @DisplayName("save - salva e restituisce fornitore")
+    void save() {
+        when(fornitoreRepository.save(fornitore)).thenReturn(fornitore);
+        assertThat(fornitoreService.save(fornitore)).isEqualTo(fornitore);
     }
 
     @Test
-    @DisplayName("eliminaFornitore - non trovato lancia ResourceNotFoundException")
-    void eliminaFornitore_notFound() {
-        when(fornitoreRepository.findById(5L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> fornitoreService.eliminaFornitore(5L))
+    @DisplayName("delete - trovato, elimina")
+    void delete_found() {
+        when(fornitoreRepository.findById(1L)).thenReturn(Optional.of(fornitore));
+        fornitoreService.delete(1L);
+        verify(fornitoreRepository).delete(fornitore);
+    }
+
+    @Test
+    @DisplayName("delete - non trovato lancia ResourceNotFoundException")
+    void delete_notFound() {
+        when(fornitoreRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> fornitoreService.delete(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
-    @DisplayName("eliminaFornitore - trovato viene eliminato")
-    void eliminaFornitore_success() {
-        Fornitore f = new Fornitore(); f.setId(5L);
-        when(fornitoreRepository.findById(5L)).thenReturn(Optional.of(f));
-        fornitoreService.eliminaFornitore(5L);
-        verify(fornitoreRepository).delete(f);
     }
 }

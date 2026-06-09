@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.services;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
+import com.yumaste.yumasteapi.repositories.BoxCompositionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,9 @@ import static org.mockito.Mockito.*;
 class BoxServiceTest {
 
     @Mock private BoxRepository boxRepository;
+    @Mock private BoxCompositionRepository boxCompositionRepository;
     @Mock private com.yumaste.yumasteapi.repositories.IngredienteRepository ingredienteRepository;
     @Mock private com.yumaste.yumasteapi.repositories.AllergeneRepository allergeneRepository;
-    @Mock private com.yumaste.yumasteapi.repositories.BoxCompositionRepository boxCompositionRepository;
     @Mock private com.yumaste.yumasteapi.mapper.BoxMapper boxMapper;
 
     @InjectMocks private BoxService boxService;
@@ -42,10 +43,10 @@ class BoxServiceTest {
     }
 
     @Test
-    @DisplayName("getAllBoxAttive - restituisce solo box attive")
-    void getAllBoxAttive() {
-        when(boxRepository.findByAttivoTrue()).thenReturn(List.of(box));
-        assertThat(boxService.getAllBoxAttive()).hasSize(1);
+    @DisplayName("getAll - restituisce tutte le box")
+    void getAll() {
+        when(boxRepository.findAll()).thenReturn(List.of(box));
+        assertThat(boxService.getAll()).hasSize(1);
     }
 
     @Test
@@ -64,43 +65,23 @@ class BoxServiceTest {
     }
 
     @Test
-    @DisplayName("attivaBox - box non trovata lancia ResourceNotFoundException")
-    void attivaBox_notFound() {
+    @DisplayName("toggleAttivoBox - box non trovata lancia ResourceNotFoundException")
+    void toggleAttivoBox_notFound() {
         when(boxRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> boxService.attivaBox(99L))
+        assertThatThrownBy(() -> boxService.toggleAttivoBox(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    @DisplayName("attivaBox - box disattivata viene attivata")
-    void attivaBox_success() {
+    @DisplayName("toggleAttivoBox - inverte il flag attivo")
+    void toggleAttivoBox_success() {
         box.setAttivo(false);
         when(boxRepository.findById(1L)).thenReturn(Optional.of(box));
         when(boxRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        boxService.attivaBox(1L);
+        boxService.toggleAttivoBox(1L);
 
         assertThat(box.getAttivo()).isTrue();
-        verify(boxRepository).save(box);
-    }
-
-    @Test
-    @DisplayName("disattivaBox - box non trovata lancia ResourceNotFoundException")
-    void disattivaBox_notFound() {
-        when(boxRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> boxService.disattivaBox(99L))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
-    @DisplayName("disattivaBox - box attiva viene disattivata")
-    void disattivaBox_success() {
-        when(boxRepository.findById(1L)).thenReturn(Optional.of(box));
-        when(boxRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        boxService.disattivaBox(1L);
-
-        assertThat(box.getAttivo()).isFalse();
         verify(boxRepository).save(box);
     }
 }
