@@ -58,12 +58,6 @@ class OrderServiceTest {
         utente.setEmail("mario@yumaste.it");
     }
 
-    // =========================================================
-    // Helpers per costruire CartDTO / CartItemDTO con firme reali
-    // CartDTO(items, totalItems, totalQuantity, totalPrice)
-    // CartItemDTO(idRigaCarrello, boxId, nomeBox, quantita, immagineUrl, prezzoOriginale, prezzoScontato, percentualeSconto)
-    // =========================================================
-
     private CartDTO emptyCart() {
         return new CartDTO(List.of(), 0, 0, BigDecimal.ZERO);
     }
@@ -136,7 +130,6 @@ class OrderServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.codiceOrdine()).isEqualTo("ORD-TEST");
         assertThat(result.statoOrdine()).isEqualTo("IN_ATTESA");
-        // OrdineResponseDTO.nomeCliente() è il campo corretto
         assertThat(result.nomeCliente()).isEqualTo("Mario");
         verify(ordineRepository).save(any(Ordine.class));
         verify(spedizioneRepository).save(any(Spedizione.class));
@@ -150,11 +143,10 @@ class OrderServiceTest {
         CartItemDTO i = item(99L, 1, BigDecimal.TEN);
         when(cartService.getCarrelloDellUtente(utente)).thenReturn(cartWithItem(i));
 
-        IndirizzoUtente indirizzo = buildIndirizzo();
         CheckoutRequestDTO req = mock(CheckoutRequestDTO.class);
         when(req.indirizzoId()).thenReturn(1L);
-        when(req.metodoPagamento()).thenReturn("CARTA");
-        when(indirizzoRepository.findById(1L)).thenReturn(Optional.of(indirizzo));
+        // Non stubbiamo metodoPagamento() perché l'eccezione avviene prima
+        when(indirizzoRepository.findById(1L)).thenReturn(Optional.of(buildIndirizzo()));
         when(boxRepository.findAllById(List.of(99L))).thenReturn(List.of());
 
         assertThatThrownBy(() -> orderService.checkout(utente, req))

@@ -21,19 +21,24 @@ import static org.mockito.Mockito.*;
 class CustomOAuth2UserServiceTest {
 
     @Mock private UtenteRepository utenteRepository;
-
-    // Spy per intercettare super.loadUser() senza fare HTTP reale
-    @Spy
-    @InjectMocks
-    private CustomOAuth2UserService service;
-
     @Mock private OAuth2UserRequest userRequest;
     @Mock private OAuth2User oAuth2User;
 
+    /**
+     * Sottoclasse testabile che sovrascrive loadUser() del padre (DefaultOAuth2UserService)
+     * per evitare chiamate HTTP reali, esponendo la logica di business di CustomOAuth2UserService.
+     */
+    private CustomOAuth2UserService service;
+
     @BeforeEach
     void setUp() {
-        // Facciamo override del metodo padre così non parte nessuna chiamata HTTP
-        doReturn(oAuth2User).when(service).loadUser(userRequest);
+        // Creiamo una sottoclasse anonima che sovrascrive solo il metodo padre
+        service = new CustomOAuth2UserService(utenteRepository) {
+            @Override
+            protected OAuth2User fetchOAuth2User(OAuth2UserRequest request) {
+                return oAuth2User;
+            }
+        };
     }
 
     // --- utente esistente ---
@@ -42,8 +47,6 @@ class CustomOAuth2UserServiceTest {
     @DisplayName("loadUser - utente già presente nel DB: non salva nulla e restituisce OAuth2User")
     void loadUser_existingUser_doesNotSave() {
         when(oAuth2User.getAttribute("email")).thenReturn("mario@yumaste.it");
-        when(oAuth2User.getAttribute("name")).thenReturn("Mario Rossi");
-        when(oAuth2User.getAttribute("login")).thenReturn("mariorossi");
         when(utenteRepository.findByEmail("mario@yumaste.it")).thenReturn(Optional.of(new Utente()));
 
         OAuth2User result = service.loadUser(userRequest);
@@ -87,7 +90,7 @@ class CustomOAuth2UserServiceTest {
         when(utenteRepository.findByEmail("marco99@github.com")).thenReturn(Optional.empty());
         when(utenteRepository.save(any(Utente.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        OAuth2User result = service.loadUser(userRequest);
+        service.loadUser(userRequest);
 
         ArgumentCaptor<Utente> captor = ArgumentCaptor.forClass(Utente.class);
         verify(utenteRepository).save(captor.capture());
@@ -109,7 +112,6 @@ class CustomOAuth2UserServiceTest {
 
         ArgumentCaptor<Utente> captor = ArgumentCaptor.forClass(Utente.class);
         verify(utenteRepository).save(captor.capture());
-        // Quando name è null usa login come nome, cognome = "GitHubUser"
         assertThat(captor.getValue().getNome()).isEqualTo("gino");
         assertThat(captor.getValue().getCognome()).isEqualTo("GitHubUser");
     }

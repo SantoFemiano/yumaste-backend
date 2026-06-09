@@ -18,9 +18,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UtenteRepository utenteRepository;
 
+    /**
+     * Metodo estratto per consentire l'override nei test senza chiamate HTTP reali.
+     */
+    protected OAuth2User fetchOAuth2User(OAuth2UserRequest userRequest) {
+        return super.loadUser(userRequest);
+    }
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
+        OAuth2User oAuth2User = fetchOAuth2User(userRequest);
 
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
@@ -34,19 +41,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<Utente> userOptional = utenteRepository.findByEmail(email);
 
         if (userOptional.isEmpty()) {
-            // Creazione nuovo utente da flusso GitHub OAuth2
             Utente utente = new Utente();
             utente.setEmail(email);
             utente.setProvider("GITHUB");
             utente.setRuolo("ROLE_USER");
 
-            // Parsing del nome da GitHub
             String[] nameParts = (name != null ? name : login).split(" ", 2);
             utente.setNome(nameParts[0]);
             utente.setCognome(nameParts.length > 1 ? nameParts[1] : "GitHubUser");
 
-            // I campi strutturali (cf, telefono, dataNascita, passwordC) rimangono null
-            // e verranno eventualmente completati dall'utente in un secondo momento sul profilo
             utente.setDataRegistrazione(Instant.now());
             utente.setDataAggiornamento(Instant.now());
 
