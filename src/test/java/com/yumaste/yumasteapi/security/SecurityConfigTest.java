@@ -1,16 +1,9 @@
 package com.yumaste.yumasteapi.security;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -19,20 +12,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = SecurityConfigTest.TestSecurityController.class)
-@Import({SecurityConfig.class, SecurityConfigTest.FilterTestConfig.class})
+@Import(SecurityConfig.class)
 class SecurityConfigTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    // Mock delle dipendenze richieste da SecurityConfig
+    // Mock di tutte le dipendenze richieste da SecurityConfig
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockitoBean
     private org.springframework.security.authentication.AuthenticationProvider authenticationProvider;
     @MockitoBean
@@ -40,35 +32,11 @@ class SecurityConfigTest {
     @MockitoBean
     private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
-    // Mock di JwtService e UserDetailsService per soddisfare le dipendenze
-    // di JwtAuthenticationFilter durante il caricamento del contesto Spring
+    // Mock aggiuntivi richiesti dall'autoconfiguration di Spring Security
     @MockitoBean
     private JwtService jwtService;
     @MockitoBean
     private UserDetailsService userDetailsService;
-
-    /**
-     * Fornisce un JwtAuthenticationFilter pass-through che non esegue nessuna
-     * logica JWT, lasciando che Spring Security gestisca le sue regole di
-     * autorizzazione normalmente nei test.
-     */
-    @TestConfiguration
-    static class FilterTestConfig {
-        @Bean
-        public JwtAuthenticationFilter jwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService) {
-            return new JwtAuthenticationFilter(jwtService, userDetailsService) {
-                @Override
-                protected void doFilterInternal(
-                        @NonNull HttpServletRequest request,
-                        @NonNull HttpServletResponse response,
-                        @NonNull FilterChain filterChain
-                ) throws ServletException, IOException {
-                    // Pass-through: non valida il JWT, lascia decidere Spring Security
-                    filterChain.doFilter(request, response);
-                }
-            };
-        }
-    }
 
     // =========================================================================
     // TESTS: Rotte Pubbliche
