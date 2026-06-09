@@ -31,7 +31,7 @@ jobs:
           org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar \
           -Dsonar.projectKey=SantoFemiano_yumaste-backend \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-          -DargLine="-XX:+EnableDynamicAgentLoading"
+          -Darguments="-XX:+EnableDynamicAgentLoading"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
