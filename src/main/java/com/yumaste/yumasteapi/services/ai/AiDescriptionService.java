@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -258,10 +259,14 @@ public class AiDescriptionService {
     }
 
     private String generaEanUnivocoCasuale() {
-        var random = ThreadLocalRandom.current();
+        // SecureRandom è thread-safe e crittograficamente sicuro
+        SecureRandom random = new SecureRandom();
+
         StringBuilder ean = new StringBuilder();
         ean.append(random.nextInt(1, 10));
-        for (int i = 0; i < 12; i++) ean.append(random.nextInt(10));
+        for (int i = 0; i < 12; i++) {
+            ean.append(random.nextInt(10));
+        }
         return ean.toString();
     }
 }
