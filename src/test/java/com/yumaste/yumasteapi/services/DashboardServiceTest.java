@@ -36,7 +36,7 @@ class DashboardServiceTest {
         DashboardStatsDTO result = dashboardService.getStats();
 
         assertThat(result.totaleOrdini()).isEqualTo(10L);
-        assertThat(result.incasso()).isEqualByComparingTo(BigDecimal.valueOf(500.00));
+        assertThat(result.incassoTotale()).isEqualByComparingTo(BigDecimal.valueOf(500.00));
         assertThat(result.totaleClienti()).isEqualTo(5L);
         assertThat(result.boxAttive()).isEqualTo(3L);
     }
@@ -52,7 +52,7 @@ class DashboardServiceTest {
         DashboardStatsDTO result = dashboardService.getStats();
 
         assertThat(result.totaleOrdini()).isZero();
-        assertThat(result.incasso()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.incassoTotale()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.totaleClienti()).isZero();
         assertThat(result.boxAttive()).isZero();
     }
