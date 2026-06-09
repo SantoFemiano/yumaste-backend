@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,24 +26,22 @@ class CustomOAuth2UserServiceTest {
     private UtenteRepository utenteRepository;
 
     /**
-     * Sottoclasse testabile: sovrascrive solo il comportamento di super.loadUser()
-     * (che farebbe una vera chiamata HTTP a GitHub), lasciando intatta tutta la
-     * logica di business che vogliamo testare.
+     * Sottoclasse testabile: bypassa super.loadUser() (chiamata HTTP reale a GitHub)
+     * e replica la logica di business di CustomOAuth2UserService usando il repository
+     * iniettato localmente — senza chiamare getUtenteRepository() che non esiste.
      */
-    private static class TestableCustomOAuth2UserService extends CustomOAuth2UserService {
+    private class TestableCustomOAuth2UserService extends CustomOAuth2UserService {
 
         private final OAuth2User stubbedOAuth2User;
 
-        TestableCustomOAuth2UserService(UtenteRepository utenteRepository, OAuth2User stubbedOAuth2User) {
-            super(utenteRepository);
+        TestableCustomOAuth2UserService(OAuth2User stubbedOAuth2User) {
+            super(utenteRepository); // passa il mock al costruttore della classe padre
             this.stubbedOAuth2User = stubbedOAuth2User;
         }
 
         @Override
         public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-            // Bypassa la chiamata HTTP reale a GitHub, invoca la logica della classe padre (CustomOAuth2UserService)
-            // facendo credere che super.loadUser() abbia restituito stubbedOAuth2User.
-            // Usiamo reflection-free trick: duplichiamo la logica del metodo con il super mockato.
+            // Bypassa super.loadUser() (HTTP reale) e usa il mock
             OAuth2User oAuth2User = stubbedOAuth2User;
 
             String email = oAuth2User.getAttribute("email");
@@ -53,11 +52,10 @@ class CustomOAuth2UserServiceTest {
                 email = login + "@github.com";
             }
 
-            var utenteRepository = getUtenteRepository();
-            var userOptional = utenteRepository.findByEmail(email);
+            Optional<Utente> userOptional = utenteRepository.findByEmail(email);
 
             if (userOptional.isEmpty()) {
-                var utente = new Utente();
+                Utente utente = new Utente();
                 utente.setEmail(email);
                 utente.setProvider("GITHUB");
                 utente.setRuolo("ROLE_USER");
@@ -66,8 +64,8 @@ class CustomOAuth2UserServiceTest {
                 utente.setNome(nameParts[0]);
                 utente.setCognome(nameParts.length > 1 ? nameParts[1] : "GitHubUser");
 
-                utente.setDataRegistrazione(java.time.Instant.now());
-                utente.setDataAggiornamento(java.time.Instant.now());
+                utente.setDataRegistrazione(Instant.now());
+                utente.setDataAggiornamento(Instant.now());
 
                 utenteRepository.save(utente);
             }
@@ -86,7 +84,7 @@ class CustomOAuth2UserServiceTest {
     }
 
     private TestableCustomOAuth2UserService buildService() {
-        return new TestableCustomOAuth2UserService(utenteRepository, oAuth2User);
+        return new TestableCustomOAuth2UserService(oAuth2User);
     }
 
     @Test
