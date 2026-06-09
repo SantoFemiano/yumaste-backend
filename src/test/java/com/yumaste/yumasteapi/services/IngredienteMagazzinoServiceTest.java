@@ -41,6 +41,7 @@ class IngredienteMagazzinoServiceTest {
 
     private Ingrediente ingrediente;
     private Magazzino magazzino;
+    // Ordine corretto del record: (ingredienteId, magazzinoId, quantita, lotto, dataIngresso)
     private IngredienteMagazzinoRequest request;
     private IngredienteMagazzinoResponse mockResponse;
 
@@ -53,8 +54,11 @@ class IngredienteMagazzinoServiceTest {
         magazzino.setId(1L);
 
         request = new IngredienteMagazzinoRequest(
-                1L, 1L, "LOTTO-001",
-                new BigDecimal("100"), LocalDate.now()
+                1L,
+                1L,
+                new BigDecimal("100"),
+                "LOTTO-001",
+                LocalDate.now()
         );
 
         mockResponse = mock(IngredienteMagazzinoResponse.class);
@@ -79,7 +83,7 @@ class IngredienteMagazzinoServiceTest {
     }
 
     @Test
-    @DisplayName("caricaMerci - aggiorna quantità quando giacenza esiste già")
+    @DisplayName("caricaMerci - aggiorna quantita quando giacenza esiste gia")
     void caricaMerci_updatesQuantity_whenGiacenzaExists() {
         when(ingredienteRepository.findById(1L)).thenReturn(Optional.of(ingrediente));
         when(magazzinoRepository.findById(1L)).thenReturn(Optional.of(magazzino));

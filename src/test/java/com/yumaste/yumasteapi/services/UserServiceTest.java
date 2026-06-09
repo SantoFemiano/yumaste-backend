@@ -1,7 +1,11 @@
 package com.yumaste.yumasteapi.services;
 
+import com.yumaste.yumasteapi.dto.response.UtenteProfileDTO;
 import com.yumaste.yumasteapi.exceptions.ResourceNotFoundException;
+import com.yumaste.yumasteapi.mapper.IndirizzoMapper;
+import com.yumaste.yumasteapi.mapper.UtenteMapper;
 import com.yumaste.yumasteapi.models.Utente;
+import com.yumaste.yumasteapi.repositories.IndirizzoUtenteRepository;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,20 +14,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock
-    private UtenteRepository utenteRepository;
+    @Mock private UtenteRepository utenteRepository;
+    @Mock private IndirizzoUtenteRepository indirizzoUtenteRepository;
+    @Mock private IndirizzoMapper indirizzoMapper;
+    @Mock private UtenteMapper utenteMapper;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private UserService self;
 
     @InjectMocks
     private UserService userService;
@@ -42,42 +50,46 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("loadUserByUsername - utente trovato restituisce UserDetails")
-    void loadUserByUsername_found_returnsUserDetails() {
-        when(utenteRepository.findByEmail("mario@yumaste.it")).thenReturn(Optional.of(utente));
+    @DisplayName("getClienti - restituisce lista di profili utenti")
+    void getClienti_returnsList() {
+        when(utenteRepository.findByRuolo("ROLE_USER")).thenReturn(List.of(utente));
+        when(indirizzoUtenteRepository.findByUtente(utente)).thenReturn(List.of());
 
-        UserDetails result = userService.loadUserByUsername("mario@yumaste.it");
+        List<UtenteProfileDTO> result = userService.getClienti();
 
-        assertThat(result).isNotNull();
-        assertThat(result.getUsername()).isEqualTo("mario@yumaste.it");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).nome()).isEqualTo("Mario");
+        assertThat(result.get(0).cognome()).isEqualTo("Rossi");
+        assertThat(result.get(0).email()).isEqualTo("mario@yumaste.it");
     }
 
     @Test
-    @DisplayName("loadUserByUsername - utente non trovato lancia UsernameNotFoundException")
-    void loadUserByUsername_notFound_throwsException() {
-        when(utenteRepository.findByEmail("unknown@yumaste.it")).thenReturn(Optional.empty());
+    @DisplayName("getClienti - lista vuota quando non ci sono clienti")
+    void getClienti_emptyList() {
+        when(utenteRepository.findByRuolo("ROLE_USER")).thenReturn(List.of());
 
-        assertThatThrownBy(() -> userService.loadUserByUsername("unknown@yumaste.it"))
-                .isInstanceOf(UsernameNotFoundException.class);
+        List<UtenteProfileDTO> result = userService.getClienti();
+
+        assertThat(result).isEmpty();
     }
 
     @Test
-    @DisplayName("getUtenteByEmail - utente trovato")
-    void getUtenteByEmail_found_returnsUtente() {
-        when(utenteRepository.findByEmail("mario@yumaste.it")).thenReturn(Optional.of(utente));
+    @DisplayName("deleteUser - utente trovato viene eliminato")
+    void deleteUser_found_deletesUser() {
+        when(utenteRepository.findById(1L)).thenReturn(Optional.of(utente));
 
-        Utente result = userService.getUtenteByEmail("mario@yumaste.it");
+        userService.deleteUser(1L);
 
-        assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo("mario@yumaste.it");
+        verify(utenteRepository).delete(utente);
     }
 
     @Test
-    @DisplayName("getUtenteByEmail - utente non trovato lancia ResourceNotFoundException")
-    void getUtenteByEmail_notFound_throwsException() {
-        when(utenteRepository.findByEmail("ghost@yumaste.it")).thenReturn(Optional.empty());
+    @DisplayName("deleteUser - utente non trovato lancia ResourceNotFoundException")
+    void deleteUser_notFound_throwsException() {
+        when(utenteRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.getUtenteByEmail("ghost@yumaste.it"))
-                .isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> userService.deleteUser(99L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("99");
     }
 }
