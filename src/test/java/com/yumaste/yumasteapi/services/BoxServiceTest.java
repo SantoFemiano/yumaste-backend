@@ -23,10 +23,9 @@ import static org.mockito.Mockito.*;
 class BoxServiceTest {
 
     @Mock private BoxRepository boxRepository;
-    // BoxService dipende anche da altri service/repo — aggiungiamo i mock necessari
     @Mock private com.yumaste.yumasteapi.repositories.IngredienteRepository ingredienteRepository;
     @Mock private com.yumaste.yumasteapi.repositories.AllergeneRepository allergeneRepository;
-    @Mock private com.yumaste.yumasteapi.repositories.BoxIngredienteRepository boxIngredienteRepository;
+    @Mock private com.yumaste.yumasteapi.repositories.BoxCompositionRepository boxCompositionRepository;
     @Mock private com.yumaste.yumasteapi.mapper.BoxMapper boxMapper;
 
     @InjectMocks private BoxService boxService;
