@@ -58,8 +58,8 @@ class CartServiceTest {
     @Test
     @DisplayName("getCarrelloDellUtente - carrello vuoto restituisce totali a zero")
     void getCarrello_empty() {
+        // Carrello vuoto: scontoRepository non viene mai chiamato, nessun stubbing necessario
         when(cartRepository.findByUtente(utente)).thenReturn(List.of());
-        when(scontoRepository.findMigliorScontoAttivoPerBox(any(), any())).thenReturn(Optional.empty());
 
         CartDTO dto = cartService.getCarrelloDellUtente(utente);
 
@@ -127,8 +127,14 @@ class CartServiceTest {
     void addToCart_newRow() {
         when(boxRepository.findById(10L)).thenReturn(Optional.of(box));
         when(cartRepository.findByUtenteAndBox(utente, box)).thenReturn(Optional.empty());
-        when(cartRepository.findByUtente(utente)).thenReturn(List.of());
-        when(scontoRepository.findMigliorScontoAttivoPerBox(any(), any())).thenReturn(Optional.empty());
+        // Dopo il save, getCarrelloDellUtente viene chiamato: il carrello ha 1 item
+        Carrello nuova = new Carrello();
+        nuova.setBox(box);
+        nuova.setQuantita(3);
+        nuova.setUtente(utente);
+        when(cartRepository.findByUtente(utente)).thenReturn(List.of(nuova));
+        when(scontoRepository.findMigliorScontoAttivoPerBox(box.getId(), box.getCategoria()))
+                .thenReturn(Optional.empty());
 
         cartService.aggiungiBoxAlCarrello(utente, 10L, 3);
 

@@ -1,5 +1,6 @@
 package com.yumaste.yumasteapi.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,10 +17,9 @@ class JwtServiceTest {
 
     private JwtService jwtService;
 
-    // Chiave Base64 di 256 bit valida per HMAC-SHA256
     private static final String SECRET = "dGVzdFNlY3JldEtleUZvckp3dFRlc3RpbmdZdW1hc3RlMTIz";
-    private static final long EXPIRATION = 3_600_000L;      // 1 ora
-    private static final long REFRESH_EXPIRATION = 86_400_000L; // 24 ore
+    private static final long EXPIRATION = 3_600_000L;
+    private static final long REFRESH_EXPIRATION = 86_400_000L;
 
     @BeforeEach
     void setUp() {
@@ -75,13 +75,17 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("isTokenValid - token scaduto deve essere falso")
+    @DisplayName("isTokenValid - token scaduto deve lanciare ExpiredJwtException")
     void isTokenValid_expiredToken() throws Exception {
-        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 1L); // 1 ms
+        // JwtService non cattura ExpiredJwtException internamente:
+        // extractAllClaims() -> parseClaimsJws() lancia l'eccezione direttamente.
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 1L);
         UserDetails user = buildUser("exp@yumaste.it");
         String token = jwtService.generateToken(user);
-        Thread.sleep(10);
-        assertThat(jwtService.isTokenValid(token, user)).isFalse();
+        Thread.sleep(50);
+
+        assertThatThrownBy(() -> jwtService.isTokenValid(token, user))
+                .isInstanceOf(ExpiredJwtException.class);
     }
 
     @Test
