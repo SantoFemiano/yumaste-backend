@@ -80,7 +80,7 @@ class AuthControllerTest {
 
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(resp.getBody()).isNotNull();
-        assertThat(resp.getBody().getAccessToken()).isEqualTo("access-token");
+        assertThat(resp.getBody().getToken()).isEqualTo("access-token");
         assertThat(resp.getBody().getRefreshToken()).isEqualTo("refresh-token");
         verify(utenteRepository).save(any(Utente.class));
     }
@@ -100,7 +100,7 @@ class AuthControllerTest {
         ResponseEntity<AuthResponse> resp = authController.login(req);
 
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resp.getBody().getAccessToken()).isEqualTo("access");
+        assertThat(resp.getBody().getToken()).isEqualTo("access");
         assertThat(resp.getBody().getRefreshToken()).isEqualTo("refresh");
     }
 
@@ -157,7 +157,7 @@ class AuthControllerTest {
         ResponseEntity<AuthResponse> resp = authController.refreshToken(req);
 
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resp.getBody().getAccessToken()).isEqualTo("new-access");
+        assertThat(resp.getBody().getToken()).isEqualTo("new-access");
         assertThat(resp.getBody().getRefreshToken()).isEqualTo(refreshTok);
     }
 

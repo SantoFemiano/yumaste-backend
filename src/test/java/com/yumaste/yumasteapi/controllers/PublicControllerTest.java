@@ -64,7 +64,7 @@ class PublicControllerTest {
     @DisplayName("getCatalog - catalogo non vuoto restituisce 200")
     void getCatalog_nonEmpty_returns200() {
         CatalogBoxDTO box = mock(CatalogBoxDTO.class);
-        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(box), 1, 1, 0, false);
+        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(box), 0, 10, 1L, 1, false);
         when(boxService.getAllActiveBoxes(null, null, Pageable.unpaged())).thenReturn(paged);
 
         ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> result =
@@ -77,7 +77,7 @@ class PublicControllerTest {
     @Test
     @DisplayName("getCatalog - catalogo vuoto restituisce 204")
     void getCatalog_empty_returns204() {
-        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(), 0, 0, 0, false);
+        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(), 0, 0, 0L, 0, false);
         when(boxService.getAllActiveBoxes(null, null, Pageable.unpaged())).thenReturn(paged);
 
         ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> result =

@@ -86,7 +86,7 @@ class AdminControllerTest {
     @DisplayName("getInattiveBoxes - lista non vuota restituisce 200")
     void getInattiveBoxes_nonEmpty_returns200() {
         CatalogBoxDTO box = mock(CatalogBoxDTO.class);
-        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(box), 1, 1, 0, false);
+        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(box), 0, 10, 1L, 1, false);
         when(boxService.getAllInattiveBoxes(Pageable.unpaged())).thenReturn(paged);
 
         ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> resp = adminController.getInattiveBoxes(Pageable.unpaged());
@@ -97,7 +97,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("getInattiveBoxes - lista vuota restituisce 204")
     void getInattiveBoxes_empty_returns204() {
-        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(), 0, 0, 0, false);
+        PagedResponseDTO<CatalogBoxDTO> paged = new PagedResponseDTO<>(List.of(), 0, 0, 0L, 0, false);
         when(boxService.getAllInattiveBoxes(Pageable.unpaged())).thenReturn(paged);
 
         ResponseEntity<PagedResponseDTO<CatalogBoxDTO>> resp = adminController.getInattiveBoxes(Pageable.unpaged());
