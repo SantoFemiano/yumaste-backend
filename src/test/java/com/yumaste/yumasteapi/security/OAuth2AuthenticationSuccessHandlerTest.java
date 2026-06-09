@@ -2,6 +2,7 @@ package com.yumaste.yumasteapi.security;
 
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,11 +51,9 @@ class OAuth2AuthenticationSuccessHandlerTest {
         when(authentication.getPrincipal()).thenReturn(oAuth2User);
     }
 
-    // --- email presente negli attributi ---
-
     @Test
     @DisplayName("onAuthenticationSuccess - email presente: redirect con token e refreshToken")
-    void onAuthenticationSuccess_withEmail_redirectsWithTokens() throws IOException {
+    void onAuthenticationSuccess_withEmail_redirectsWithTokens() throws IOException, ServletException {
         when(oAuth2User.getAttribute("email")).thenReturn("mario@yumaste.it");
         when(utenteRepository.findByEmail("mario@yumaste.it")).thenReturn(Optional.of(utente));
         when(jwtService.generateToken(utente)).thenReturn("access-tok");
@@ -71,11 +70,9 @@ class OAuth2AuthenticationSuccessHandlerTest {
         assertThat(redirectUrl).contains("refreshToken=refresh-tok");
     }
 
-    // --- email null: fallback su login@github.com ---
-
     @Test
     @DisplayName("onAuthenticationSuccess - email null: usa login@github.com per trovare utente")
-    void onAuthenticationSuccess_nullEmail_usesLoginFallback() throws IOException {
+    void onAuthenticationSuccess_nullEmail_usesLoginFallback() throws IOException, ServletException {
         when(oAuth2User.getAttribute("email")).thenReturn(null);
         when(oAuth2User.getAttribute("login")).thenReturn("mario99");
         when(utenteRepository.findByEmail("mario99@github.com")).thenReturn(Optional.of(utente));
@@ -88,8 +85,6 @@ class OAuth2AuthenticationSuccessHandlerTest {
         verify(redirectStrategy).sendRedirect(any(), any(), anyString());
     }
 
-    // --- utente non trovato ---
-
     @Test
     @DisplayName("onAuthenticationSuccess - utente non trovato: lancia RuntimeException")
     void onAuthenticationSuccess_userNotFound_throws() {
@@ -101,11 +96,9 @@ class OAuth2AuthenticationSuccessHandlerTest {
                 .hasMessageContaining("Utente non trovato");
     }
 
-    // --- frontendUrl custom (via ReflectionTestUtils) ---
-
     @Test
     @DisplayName("onAuthenticationSuccess - frontendUrl custom: redirect punta al nuovo URL")
-    void onAuthenticationSuccess_customFrontendUrl_redirectsCorrectly() throws IOException {
+    void onAuthenticationSuccess_customFrontendUrl_redirectsCorrectly() throws IOException, ServletException {
         ReflectionTestUtils.setField(handler, "frontendUrl", "http://localhost:3000");
         when(oAuth2User.getAttribute("email")).thenReturn("mario@yumaste.it");
         when(utenteRepository.findByEmail("mario@yumaste.it")).thenReturn(Optional.of(utente));

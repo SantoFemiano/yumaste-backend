@@ -59,15 +59,31 @@ class OrderServiceTest {
     }
 
     // =========================================================
+    // Helpers per costruire CartDTO / CartItemDTO con firme reali
+    // CartDTO(items, totalItems, totalQuantity, totalPrice)
+    // CartItemDTO(idRigaCarrello, boxId, nomeBox, quantita, immagineUrl, prezzoOriginale, prezzoScontato, percentualeSconto)
+    // =========================================================
+
+    private CartDTO emptyCart() {
+        return new CartDTO(List.of(), 0, 0, BigDecimal.ZERO);
+    }
+
+    private CartItemDTO item(Long boxId, int quantita, BigDecimal prezzo) {
+        return new CartItemDTO(null, boxId, "Box Test", quantita, null, prezzo, prezzo, 0);
+    }
+
+    private CartDTO cartWithItem(CartItemDTO i) {
+        return new CartDTO(List.of(i), 1, i.quantita(), i.prezzoScontato());
+    }
+
+    // =========================================================
     // checkout
     // =========================================================
 
     @Test
     @DisplayName("checkout - carrello vuoto lancia BusinessException")
     void checkout_emptyCart_throwsBusinessException() {
-        CartDTO emptyCart = new CartDTO(List.of(), BigDecimal.ZERO, 0);
-        when(cartService.getCarrelloDellUtente(utente)).thenReturn(emptyCart);
-
+        when(cartService.getCarrelloDellUtente(utente)).thenReturn(emptyCart());
         CheckoutRequestDTO req = mock(CheckoutRequestDTO.class);
 
         assertThatThrownBy(() -> orderService.checkout(utente, req))
@@ -78,9 +94,8 @@ class OrderServiceTest {
     @Test
     @DisplayName("checkout - indirizzo non trovato lancia ResourceNotFoundException")
     void checkout_addressNotFound_throwsResourceNotFoundException() {
-        CartItemDTO item = new CartItemDTO(10L, "Box Test", 2, BigDecimal.TEN, BigDecimal.TEN, null);
-        CartDTO cart = new CartDTO(List.of(item), BigDecimal.TEN, 2);
-        when(cartService.getCarrelloDellUtente(utente)).thenReturn(cart);
+        CartItemDTO i = item(10L, 2, BigDecimal.TEN);
+        when(cartService.getCarrelloDellUtente(utente)).thenReturn(cartWithItem(i));
 
         CheckoutRequestDTO req = mock(CheckoutRequestDTO.class);
         when(req.indirizzoId()).thenReturn(99L);
@@ -93,14 +108,10 @@ class OrderServiceTest {
     @Test
     @DisplayName("checkout - flusso completo: crea ordine, spedizione, fattura e ritorna DTO")
     void checkout_happyPath_returnsOrdineResponseDTO() {
-        CartItemDTO item = new CartItemDTO(10L, "Box A", 1, BigDecimal.TEN, BigDecimal.TEN, null);
-        CartDTO cart = new CartDTO(List.of(item), BigDecimal.TEN, 1);
-        when(cartService.getCarrelloDellUtente(utente)).thenReturn(cart);
+        CartItemDTO i = item(10L, 1, BigDecimal.TEN);
+        when(cartService.getCarrelloDellUtente(utente)).thenReturn(cartWithItem(i));
 
-        IndirizzoUtente indirizzo = new IndirizzoUtente();
-        indirizzo.setUtente(utente);
-        indirizzo.setVia("Via Roma"); indirizzo.setCivico("1");
-        indirizzo.setCap("00100"); indirizzo.setCitta("Roma"); indirizzo.setProvincia("RM");
+        IndirizzoUtente indirizzo = buildIndirizzo();
         CheckoutRequestDTO req = mock(CheckoutRequestDTO.class);
         when(req.indirizzoId()).thenReturn(1L);
         when(req.metodoPagamento()).thenReturn("CARTA");
@@ -109,13 +120,7 @@ class OrderServiceTest {
         Box box = new Box(); box.setId(10L);
         when(boxRepository.findAllById(List.of(10L))).thenReturn(List.of(box));
 
-        Ordine ordineSalvato = new Ordine();
-        ordineSalvato.setId(100L);
-        ordineSalvato.setCodiceOrdine("ORD-ABCD1234");
-        ordineSalvato.setDataOrdine(Instant.now());
-        ordineSalvato.setTotalePrezzo(BigDecimal.TEN);
-        ordineSalvato.setStatoOrdine("IN_ATTESA");
-        ordineSalvato.setUtente(utente);
+        Ordine ordineSalvato = buildOrdine();
         when(ordineRepository.save(any(Ordine.class))).thenReturn(ordineSalvato);
 
         Spedizione spedizione = new Spedizione();
@@ -129,9 +134,10 @@ class OrderServiceTest {
         OrdineResponseDTO result = orderService.checkout(utente, req);
 
         assertThat(result).isNotNull();
-        assertThat(result.codiceOrdine()).isEqualTo("ORD-ABCD1234");
+        assertThat(result.codiceOrdine()).isEqualTo("ORD-TEST");
         assertThat(result.statoOrdine()).isEqualTo("IN_ATTESA");
-        assertThat(result.nomeUtente()).isEqualTo("Mario");
+        // OrdineResponseDTO.nomeCliente() è il campo corretto
+        assertThat(result.nomeCliente()).isEqualTo("Mario");
         verify(ordineRepository).save(any(Ordine.class));
         verify(spedizioneRepository).save(any(Spedizione.class));
         verify(fatturaRepository).save(any(Fattura.class));
@@ -141,22 +147,17 @@ class OrderServiceTest {
     @Test
     @DisplayName("checkout - box non trovata nella mappa lancia ResourceNotFoundException")
     void checkout_boxNotFound_throwsResourceNotFoundException() {
-        CartItemDTO item = new CartItemDTO(99L, "Missing", 1, BigDecimal.TEN, BigDecimal.TEN, null);
-        CartDTO cart = new CartDTO(List.of(item), BigDecimal.TEN, 1);
-        when(cartService.getCarrelloDellUtente(utente)).thenReturn(cart);
+        CartItemDTO i = item(99L, 1, BigDecimal.TEN);
+        when(cartService.getCarrelloDellUtente(utente)).thenReturn(cartWithItem(i));
 
-        IndirizzoUtente indirizzo = new IndirizzoUtente();
-        indirizzo.setUtente(utente);
-        indirizzo.setVia("Via Roma"); indirizzo.setCivico("1");
-        indirizzo.setCap("00100"); indirizzo.setCitta("Roma"); indirizzo.setProvincia("RM");
+        IndirizzoUtente indirizzo = buildIndirizzo();
         CheckoutRequestDTO req = mock(CheckoutRequestDTO.class);
         when(req.indirizzoId()).thenReturn(1L);
         when(req.metodoPagamento()).thenReturn("CARTA");
         when(indirizzoRepository.findById(1L)).thenReturn(Optional.of(indirizzo));
-        when(boxRepository.findAllById(List.of(99L))).thenReturn(List.of()); // box assente
+        when(boxRepository.findAllById(List.of(99L))).thenReturn(List.of());
 
-        Ordine ordineSalvato = new Ordine();
-        ordineSalvato.setId(1L); ordineSalvato.setUtente(utente);
+        Ordine ordineSalvato = buildOrdine();
         when(ordineRepository.save(any(Ordine.class))).thenReturn(ordineSalvato);
 
         assertThatThrownBy(() -> orderService.checkout(utente, req))
@@ -278,7 +279,7 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("updateStatoOrdine - aggiorna solo statoOrdine (senza spedizione)")
+    @DisplayName("updateStatoOrdine - aggiorna solo statoOrdine")
     void updateStatoOrdine_onlyOrderStatus_updatesAndReturns() {
         Ordine ordine = buildOrdine();
         when(ordineRepository.findById(1L)).thenReturn(Optional.of(ordine));
@@ -322,7 +323,7 @@ class OrderServiceTest {
     }
 
     // =========================================================
-    // Helper
+    // Helpers
     // =========================================================
 
     private Ordine buildOrdine() {
@@ -334,5 +335,13 @@ class OrderServiceTest {
         o.setStatoOrdine("IN_ATTESA");
         o.setUtente(utente);
         return o;
+    }
+
+    private IndirizzoUtente buildIndirizzo() {
+        IndirizzoUtente ind = new IndirizzoUtente();
+        ind.setUtente(utente);
+        ind.setVia("Via Roma"); ind.setCivico("1");
+        ind.setCap("00100"); ind.setCitta("Roma"); ind.setProvincia("RM");
+        return ind;
     }
 }
