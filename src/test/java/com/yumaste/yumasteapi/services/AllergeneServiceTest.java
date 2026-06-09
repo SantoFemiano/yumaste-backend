@@ -1,10 +1,7 @@
 package com.yumaste.yumasteapi.services;
 
-import com.yumaste.yumasteapi.dto.response.AllergeneDTO;
-import com.yumaste.yumasteapi.mapper.AllergeneMapper;
 import com.yumaste.yumasteapi.models.Allergene;
 import com.yumaste.yumasteapi.repositories.AllergeneRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,48 +11,33 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AllergeneServiceTest {
 
-    @Mock private AllergeneRepository allergeneRepository;
-    @Mock private AllergeneMapper allergeneMapper;
-    @InjectMocks private AllergeneService allergeneService;
-
-    private Allergene allergene;
-    private AllergeneDTO allergeneDTO;
-
-    @BeforeEach
-    void setUp() {
-        allergene = new Allergene();
-        allergene.setId(1L);
-        allergene.setNome("Glutine");
-        // AllergeneDTO(Long id, String nome, String descrizione)
-        allergeneDTO = new AllergeneDTO(1L, "Glutine", "Cereali contenenti glutine");
-    }
+    @Mock AllergeneRepository allergeneRepository;
+    @InjectMocks AllergeneService allergeneService;
 
     @Test
-    @DisplayName("getAllAllergeni - restituisce lista DTO mappata")
-    void getAllAllergeni_returnsMappedList() {
-        when(allergeneRepository.findAll()).thenReturn(List.of(allergene));
-        when(allergeneMapper.toDto(allergene)).thenReturn(allergeneDTO);
+    @DisplayName("getAllAllergeni - restituisce lista dal repository")
+    void getAllAllergeni_returnsList() {
+        Allergene a1 = new Allergene();
+        a1.setId(1L);
+        a1.setNome("Glutine");
+        when(allergeneRepository.findAll()).thenReturn(List.of(a1));
 
-        List<AllergeneDTO> result = allergeneService.getAllAllergeni();
-
+        List<Allergene> result = allergeneService.getAllAllergeni();
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).nome()).isEqualTo("Glutine");
-        verify(allergeneRepository).findAll();
+        assertThat(result.get(0).getNome()).isEqualTo("Glutine");
     }
 
     @Test
-    @DisplayName("getAllAllergeni - repository vuoto restituisce lista vuota")
+    @DisplayName("getAllAllergeni - restituisce lista vuota se nessun allergene")
     void getAllAllergeni_emptyList() {
         when(allergeneRepository.findAll()).thenReturn(List.of());
-
-        List<AllergeneDTO> result = allergeneService.getAllAllergeni();
-
+        List<Allergene> result = allergeneService.getAllAllergeni();
         assertThat(result).isEmpty();
     }
 }

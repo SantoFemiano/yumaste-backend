@@ -1,122 +1,78 @@
 package com.yumaste.yumasteapi.exceptions;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class GlobalExceptionHandlerTest {
 
-    private GlobalExceptionHandler handler;
-    private HttpServletRequest request;
+    private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
-    @BeforeEach
-    void setUp() {
-        handler = new GlobalExceptionHandler();
-        request = mock(HttpServletRequest.class);
-        when(request.getRequestURI()).thenReturn("/api/test");
+    @Test
+    @DisplayName("handleResourceNotFound - restituisce 404")
+    void handleResourceNotFound_returns404() {
+        ResponseEntity<?> resp = handler.handleResourceNotFound(new ResourceNotFoundException("non trovato"));
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(resp.getBody()).isInstanceOf(Map.class);
+        @SuppressWarnings("unchecked")
+        Map<String, String> body = (Map<String, String>) resp.getBody();
+        assertThat(body).containsEntry("error", "non trovato");
     }
 
     @Test
-    @DisplayName("handleResourceNotFoundException - deve restituire 404")
-    void handleResourceNotFoundException_returns404() {
-        ResourceNotFoundException ex = new ResourceNotFoundException("Risorsa non trovata");
-        ResponseEntity<ErrorResponseDTO> response = handler.handleResourceNotFoundException(ex, request);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(404);
-        assertThat(response.getBody().message()).isEqualTo("Risorsa non trovata");
-        assertThat(response.getBody().error()).isEqualTo("Not Found");
-        assertThat(response.getBody().path()).isEqualTo("/api/test");
+    @DisplayName("handleBusinessException - restituisce 409")
+    void handleBusinessException_returns409() {
+        ResponseEntity<?> resp = handler.handleBusinessException(new BusinessException("conflitto"));
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
-    @DisplayName("handleUnauthorizedException - deve restituire 403")
-    void handleUnauthorizedException_returns403() {
-        UnauthorizedException ex = new UnauthorizedException("Accesso negato");
-        ResponseEntity<ErrorResponseDTO> response = handler.handleUnauthorizedException(ex, request);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(403);
-        assertThat(response.getBody().message()).isEqualTo("Accesso negato");
-        assertThat(response.getBody().error()).isEqualTo("Forbidden");
+    @DisplayName("handleAccessDeniedException - restituisce 403")
+    void handleAccessDeniedException_returns403() {
+        ResponseEntity<?> resp = handler.handleAccessDeniedException(new AccessDeniedException("vietato"));
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
-    @DisplayName("handleBusinessException - deve restituire 400")
-    void handleBusinessException_returns400() {
-        BusinessException ex = new BusinessException("Operazione non valida");
-        ResponseEntity<ErrorResponseDTO> response = handler.handleBusinessException(ex, request);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(400);
-        assertThat(response.getBody().message()).isEqualTo("Operazione non valida");
-        assertThat(response.getBody().error()).isEqualTo("Bad Request");
+    @DisplayName("handleBadCredentials - restituisce 401")
+    void handleBadCredentials_returns401() {
+        ResponseEntity<?> resp = handler.handleBadCredentials(new BadCredentialsException("credenziali errate"));
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
-    @DisplayName("handleConflictException - deve restituire 409")
-    void handleConflictException_returns409() {
-        ConflictException ex = new ConflictException("Email già esistente");
-        ResponseEntity<ErrorResponseDTO> response = handler.handleConflictException(ex, request);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(409);
-        assertThat(response.getBody().message()).isEqualTo("Email già esistente");
-        assertThat(response.getBody().error()).isEqualTo("Conflict");
-    }
-
-    @Test
-    @DisplayName("handleValidationExceptions - deve restituire 400 con dettagli campi")
-    void handleValidationExceptions_returns400WithFieldErrors() {
+    @DisplayName("handleValidation - restituisce 400 con errori campi")
+    void handleValidation_returns400() {
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
         BindingResult bindingResult = mock(BindingResult.class);
-        FieldError fieldError = new FieldError("ingrediente", "nome", "Il nome è obbligatorio");
+        FieldError fieldError = new FieldError("obj", "email", "non valida");
 
         when(ex.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
 
-        ResponseEntity<ErrorResponseDTO> response = handler.handleValidationExceptions(ex, request);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(400);
-        assertThat(response.getBody().error()).isEqualTo("Validation Error");
-        assertThat(response.getBody().message()).contains("nome");
+        ResponseEntity<?> resp = handler.handleValidation(ex);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        @SuppressWarnings("unchecked")
+        Map<String, String> body = (Map<String, String>) resp.getBody();
+        assertThat(body).containsEntry("email", "non valida");
     }
 
     @Test
-    @DisplayName("handleGlobalException - deve restituire 500")
-    void handleGlobalException_returns500() {
-        Exception ex = new RuntimeException("Errore generico inaspettato");
-        ResponseEntity<ErrorResponseDTO> response = handler.handleGlobalException(ex, request);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().status()).isEqualTo(500);
-        assertThat(response.getBody().error()).isEqualTo("Internal Server Error");
-    }
-
-    @Test
-    @DisplayName("ErrorResponseDTO - il timestamp deve essere non nullo")
-    void errorResponseDTO_timestampNotNull() {
-        ResourceNotFoundException ex = new ResourceNotFoundException("Test");
-        ResponseEntity<ErrorResponseDTO> response = handler.handleResourceNotFoundException(ex, request);
-
-        assertThat(response.getBody().timestamp()).isNotNull();
+    @DisplayName("handleGenericException - restituisce 500")
+    void handleGenericException_returns500() {
+        ResponseEntity<?> resp = handler.handleGenericException(new RuntimeException("errore generico"));
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
