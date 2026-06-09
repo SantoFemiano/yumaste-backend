@@ -100,5 +100,6 @@ public class SecurityConfig {
         } catch (Exception e) {
             throw new IllegalStateException("Errore fatale nella configurazione della sicurezza", e);
         }
+
     }
 }
