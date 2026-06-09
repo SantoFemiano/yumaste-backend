@@ -8,7 +8,6 @@ import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Bean;
@@ -33,21 +32,39 @@ class SecurityConfigTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // Isola e mocka l'infrastruttura richiesta da SecurityConfig per caricare il contesto Spring
-    @MockitoBean private org.springframework.security.authentication.AuthenticationProvider authenticationProvider;
-    @MockitoBean private CustomOAuth2UserService customOAuth2UserService;
-    @MockitoBean private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    // Mock delle dipendenze richieste da SecurityConfig
+    @MockitoBean
+    private org.springframework.security.authentication.AuthenticationProvider authenticationProvider;
+    @MockitoBean
+    private CustomOAuth2UserService customOAuth2UserService;
+    @MockitoBean
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
-    // Sostituisce il JwtAuthenticationFilter con una versione pass-through per non rompere la catena dei filtri
+    // Mock di JwtService e UserDetailsService per soddisfare le dipendenze
+    // di JwtAuthenticationFilter durante il caricamento del contesto Spring
+    @MockitoBean
+    private JwtService jwtService;
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
+    /**
+     * Fornisce un JwtAuthenticationFilter pass-through che non esegue nessuna
+     * logica JWT, lasciando che Spring Security gestisca le sue regole di
+     * autorizzazione normalmente nei test.
+     */
     @TestConfiguration
     static class FilterTestConfig {
         @Bean
-        public JwtAuthenticationFilter jwtAuthFilter() {
-            return new JwtAuthenticationFilter(mock(JwtService.class), mock(UserDetailsService.class)) {
+        public JwtAuthenticationFilter jwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+            return new JwtAuthenticationFilter(jwtService, userDetailsService) {
                 @Override
-                protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
-                        throws ServletException, IOException {
-                    filterChain.doFilter(request, response); // Fa proseguire la richiesta ai filtri successivi di Spring Security
+                protected void doFilterInternal(
+                        @NonNull HttpServletRequest request,
+                        @NonNull HttpServletResponse response,
+                        @NonNull FilterChain filterChain
+                ) throws ServletException, IOException {
+                    // Pass-through: non valida il JWT, lascia decidere Spring Security
+                    filterChain.doFilter(request, response);
                 }
             };
         }
