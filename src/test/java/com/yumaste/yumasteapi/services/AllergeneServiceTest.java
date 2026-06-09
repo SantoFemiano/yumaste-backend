@@ -1,5 +1,7 @@
 package com.yumaste.yumasteapi.services;
 
+import com.yumaste.yumasteapi.dto.response.AllergeneDTO;
+import com.yumaste.yumasteapi.mapper.AllergeneMapper;
 import com.yumaste.yumasteapi.models.Allergene;
 import com.yumaste.yumasteapi.repositories.AllergeneRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -18,26 +20,29 @@ import static org.mockito.Mockito.*;
 class AllergeneServiceTest {
 
     @Mock AllergeneRepository allergeneRepository;
+    @Mock AllergeneMapper allergeneMapper;
     @InjectMocks AllergeneService allergeneService;
 
     @Test
-    @DisplayName("getAllAllergeni - restituisce lista dal repository")
-    void getAllAllergeni_returnsList() {
+    @DisplayName("getAllAllergeni - restituisce lista DTO mappata")
+    void getAllAllergeni_returnsMappedDTOs() {
         Allergene a1 = new Allergene();
         a1.setId(1L);
         a1.setNome("Glutine");
-        when(allergeneRepository.findAll()).thenReturn(List.of(a1));
+        AllergeneDTO dto = mock(AllergeneDTO.class);
 
-        List<Allergene> result = allergeneService.getAllAllergeni();
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getNome()).isEqualTo("Glutine");
+        when(allergeneRepository.findAll()).thenReturn(List.of(a1));
+        when(allergeneMapper.toDto(a1)).thenReturn(dto);
+
+        List<AllergeneDTO> result = allergeneService.getAllAllergeni();
+        assertThat(result).containsExactly(dto);
     }
 
     @Test
-    @DisplayName("getAllAllergeni - restituisce lista vuota se nessun allergene")
+    @DisplayName("getAllAllergeni - lista vuota se nessun allergene")
     void getAllAllergeni_emptyList() {
         when(allergeneRepository.findAll()).thenReturn(List.of());
-        List<Allergene> result = allergeneService.getAllAllergeni();
+        List<AllergeneDTO> result = allergeneService.getAllAllergeni();
         assertThat(result).isEmpty();
     }
 }

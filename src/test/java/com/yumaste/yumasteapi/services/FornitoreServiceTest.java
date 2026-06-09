@@ -37,45 +37,44 @@ class FornitoreServiceTest {
     }
 
     @Test
-    @DisplayName("getAllFornitori - restituisce lista mappata")
-    void getAllFornitori_returnsMappedList() {
+    @DisplayName("getAllFornitore - restituisce lista DTO mappata")
+    void getAllFornitore_returnsMappedList() {
         FornitoreResponseDTO dto = mock(FornitoreResponseDTO.class);
         when(fornitoreRepository.findAll()).thenReturn(List.of(fornitore));
-        when(fornitoreMapper.toResponseDTO(fornitore)).thenReturn(dto);
+        when(fornitoreMapper.toDto(fornitore)).thenReturn(dto);
 
-        List<FornitoreResponseDTO> result = fornitoreService.getAllFornitori();
+        List<FornitoreResponseDTO> result = fornitoreService.getAllFornitore();
         assertThat(result).containsExactly(dto);
     }
 
     @Test
-    @DisplayName("createFornitore - salva e restituisce DTO")
-    void createFornitore_savesAndReturnsDTO() {
+    @DisplayName("addFornitore - salva e restituisce DTO")
+    void addFornitore_savesAndReturnsDTO() {
         FornitoreRequestDTO req = mock(FornitoreRequestDTO.class);
         FornitoreResponseDTO dto = mock(FornitoreResponseDTO.class);
         when(fornitoreMapper.toEntity(req)).thenReturn(fornitore);
         when(fornitoreRepository.save(fornitore)).thenReturn(fornitore);
-        when(fornitoreMapper.toResponseDTO(fornitore)).thenReturn(dto);
+        when(fornitoreMapper.toDto(fornitore)).thenReturn(dto);
 
-        FornitoreResponseDTO result = fornitoreService.createFornitore(req);
+        FornitoreResponseDTO result = fornitoreService.addFornitore(req);
         assertThat(result).isEqualTo(dto);
     }
 
     @Test
-    @DisplayName("updateFornitore - aggiorna e restituisce DTO")
+    @DisplayName("updateFornitore - aggiorna campi e restituisce DTO")
     void updateFornitore_updatesAndReturns() {
         FornitoreRequestDTO req = mock(FornitoreRequestDTO.class);
         FornitoreResponseDTO dto = mock(FornitoreResponseDTO.class);
         when(fornitoreRepository.findById(1L)).thenReturn(Optional.of(fornitore));
-        when(fornitoreMapper.toEntity(req)).thenReturn(fornitore);
         when(fornitoreRepository.save(fornitore)).thenReturn(fornitore);
-        when(fornitoreMapper.toResponseDTO(fornitore)).thenReturn(dto);
+        when(fornitoreMapper.toDto(fornitore)).thenReturn(dto);
 
         FornitoreResponseDTO result = fornitoreService.updateFornitore(1L, req);
         assertThat(result).isEqualTo(dto);
     }
 
     @Test
-    @DisplayName("updateFornitore - lancia eccezione se non trovato")
+    @DisplayName("updateFornitore - lancia ResourceNotFoundException se non trovato")
     void updateFornitore_notFound_throws() {
         when(fornitoreRepository.findById(99L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> fornitoreService.updateFornitore(99L, mock(FornitoreRequestDTO.class)))
@@ -91,7 +90,7 @@ class FornitoreServiceTest {
     }
 
     @Test
-    @DisplayName("deleteFornitore - lancia eccezione se non trovato")
+    @DisplayName("deleteFornitore - lancia ResourceNotFoundException se non trovato")
     void deleteFornitore_notFound_throws() {
         when(fornitoreRepository.findById(99L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> fornitoreService.deleteFornitore(99L))

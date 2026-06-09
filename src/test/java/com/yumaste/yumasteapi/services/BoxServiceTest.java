@@ -37,8 +37,7 @@ class BoxServiceTest {
     @Mock IngredienteAllergeneRepository ingredienteAllergeneRepository;
     @Mock ScontoRepository scontoRepository;
 
-    @InjectMocks
-    BoxService boxService;
+    @InjectMocks BoxService boxService;
 
     private Box box;
     private Pageable pageable;
@@ -68,7 +67,7 @@ class BoxServiceTest {
         stubNoSconto();
 
         PagedResponseDTO<CatalogBoxDTO> result = boxService.getAllActiveBoxes(null, null, pageable);
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.content()).hasSize(1);
     }
 
     @Test
@@ -79,7 +78,7 @@ class BoxServiceTest {
         stubNoSconto();
 
         PagedResponseDTO<CatalogBoxDTO> result = boxService.getAllActiveBoxes("Vegano", null, pageable);
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.content()).hasSize(1);
     }
 
     @Test
@@ -90,7 +89,7 @@ class BoxServiceTest {
         stubNoSconto();
 
         PagedResponseDTO<CatalogBoxDTO> result = boxService.getAllActiveBoxes(null, "veg", pageable);
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.content()).hasSize(1);
     }
 
     @Test
@@ -101,30 +100,45 @@ class BoxServiceTest {
         stubNoSconto();
 
         PagedResponseDTO<CatalogBoxDTO> result = boxService.getAllActiveBoxes("Vegano", "veg", pageable);
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.content()).hasSize(1);
     }
 
     @Test
-    @DisplayName("getAllActiveBoxes - categoria 'Tutte' ignorata, restituisce tutte")
+    @DisplayName("getAllActiveBoxes - categoria 'Tutte' ignorata")
     void getAllActiveBoxes_categoriasTutte_treatedAsNoFilter() {
         Page<Box> page = new PageImpl<>(List.of(box));
         when(boxRepository.findByAttivoTrue(pageable)).thenReturn(page);
         stubNoSconto();
 
         PagedResponseDTO<CatalogBoxDTO> result = boxService.getAllActiveBoxes("Tutte", null, pageable);
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.content()).hasSize(1);
     }
 
     // --- getBoxById ---
 
     @Test
-    @DisplayName("getBoxById - restituisce DTO se box trovata")
-    void getBoxById_found() {
+    @DisplayName("getBoxById - restituisce DTO se box trovata senza sconto")
+    void getBoxById_found_noDiscount() {
         when(boxRepository.findById(1L)).thenReturn(Optional.of(box));
         stubNoSconto();
 
         CatalogBoxDTO result = boxService.getBoxById(1L);
         assertThat(result).isNotNull();
+        assertThat(result.percentualeSconto()).isEqualTo(0);
+        assertThat(result.prezzoScontato()).isEqualByComparingTo(BigDecimal.valueOf(20.00));
+    }
+
+    @Test
+    @DisplayName("getBoxById - applica sconto se sconto attivo presente")
+    void getBoxById_appliesDiscount() {
+        Sconto sconto = new Sconto();
+        sconto.setValore(20);
+        when(boxRepository.findById(1L)).thenReturn(Optional.of(box));
+        when(scontoRepository.findMigliorScontoAttivoPerBox(1L, "Vegano")).thenReturn(Optional.of(sconto));
+
+        CatalogBoxDTO result = boxService.getBoxById(1L);
+        assertThat(result.prezzoScontato()).isEqualByComparingTo(new BigDecimal("16.00"));
+        assertThat(result.percentualeSconto()).isEqualTo(20);
     }
 
     @Test
@@ -169,9 +183,7 @@ class BoxServiceTest {
     @DisplayName("deleteBox - soft delete imposta attivo=false")
     void deleteBox_softDelete() {
         when(boxRepository.findById(1L)).thenReturn(Optional.of(box));
-
         boxService.deleteBox(1L);
-
         assertThat(box.getAttivo()).isFalse();
         verify(boxRepository).save(box);
     }
@@ -194,7 +206,7 @@ class BoxServiceTest {
         when(req.nome()).thenReturn("NuovoNome");
         when(req.categoria()).thenReturn("Carne");
         when(req.prezzo()).thenReturn(25.0);
-        when(req.porzioni()).thenReturn(2);
+        when(req.porzioni()).thenReturn((byte) 2);
         when(req.quantitaInBox()).thenReturn(3);
         when(req.immagineUrl()).thenReturn("img.jpg");
         when(req.attivo()).thenReturn(false);
@@ -217,23 +229,6 @@ class BoxServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
-    // --- calcolaSconto (testato indirettamente via getBoxById) ---
-
-    @Test
-    @DisplayName("getBoxById - applica sconto se sconto attivo presente")
-    void getBoxById_appliesDiscount() {
-        Sconto sconto = new Sconto();
-        sconto.setValore(20);
-        when(boxRepository.findById(1L)).thenReturn(Optional.of(box));
-        when(scontoRepository.findMigliorScontoAttivoPerBox(1L, "Vegano")).thenReturn(Optional.of(sconto));
-
-        CatalogBoxDTO result = boxService.getBoxById(1L);
-
-        // prezzoScontato = 20 * (100-20)/100 = 16.00
-        assertThat(result.prezzoScontato()).isEqualByComparingTo(BigDecimal.valueOf(16.00));
-        assertThat(result.percentualeSconto()).isEqualTo(20);
-    }
-
     // --- getAllInattiveBoxes ---
 
     @Test
@@ -245,6 +240,6 @@ class BoxServiceTest {
         stubNoSconto();
 
         PagedResponseDTO<CatalogBoxDTO> result = boxService.getAllInattiveBoxes(pageable);
-        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.content()).hasSize(1);
     }
 }
