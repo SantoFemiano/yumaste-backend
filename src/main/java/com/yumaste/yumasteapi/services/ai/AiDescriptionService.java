@@ -200,8 +200,8 @@ public class AiDescriptionService {
         // Fallback: nessun ordine precedente
         if (ultimi.isEmpty()) {
             List<Box> catalogo = boxRepository.findByAttivoTrue();
-            if (catalogo.isEmpty()) throw new RuntimeException("Nessuna box disponibile.");
-            Box fallback = catalogo.get(0);
+            if (catalogo.isEmpty()) throw new ResourceNotFoundException("Nessuna box disponibile.");
+            Box fallback = catalogo.getFirst();
             return new AiRecommendationResponseDTO(
                     fallback.getId(),
                     "Benvenuto! Questa è una delle nostre box più amate, perfetta per iniziare!",

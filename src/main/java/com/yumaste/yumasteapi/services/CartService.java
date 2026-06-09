@@ -31,7 +31,7 @@ public class CartService {
     private final BoxRepository boxRepository;
     private final UtenteRepository utenteRepository;
 
-    private datiSconto calcolaSconto(Box box) {
+    private DatiSconto calcolaSconto(Box box) {
         BigDecimal prezzoOriginale = box.getPrezzo();
         BigDecimal prezzoScontato = prezzoOriginale;
         Integer percentuale = 0;
@@ -46,15 +46,15 @@ public class CartService {
             prezzoScontato = prezzoOriginale.multiply(moltiplicatore).setScale(2, RoundingMode.HALF_UP);
         }
 
-        return new datiSconto(prezzoOriginale, prezzoScontato, percentuale);
+        return new DatiSconto(prezzoOriginale, prezzoScontato, percentuale);
     }
 
-    private record datiSconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
+    private record DatiSconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
 
 
     private CartItemDTO mapToCartItemDTO(Carrello carrello) {
         Box box = carrello.getBox();
-        datiSconto sconto = calcolaSconto(box);
+        DatiSconto sconto = calcolaSconto(box);
 
         return new CartItemDTO(
                 carrello.getId(),
