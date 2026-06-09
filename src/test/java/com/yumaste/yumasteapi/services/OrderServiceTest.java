@@ -157,9 +157,6 @@ class OrderServiceTest {
         when(indirizzoRepository.findById(1L)).thenReturn(Optional.of(indirizzo));
         when(boxRepository.findAllById(List.of(99L))).thenReturn(List.of());
 
-        Ordine ordineSalvato = buildOrdine();
-        when(ordineRepository.save(any(Ordine.class))).thenReturn(ordineSalvato);
-
         assertThatThrownBy(() -> orderService.checkout(utente, req))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Box non trovata");
