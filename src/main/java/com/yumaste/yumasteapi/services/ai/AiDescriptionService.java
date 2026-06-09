@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,11 +39,9 @@ public class AiDescriptionService {
     private final AllergeneRepository allergeneRepository;
     private final DettaglioOrdineRepository dettaglioOrdineRepository;
 
-
     private static final String JSON_BLOCK_START = "```json";
     private static final String MARKDOWN_FENCE = "```";
 
-    // ✅ FUNZIONE 1: Genera descrizione box
     public String generaDescrizionePerBox(Long boxId) {
         Box box = boxRepository.findById(boxId)
                 .orElseThrow(() -> new ResourceNotFoundException("Box non trovata con ID: " + boxId));
@@ -71,7 +69,6 @@ public class AiDescriptionService {
         }
     }
 
-    // ✅ FUNZIONE 2: Chef AI - consiglia box
     public AiRecommendationResponseDTO consigliaBoxIntelligente(AiRecommendationRequestDTO preferenze) {
         List<Box> catalogo = boxRepository.findByAttivoTrue();
         String riassuntoCatalogo = catalogo.stream()
@@ -109,7 +106,6 @@ public class AiDescriptionService {
         }
     }
 
-    // ✅ FUNZIONE 3: Genera valori nutrizionali ingrediente
     public ValoriNutrizionaliRequestDTO generaValoriNutrizionali(String nomeIngrediente) {
         String prompt = String.format(
                 "Sei un nutrizionista esperto. Fornisci i valori nutrizionali medi per 100g di '%s'. " +
@@ -131,7 +127,6 @@ public class AiDescriptionService {
         }
     }
 
-    // ✅ FUNZIONE 4: Genera ingredienti nuovi (rimane identica nel prompt)
     public List<IngredienteRequestDTO> generaIngredientiNuovi(int quantita, String suggerimento) {
         List<String> nomiEsistenti = ingredienteRepository.findAll().stream()
                 .map(Ingrediente::getNome).toList();
@@ -190,14 +185,10 @@ public class AiDescriptionService {
         }
     }
 
-
     public AiRecommendationResponseDTO consigliaBoxDaOrdini(Long utenteId) {
-
-        // 1. Ultimi 10 acquisti dell'utente
         List<DettaglioOrdine> ultimi = dettaglioOrdineRepository
                 .findUltimiDettagliByUtenteId(utenteId, 10);
 
-        // Fallback: nessun ordine precedente
         if (ultimi.isEmpty()) {
             List<Box> catalogo = boxRepository.findByAttivoTrue();
             if (catalogo.isEmpty()) throw new ResourceNotFoundException("Nessuna box disponibile.");
@@ -209,18 +200,14 @@ public class AiDescriptionService {
             );
         }
 
-        // 2. Box già ordinate → da escludere
         List<Long> boxGiaOrdinate = dettaglioOrdineRepository
                 .findBoxIdOrdinateByUtenteId(utenteId);
 
-        // 3. Box disponibili non ancora ordinate
         List<Box> boxDisponibili = boxRepository.findByAttivoTrueAndIdNotIn(boxGiaOrdinate);
         if (boxDisponibili.isEmpty()) {
-            // Ha ordinato tutto — consiglia comunque dal catalogo completo
             boxDisponibili = boxRepository.findByAttivoTrue();
         }
 
-        // 4. Costruisci contesto ordini precedenti
         String ordiniPrecedenti = ultimi.stream()
                 .map(d -> String.format("- %s (categoria: %s, €%s)",
                         d.getBox().getNome(),
@@ -228,13 +215,11 @@ public class AiDescriptionService {
                         d.getPrezzoUnitario()))
                 .collect(Collectors.joining("\n"));
 
-        // 5. Costruisci catalogo disponibile
         String catalogoDisponibile = boxDisponibili.stream()
                 .map(b -> String.format("- ID: %d, Nome: %s (Categoria: %s, €%s)",
                         b.getId(), b.getNome(), b.getCategoria(), b.getPrezzo()))
                 .collect(Collectors.joining("\n"));
 
-        // 6. Prompt — stesso stile delle altre funzioni
         String prompt = String.format("""
             Sei il nutrizionista virtuale di Yumaste.
             
@@ -272,12 +257,11 @@ public class AiDescriptionService {
         }
     }
 
-    private static final Random RANDOM = new Random();
-
     private String generaEanUnivocoCasuale() {
+        var random = ThreadLocalRandom.current();
         StringBuilder ean = new StringBuilder();
-        ean.append(RANDOM.nextInt(9) + 1);
-        for (int i = 0; i < 12; i++) ean.append(RANDOM.nextInt(10));
+        ean.append(random.nextInt(1, 10));
+        for (int i = 0; i < 12; i++) ean.append(random.nextInt(10));
         return ean.toString();
     }
 }
