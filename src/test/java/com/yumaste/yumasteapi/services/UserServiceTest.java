@@ -58,8 +58,8 @@ class UserServiceTest {
     @Test
     @DisplayName("putProfile - aggiorna correttamente i dati utente")
     void putProfile_updatesAndReturnsDto() {
-        UserUpdateDTO req = new UserUpdateDTO("nuovo@mail.it", "Luigi", "Verdi");
-        // findByEmail ritorna lo stesso oggetto utente: così i setXxx agiscono su di esso
+        // Ordine corretto: UserUpdateDTO(nome, cognome, email)
+        UserUpdateDTO req = new UserUpdateDTO("Luigi", "Verdi", "nuovo@mail.it");
         when(utenteRepository.findByEmail("mario@yumaste.it")).thenReturn(Optional.of(utente));
         when(utenteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         UtenteAggDTO expected = mock(UtenteAggDTO.class);
@@ -68,16 +68,16 @@ class UserServiceTest {
         UtenteAggDTO result = userService.putProfile(utente, req);
 
         assertThat(result).isEqualTo(expected);
-        assertThat(utente.getEmail()).isEqualTo("nuovo@mail.it");
         assertThat(utente.getNome()).isEqualTo("Luigi");
         assertThat(utente.getCognome()).isEqualTo("Verdi");
+        assertThat(utente.getEmail()).isEqualTo("nuovo@mail.it");
     }
 
     @Test
     @DisplayName("putProfile - lancia ResourceNotFoundException se utente non trovato")
     void putProfile_userNotFound_throws() {
         when(utenteRepository.findByEmail(any())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.putProfile(utente, new UserUpdateDTO("a@b.it", "A", "B")))
+        assertThatThrownBy(() -> userService.putProfile(utente, new UserUpdateDTO("A", "B", "a@b.it")))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
