@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml — versione ottimizzata
 name: CI/CD Pipeline
 
 on:
@@ -7,7 +6,7 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest          # ← runner GitHub-hosted, molto più veloce
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -20,7 +19,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'maven'            # ← funziona davvero su ubuntu-latest
+          cache: 'maven'
 
       - name: Build, Test and Analyze with SonarCloud
         env:
@@ -47,38 +46,7 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64    # ← x86 nativo sul runner, niente QEMU
+          platforms: linux/amd64
           tags: ${{ secrets.DOCKER_USERNAME }}/yumaste-backend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.ORACLE_HOST }}
-          username: ${{ secrets.ORACLE_USER }}
-          key: ${{ secrets.ORACLE_SSH_KEY }}
-          script: |
-            cd ~/yumaste-deploy
-
-            # Aggiorna le env vars
-            for VAR in GEMINI_API_KEY GH_OAUTH_CLIENT_ID GH_OAUTH_CLIENT_SECRET \
-                       JWT_SECRET_KEY JWT_EXPIRATION JWT_REFRESH_EXPIRATION; do
-              sed -i "/${VAR}/d" ./yumaste.env
-            done
-
-            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> ./yumaste.env
-            echo "GH_OAUTH_CLIENT_ID=${{ secrets.GH_OAUTH_CLIENT_ID }}" >> ./yumaste.env
-            echo "GH_OAUTH_CLIENT_SECRET=${{ secrets.GH_OAUTH_CLIENT_SECRET }}" >> ./yumaste.env
-            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ./yumaste.env
-            echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> ./yumaste.env
-            echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> ./yumaste.env
-
-            # Pull nuova immagine e restart
-            docker pull ${{ secrets.DOCKER_USERNAME }}/yumaste-backend:latest
-            docker compose --env-file ./yumaste.env up -d --force-recreate yumaste-backend
