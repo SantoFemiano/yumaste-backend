@@ -258,15 +258,16 @@ public class AiDescriptionService {
         }
     }
 
-    private String generaEanUnivocoCasuale() {
-        // SecureRandom è thread-safe e crittograficamente sicuro
-        SecureRandom random = new SecureRandom();
-
-        StringBuilder ean = new StringBuilder();
-        ean.append(random.nextInt(1, 10));
-        for (int i = 0; i < 12; i++) {
-            ean.append(random.nextInt(10));
-        }
-        return ean.toString();
+ // Definisci la costante all'inizio della classe
+private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+ 
+private String generaEanUnivocoCasuale() {
+    // Ora riutilizzi la costante invece di istanziarne una nuova
+    StringBuilder ean = new StringBuilder();
+    ean.append(SECURE_RANDOM.nextInt(1, 10));
+    for (int i = 0; i < 12; i++) {
+        ean.append(SECURE_RANDOM.nextInt(10));
     }
+    return ean.toString();
+}
 }
