@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,15 +59,18 @@ class UserServiceTest {
     @DisplayName("putProfile - aggiorna correttamente i dati utente")
     void putProfile_updatesAndReturnsDto() {
         UserUpdateDTO req = new UserUpdateDTO("nuovo@mail.it", "Luigi", "Verdi");
+        // findByEmail ritorna lo stesso oggetto utente: così i setXxx agiscono su di esso
         when(utenteRepository.findByEmail("mario@yumaste.it")).thenReturn(Optional.of(utente));
-        when(utenteRepository.save(any())).thenReturn(utente);
+        when(utenteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         UtenteAggDTO expected = mock(UtenteAggDTO.class);
-        when(utenteMapper.toDto(utente)).thenReturn(expected);
+        when(utenteMapper.toDto(any(Utente.class))).thenReturn(expected);
 
         UtenteAggDTO result = userService.putProfile(utente, req);
 
         assertThat(result).isEqualTo(expected);
         assertThat(utente.getEmail()).isEqualTo("nuovo@mail.it");
+        assertThat(utente.getNome()).isEqualTo("Luigi");
+        assertThat(utente.getCognome()).isEqualTo("Verdi");
     }
 
     @Test
