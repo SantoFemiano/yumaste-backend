@@ -122,7 +122,7 @@ public class BoxService {
         //ricaviamo la lista degli allergeni.
         List<String> allergeniDellaBox = ingredienteAllergeneRepository.findNomiAllergeniByBoxId(boxId);
 
-        datiSconto datiScontobox = calcolaSconto(box);
+        DatiSconto datiScontobox = calcolaSconto(box);
 
         return new BoxDetailDTO(
                 box.getId(),
@@ -141,7 +141,7 @@ public class BoxService {
 
 
 
-    private datiSconto calcolaSconto(Box box) {
+    private DatiSconto calcolaSconto(Box box) {
         BigDecimal prezzoOriginale = box.getPrezzo();
         BigDecimal prezzoScontato = prezzoOriginale;
         Integer percentualeSconto = 0;
@@ -158,7 +158,7 @@ public class BoxService {
 
         }
 
-        return  new datiSconto(box.getPrezzo(),prezzoScontato,percentualeSconto);
+        return  new DatiSconto(box.getPrezzo(),prezzoScontato,percentualeSconto);
     }
 
     @Cacheable(value = "box_inattive", key = "{#pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
@@ -167,13 +167,13 @@ public class BoxService {
         return new PagedResponseDTO<>(boxes.map(this::mapToCatalogBoxDTOConSconto));
     }
 
-    private record datiSconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
+    private record DatiSconto(BigDecimal originale, BigDecimal scontato, Integer percentuale) {}
 
 
     private CatalogBoxDTO mapToCatalogBoxDTOConSconto(Box box) {
 
 
-        datiSconto sconto = calcolaSconto(box);
+        DatiSconto sconto = calcolaSconto(box);
 
         //DTO per catalogo con sconti
         return new CatalogBoxDTO(

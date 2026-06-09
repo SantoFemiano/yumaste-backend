@@ -69,12 +69,12 @@ public class SecurityConfig {
                             .requestMatchers("/api/auth/**").permitAll()       // Endpoint di Login e Registrazione classici (liberi)
                             .requestMatchers("/api/public/**").permitAll()     // Controller pubblico per consultazione box/ingredienti
                             .requestMatchers("/error").permitAll()
-                            .requestMatchers("/api/user/**").hasAnyRole("ROLE_USER", "ROLE_ADMIN") // Accesso concesso a utenti e admin autenticati
-                            .requestMatchers("/api/admin/**").hasRole("ROLE_ADMIN") // Pannello di controllo CRUD riservato esclusivamente agli admin
+                            .requestMatchers("/api/user/**").hasAnyRole(ROLE_USER, ROLE_ADMIN)
+                            .requestMatchers("/api/admin/**").hasRole(ROLE_ADMIN)
+                            .requestMatchers("/actuator/**").hasRole(ROLE_ADMIN)
                             .requestMatchers("/v3/api-docs/**").permitAll()   // Endpoint OpenAPI di documentazione strutturale
                             .requestMatchers("/swagger-ui/**").permitAll()     // Interfaccia grafica di Swagger
                             .requestMatchers("/swagger-ui.html").permitAll()
-                            .requestMatchers("/actuator/**").hasRole("ROLE_ADMIN") // Endpoint metriche Prometheus e monitoraggio sanitario
                             .anyRequest().authenticated()                      // Qualsiasi altra risorsa richiede esplicitamente il token
                     )
 
