@@ -3,10 +3,14 @@ package com.yumaste.yumasteapi.security;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +19,22 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = SecurityConfigTest.TestSecurityController.class)
+@WebMvcTest(
+        controllers = SecurityConfigTest.TestSecurityController.class,
+        excludeAutoConfiguration = {
+                OAuth2ClientAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientWebSecurityAutoConfiguration.class
+        }
+)
 @Import(SecurityConfig.class)
+@TestPropertySource(properties = {
+        "spring.security.oauth2.client.registration.github.client-id=test-id",
+        "spring.security.oauth2.client.registration.github.client-secret=test-secret",
+        "spring.kafka.bootstrap-servers=localhost:9092",
+        "spring.datasource.url=jdbc:h2:mem:testdb",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.jpa.hibernate.ddl-auto=none"
+})
 class SecurityConfigTest {
 
     @Autowired
