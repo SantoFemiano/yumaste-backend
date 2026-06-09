@@ -33,47 +33,47 @@ class FornitoreServiceTest {
     }
 
     @Test
-    @DisplayName("getAll - restituisce lista fornitori")
-    void getAll() {
+    @DisplayName("getAllFornitori - restituisce lista")
+    void getAllFornitori() {
         when(fornitoreRepository.findAll()).thenReturn(List.of(fornitore));
-        assertThat(fornitoreService.getAll()).hasSize(1);
+        assertThat(fornitoreService.getAllFornitori()).hasSize(1);
     }
 
     @Test
-    @DisplayName("getById - trovato")
-    void getById_found() {
+    @DisplayName("getFornitoreById - trovato")
+    void getFornitoreById_found() {
         when(fornitoreRepository.findById(1L)).thenReturn(Optional.of(fornitore));
-        assertThat(fornitoreService.getById(1L)).isEqualTo(fornitore);
+        assertThat(fornitoreService.getFornitoreById(1L)).isEqualTo(fornitore);
     }
 
     @Test
-    @DisplayName("getById - non trovato lancia ResourceNotFoundException")
-    void getById_notFound() {
+    @DisplayName("getFornitoreById - non trovato lancia ResourceNotFoundException")
+    void getFornitoreById_notFound() {
         when(fornitoreRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> fornitoreService.getById(99L))
+        assertThatThrownBy(() -> fornitoreService.getFornitoreById(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    @DisplayName("save - salva e restituisce fornitore")
-    void save() {
+    @DisplayName("creaFornitore - salva e restituisce fornitore")
+    void creaFornitore() {
         when(fornitoreRepository.save(fornitore)).thenReturn(fornitore);
-        assertThat(fornitoreService.save(fornitore)).isEqualTo(fornitore);
+        assertThat(fornitoreService.creaFornitore(fornitore)).isEqualTo(fornitore);
     }
 
     @Test
-    @DisplayName("delete - trovato, elimina")
-    void delete_found() {
+    @DisplayName("eliminaFornitore - trovato, elimina")
+    void eliminaFornitore_found() {
         when(fornitoreRepository.findById(1L)).thenReturn(Optional.of(fornitore));
-        fornitoreService.delete(1L);
+        fornitoreService.eliminaFornitore(1L);
         verify(fornitoreRepository).delete(fornitore);
     }
 
     @Test
-    @DisplayName("delete - non trovato lancia ResourceNotFoundException")
-    void delete_notFound() {
+    @DisplayName("eliminaFornitore - non trovato lancia ResourceNotFoundException")
+    void eliminaFornitore_notFound() {
         when(fornitoreRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> fornitoreService.delete(99L))
+        assertThatThrownBy(() -> fornitoreService.eliminaFornitore(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }

@@ -33,44 +33,44 @@ class ScontoServiceTest {
     void setUp() {
         sconto = new Sconto();
         sconto.setId(1L);
-        sconto.setCodice("PROMO10");
+        sconto.setValore(10);
     }
 
     @Test
-    @DisplayName("getAll - restituisce lista sconti")
-    void getAll() {
+    @DisplayName("getAllSconti - restituisce lista")
+    void getAllSconti() {
         when(scontoRepository.findAll()).thenReturn(List.of(sconto));
-        assertThat(scontoService.getAll()).hasSize(1);
+        assertThat(scontoService.getAllSconti()).hasSize(1);
     }
 
     @Test
-    @DisplayName("getById - trovato")
-    void getById_found() {
+    @DisplayName("getScontoById - trovato")
+    void getScontoById_found() {
         when(scontoRepository.findById(1L)).thenReturn(Optional.of(sconto));
-        assertThat(scontoService.getById(1L)).isEqualTo(sconto);
+        assertThat(scontoService.getScontoById(1L)).isEqualTo(sconto);
     }
 
     @Test
-    @DisplayName("getById - non trovato lancia ResourceNotFoundException")
-    void getById_notFound() {
+    @DisplayName("getScontoById - non trovato lancia ResourceNotFoundException")
+    void getScontoById_notFound() {
         when(scontoRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> scontoService.getById(99L))
+        assertThatThrownBy(() -> scontoService.getScontoById(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    @DisplayName("delete - trovato, elimina")
-    void delete_found() {
+    @DisplayName("eliminaSconto - trovato, elimina")
+    void eliminaSconto_found() {
         when(scontoRepository.findById(1L)).thenReturn(Optional.of(sconto));
-        scontoService.delete(1L);
+        scontoService.eliminaSconto(1L);
         verify(scontoRepository).delete(sconto);
     }
 
     @Test
-    @DisplayName("delete - non trovato lancia ResourceNotFoundException")
-    void delete_notFound() {
+    @DisplayName("eliminaSconto - non trovato lancia ResourceNotFoundException")
+    void eliminaSconto_notFound() {
         when(scontoRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> scontoService.delete(99L))
+        assertThatThrownBy(() -> scontoService.eliminaSconto(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }

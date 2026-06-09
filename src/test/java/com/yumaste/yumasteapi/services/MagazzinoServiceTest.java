@@ -33,24 +33,24 @@ class MagazzinoServiceTest {
     }
 
     @Test
-    @DisplayName("getAll - restituisce lista magazzini")
-    void getAll() {
+    @DisplayName("getAllMagazzini - restituisce lista")
+    void getAllMagazzini() {
         when(magazzinoRepository.findAll()).thenReturn(List.of(magazzino));
-        assertThat(magazzinoService.getAll()).hasSize(1);
+        assertThat(magazzinoService.getAllMagazzini()).hasSize(1);
     }
 
     @Test
-    @DisplayName("getById - trovato")
-    void getById_found() {
+    @DisplayName("getMagazzinoById - trovato")
+    void getMagazzinoById_found() {
         when(magazzinoRepository.findById(1L)).thenReturn(Optional.of(magazzino));
-        assertThat(magazzinoService.getById(1L)).isEqualTo(magazzino);
+        assertThat(magazzinoService.getMagazzinoById(1L)).isEqualTo(magazzino);
     }
 
     @Test
-    @DisplayName("getById - non trovato lancia ResourceNotFoundException")
-    void getById_notFound() {
+    @DisplayName("getMagazzinoById - non trovato lancia ResourceNotFoundException")
+    void getMagazzinoById_notFound() {
         when(magazzinoRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> magazzinoService.getById(99L))
+        assertThatThrownBy(() -> magazzinoService.getMagazzinoById(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
