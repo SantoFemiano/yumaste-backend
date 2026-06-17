@@ -11,6 +11,12 @@ Backend RESTful per la piattaforma **Yumaste**, un servizio di food delivery / b
 [Yumaste Shop](https://yumaste-shop.vercel.app/)
 
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend)
+
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend)
+
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend)
+
 ---
 
 ## 📋 Indice
