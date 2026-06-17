@@ -8,7 +8,7 @@
 
 Backend RESTful per la piattaforma **Yumaste**, un servizio di food delivery / box alimentari con gestione completa di utenti, ordini, ingredienti, magazzino, spedizioni e sconti.
 
-[link](https://yumaste-shop.vercel.app/)
+[Yumaste Shop](https://yumaste-shop.vercel.app/)
 
 
 ---
