@@ -4,8 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,10 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class SecurityConfigTest {
 
-    @Mock private JwtAuthenticationFilter jwtAuthFilter;
-    @Mock private org.springframework.security.authentication.AuthenticationProvider authenticationProvider;
-    @Mock private CustomOAuth2UserService customOAuth2UserService;
-    @Mock private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
 
     @InjectMocks
     private SecurityConfig securityConfig;
@@ -50,45 +48,29 @@ class SecurityConfigTest {
     // Origini permesse
     // -------------------------------------------------------
 
-    @Test
-    @DisplayName("CORS - localhost:9000 e' un'origine permessa")
-    void cors_localhost9000_isAllowed() {
+
+// -------------------------------------------------------
+    // Origini permesse
+    // -------------------------------------------------------
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "http://localhost:9000",
+            "http://localhost:4200",
+            "https://yumaste-shop.vercel.app",
+            "https://yumaste-shop-admin.vercel.app"
+    })
+    @DisplayName("CORS - origini permesse configurate correttamente")
+    void cors_allowedOrigins(String allowedOrigin) {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setRequestURI("/api/auth/login");
+        request.setRequestURI("/api/auth/login"); // URI arbitraria, coperta dal pattern /**
+
         CorsConfiguration config = corsSource.getCorsConfiguration(request);
+
         assertThat(config).isNotNull();
-        assertThat(config.getAllowedOrigins()).contains("http://localhost:9000");
+        assertThat(config.getAllowedOrigins()).contains(allowedOrigin);
     }
 
-    @Test
-    @DisplayName("CORS - localhost:4200 e' un'origine permessa")
-    void cors_localhost4200_isAllowed() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setRequestURI("/api/auth/login");
-        CorsConfiguration config = corsSource.getCorsConfiguration(request);
-        assertThat(config).isNotNull();
-        assertThat(config.getAllowedOrigins()).contains("http://localhost:4200");
-    }
-
-    @Test
-    @DisplayName("CORS - yumaste-shop.vercel.app e' un'origine permessa")
-    void cors_vercelShop_isAllowed() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setRequestURI("/api/public/box");
-        CorsConfiguration config = corsSource.getCorsConfiguration(request);
-        assertThat(config).isNotNull();
-        assertThat(config.getAllowedOrigins()).contains("https://yumaste-shop.vercel.app");
-    }
-
-    @Test
-    @DisplayName("CORS - yumaste-shop-admin.vercel.app e' un'origine permessa")
-    void cors_vercelAdmin_isAllowed() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setRequestURI("/api/admin/utenti");
-        CorsConfiguration config = corsSource.getCorsConfiguration(request);
-        assertThat(config).isNotNull();
-        assertThat(config.getAllowedOrigins()).contains("https://yumaste-shop-admin.vercel.app");
-    }
 
     @Test
     @DisplayName("CORS - hacker.com non e' un'origine permessa")
