@@ -27,7 +27,7 @@ Built with Spring Boot 4 · Java 21 · MySQL · Docker · GitHub Actions · Sona
 
 The project showcases a production-oriented architecture with automated CI/CD, code quality monitoring, containerization, and AI integration — all running in a cloud environment.
 
-### Key Highlights for Recruiters
+### Key Highlights
 
 - ✅ **Full production deployment** on Oracle Cloud Infrastructure (OCI) via Docker
 - ✅ **CI/CD pipeline** with GitHub Actions: build → test → SonarCloud analysis → Docker Hub push
