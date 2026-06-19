@@ -76,14 +76,16 @@ class JwtServiceTest {
 
     @Test
     @DisplayName("isTokenValid - token scaduto deve lanciare ExpiredJwtException")
-    void isTokenValid_expiredToken() throws Exception {
+    void isTokenValid_expiredToken() {
         // JwtService non cattura ExpiredJwtException internamente:
         // extractAllClaims() -> parseClaimsJws() lancia l'eccezione direttamente.
-        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 1L);
+
+        // Impostiamo un valore negativo per generare un token già scaduto nel passato
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", -1000L);
         UserDetails user = buildUser("exp@yumaste.it");
         String token = jwtService.generateToken(user);
-        Thread.sleep(50);
 
+        // Il test verifica immediatamente l'eccezione senza attese
         assertThatThrownBy(() -> jwtService.isTokenValid(token, user))
                 .isInstanceOf(ExpiredJwtException.class);
     }
