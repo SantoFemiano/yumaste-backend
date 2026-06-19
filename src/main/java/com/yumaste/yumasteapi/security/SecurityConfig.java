@@ -50,7 +50,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         try {
             http
                     // Abilitazione CORS e disattivazione CSRF (essendo un'architettura stateless basata su token)
