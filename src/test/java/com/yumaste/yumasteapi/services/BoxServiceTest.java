@@ -7,7 +7,6 @@ import com.yumaste.yumasteapi.mapper.BoxMapper;
 import com.yumaste.yumasteapi.models.Box;
 import com.yumaste.yumasteapi.models.Sconto;
 import com.yumaste.yumasteapi.repositories.BoxRepository;
-import com.yumaste.yumasteapi.repositories.IngredienteAllergeneRepository;
 import com.yumaste.yumasteapi.repositories.ScontoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,8 +32,6 @@ class BoxServiceTest {
 
     @Mock BoxRepository boxRepository;
     @Mock BoxMapper boxMapper;
-    @Mock BoxCompositionService boxCompositionService;
-    @Mock IngredienteAllergeneRepository ingredienteAllergeneRepository;
     @Mock ScontoRepository scontoRepository;
 
     @InjectMocks BoxService boxService;
@@ -124,7 +121,7 @@ class BoxServiceTest {
 
         CatalogBoxDTO result = boxService.getBoxById(1L);
         assertThat(result).isNotNull();
-        assertThat(result.percentualeSconto()).isEqualTo(0);
+        assertThat(result.percentualeSconto()).isZero();
         assertThat(result.prezzoScontato()).isEqualByComparingTo(BigDecimal.valueOf(20.00));
     }
 
