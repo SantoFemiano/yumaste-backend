@@ -10,8 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.time.Instant;
 import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -45,7 +45,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    // richiamato da AuthController con 1 parametro)
+    // (richiamato da AuthController con 1 parametro)
     public String generateToken(UserDetails userDetails) {
         // Chiama il metodo qui sotto passando una mappa vuota
         return generateToken(new HashMap<>(), userDetails);
@@ -53,12 +53,15 @@ public class JwtService {
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         extraClaims.put(TOKEN_TYPE_CLAIM, "access");
+
+        Instant now = Instant.now();
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(Date.from(Instant.now().plusMillis(jwtExpiration)))
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusMillis(jwtExpiration)))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -98,12 +101,14 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, "refresh");
 
+        Instant now = Instant.now();
+
         return Jwts
                 .builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(Date.from(Instant.now().plusMillis(refreshExpiration)))
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusMillis(refreshExpiration)))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
