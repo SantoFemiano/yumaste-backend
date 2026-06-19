@@ -49,19 +49,21 @@ class AiBoxGenerationServiceTest {
         ingredienteDisponibile.setUnitaMisura("g");
 
         // Risposta JSON mockata valida che l'ObjectMapper dovrà decodificare
-        mockValidJsonResponse = "```json\n" +
-                "{\n" +
-                "  \"nome\": \"Trancio di Salmone agli Agrumi\",\n" +
-                "  \"descrizione\": \"Una box fresca e deliziosa...\",\n" +
-                "  \"categoria\": \"Pesce\",\n" +
-                "  \"prezzo\": 24.50,\n" +
-                "  \"porzioni\": 2,\n" +
-                "  \"urlImmagine\": \"[https://images.unsplash.com/](https://images.unsplash.com/)...\",\n" +
-                "  \"ingredienti\": [\n" +
-                "    { \"ingredienteId\": 1, \"quantita\": 150.0 }\n" +
-                "  ]\n" +
-                "}\n" +
-                "```";
+        mockValidJsonResponse = """
+                ```json
+                {
+                  "nome": "Trancio di Salmone agli Agrumi",
+                  "descrizione": "Una box fresca e deliziosa...",
+                  "categoria": "Pesce",
+                  "prezzo": 24.50,
+                  "porzioni": 2,
+                  "urlImmagine": "[https://images.unsplash.com/](https://images.unsplash.com/)...",
+                  "ingredienti": [
+                    { "ingredienteId": 1, "quantita": 150.0 }
+                  ]
+                }
+                ```
+                """;
     }
 
     // =========================================================================
@@ -96,7 +98,7 @@ class AiBoxGenerationServiceTest {
     void generaBoxAutomatica_Success_NoSuggerimentoAndNoExistingBoxes() {
         AiGenerateBoxRequestDTO requestSenzaSuggerimento = new AiGenerateBoxRequestDTO(null);
 
-        // Caso in cui il catalogo iniziale è vuoto (es. primo avvio)
+        // Caso in cui il catalogo iniziale è vuoto (es. Primo avvio)
         when(boxRepository.findAll()).thenReturn(Collections.emptyList());
         when(ingredienteRepository.findAll()).thenReturn(List.of(ingredienteDisponibile));
         when(chatLanguageModel.generate(anyString())).thenReturn(mockValidJsonResponse);
