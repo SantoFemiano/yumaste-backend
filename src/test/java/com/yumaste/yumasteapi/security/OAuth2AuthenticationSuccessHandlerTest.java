@@ -65,9 +65,10 @@ class OAuth2AuthenticationSuccessHandlerTest {
         verify(redirectStrategy).sendRedirect(eq(request), eq(response), urlCaptor.capture());
 
         String redirectUrl = urlCaptor.getValue();
-        assertThat(redirectUrl).startsWith("https://yumaste-shop.vercel.app/oauth2/redirect");
-        assertThat(redirectUrl).contains("token=access-tok");
-        assertThat(redirectUrl).contains("refreshToken=refresh-tok");
+        assertThat(redirectUrl)
+                .startsWith("https://yumaste-shop.vercel.app/oauth2/redirect")
+                .contains("token=access-tok")
+                .contains("refreshToken=refresh-tok");
     }
 
     @Test
