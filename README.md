@@ -1,339 +1,355 @@
-# 🍽️ Yumaste Backend API
+# 🍽️ Yumaste — Backend API
+
+<div align="center">
 
 [![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.2-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
 [![MySQL](https://img.shields.io/badge/MySQL-8.x-blue?logo=mysql)](https://www.mysql.com/)
 [![JWT](https://img.shields.io/badge/Auth-JWT-yellow?logo=jsonwebtokens)](https://jwt.io/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker)](https://hub.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
-Backend RESTful per la piattaforma **Yumaste**, un servizio di food delivery / box alimentari con gestione completa di utenti, ordini, ingredienti, magazzino, spedizioni e sconti.
-
-[Yumaste Shop](https://yumaste-shop.vercel.app/)
-
 [![CI/CD Pipeline](https://github.com/SantoFemiano/yumaste-backend/actions/workflows/deploy.yml/badge.svg)](https://github.com/SantoFemiano/yumaste-backend/actions/workflows/deploy.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend)
+**Production-ready REST API for a full-stack food delivery platform.**  
+Built with Spring Boot 4 · Java 21 · MySQL · Docker · GitHub Actions · SonarCloud · AI Integration
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend)
+[🌐 Live Demo](https://yumaste-shop.vercel.app/) · [📖 Swagger UI](#-api-documentation-swagger) · [🗄️ Database Schema](https://github.com/SantoFemiano/yumaste-db) · [🖥️ Frontend Client](https://github.com/SantoFemiano/yumaste-shop) · [⚙️ Admin Panel](https://github.com/SantoFemiano/yumasteadminshop)
 
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=SantoFemiano_yumaste-backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=SantoFemiano_yumaste-backend)
-
----
-
-## 📋 Indice
-
-- [Panoramica](#-panoramica)
-- [Repository Collegate](#-repository-collegate)
-- [Stack Tecnologico](#-stack-tecnologico)
-- [Architettura del Progetto](#-architettura-del-progetto)
-- [Modelli di Dominio](#-modelli-di-dominio)
-- [Endpoint API](#-endpoint-api)
-- [Sicurezza & Autenticazione](#-sicurezza--autenticazione)
-- [Configurazione](#-configurazione)
-- [Avvio del Progetto](#-avvio-del-progetto)
-- [Documentazione API (Swagger)](#-documentazione-api-swagger)
-- [Variabili d'Ambiente](#-variabili-dambiente)
+</div>
 
 ---
 
-## 📖 Panoramica
+## 📌 Project Overview
 
-Yumaste Backend è una REST API sviluppata con **Spring Boot 4** che gestisce l'intero ciclo di vita di una piattaforma di food delivery basata su box alimentari personalizzate. Il sistema supporta:
+**Yumaste** is a full-stack e-commerce platform for **personalized food delivery boxes** (meal-kit style). This repository contains the backend REST API, which manages the complete lifecycle of the platform: user authentication, product catalog, orders, warehouse, shipping, invoicing, discounts, and AI-powered assistant features.
 
-- Registrazione e autenticazione utenti tramite JWT
-- Gestione box con composizione di ingredienti
-- Tracciamento ordini, spedizioni e fatture
-- Gestione magazzino e fornitori
-- Sistema di sconti su box e categorie
-- Pannello amministrativo dedicato
-- Documentazione interattiva via OpenAPI / Swagger UI
+The project showcases a production-oriented architecture with automated CI/CD, code quality monitoring, containerization, and AI integration — all running in a cloud environment.
+
+### Key Highlights for Recruiters
+
+- ✅ **Full production deployment** on Oracle Cloud Infrastructure (OCI) via Docker
+- ✅ **CI/CD pipeline** with GitHub Actions: build → test → SonarCloud analysis → Docker Hub push
+- ✅ **AI Integration** using Google Gemini SDK and LangChain4j for intelligent features
+- ✅ **Stateless JWT authentication** + OAuth2 client support
+- ✅ **Redis caching** and **Apache Kafka** event-driven messaging
+- ✅ **Observability** with Spring Actuator + Micrometer + Prometheus metrics
+- ✅ **PDF generation** for invoices (OpenPDF)
+- ✅ **Email notifications** via Spring Mail
+- ✅ **Code quality** enforced by SonarCloud with JaCoCo test coverage reports
+- ✅ **Multi-repo architecture**: backend, frontend (React), admin panel (Angular), database
 
 ---
 
-## 🔗 Repository Collegate
+## 🗂️ Ecosystem — Multi-Repo Architecture
 
-Yumaste è un progetto **multi-repo**. Di seguito le repository che compongono l'ecosistema:
+Yumaste is organized across **4 repositories** that together form the complete platform:
 
-| Repository | Descrizione |
-|---|---|
-| ⬅️ **Sei qui** — `yumaste-backend` | REST API Spring Boot |
-| 🗄️ [yumaste-db](https://github.com/SantoFemiano/yumaste-db/tree/main) | Schema del database, DDL, DML e diagramma UML |
-| 🗄️ [yumaste-admin](https://github.com/SantoFemiano/yumasteadminshop) | Front-end Admin in Angular |
-| 🗄️ [yumaste-client](https://github.com/SantoFemiano/yumaste-shop) | Front-end Client in React  |
----
-
-## 🛠️ Stack Tecnologico
-
-| Tecnologia | Versione | Scopo |
+| Repository | Tech Stack | Description |
 |---|---|---|
-| Java | 21 | Linguaggio principale |
-| Spring Boot | 4.0.2 | Framework applicativo |
-| Spring Web MVC | - | Layer REST |
-| Spring Data JPA | - | ORM / persistenza dati |
-| Spring Security | - | Autenticazione e autorizzazione |
-| Spring Validation | - | Validazione input |
-| Hibernate | - | Implementazione JPA |
-| MySQL | 8.x | Database relazionale |
-| JJWT | 0.11.5 | Generazione e verifica token JWT |
-| MapStruct | 1.5.5 | Mapping Entity ↔ DTO |
-| Lombok | latest | Riduzione boilerplate |
-| SpringDoc OpenAPI | 2.8.5 | Documentazione Swagger UI |
-| Maven | wrapper | Build tool |
+| ⬅️ **`yumaste-backend`** *(you are here)* | Spring Boot 4, Java 21, MySQL | REST API — core of the platform |
+| 🖥️ [`yumaste-shop`](https://github.com/SantoFemiano/yumaste-shop) | React, TypeScript, Tailwind CSS, Vite | Customer-facing storefront — deployed on Vercel |
+| ⚙️ [`yumasteadminshop`](https://github.com/SantoFemiano/yumasteadminshop) | Angular | Admin panel for platform management |
+| 🗄️ [`yumaste-db`](https://github.com/SantoFemiano/yumaste-db) | MySQL, SQL | Database schema (DDL/DML), UML ER diagram |
 
 ---
 
-## 🏗️ Architettura del Progetto
+## 🛠️ Tech Stack
 
-Il progetto segue un'architettura **a strati** (Layered Architecture) standard di Spring Boot:
+| Layer | Technology | Version | Purpose |
+|---|---|---|---|
+| **Language** | Java | 21 | Core language (LTS) |
+| **Framework** | Spring Boot | 4.0.2 | Application framework |
+| **Web** | Spring Web MVC | — | REST layer |
+| **Persistence** | Spring Data JPA + Hibernate | — | ORM & database access |
+| **Security** | Spring Security + JJWT | 0.11.5 | JWT auth & authorization |
+| **OAuth2** | Spring OAuth2 Client | — | Social login support |
+| **Database** | MySQL | 8.x | Relational data store |
+| **Caching** | Spring Data Redis | — | Cache layer (Aiven Redis) |
+| **Messaging** | Apache Kafka | — | Event-driven architecture |
+| **AI** | Google Gemini SDK + LangChain4j | 1.53.0 / 0.36.2 | AI assistant integration |
+| **Mapping** | MapStruct | 1.5.5 | Entity ↔ DTO mapping |
+| **Validation** | Spring Validation | — | Input validation |
+| **Documentation** | SpringDoc OpenAPI | 2.8.5 | Swagger UI |
+| **PDF** | OpenPDF | 2.0.4 | Invoice generation |
+| **Email** | Spring Mail | — | Transactional email |
+| **Observability** | Actuator + Micrometer + Prometheus | — | Metrics & health checks |
+| **Build** | Maven Wrapper | — | Build & dependency management |
+| **Containerization** | Docker (multi-stage build) | — | Production container image |
+| **CI/CD** | GitHub Actions | — | Automated pipeline |
+| **Code Quality** | SonarCloud + JaCoCo | — | Static analysis & coverage |
+
+---
+
+## 🏗️ Architecture
+
+The API follows a classic **Layered Architecture** (Controller → Service → Repository) with clear separation of concerns:
 
 ```
-src/
-└── main/
-    ├── java/com/yumaste/yumasteapi/
-    │   ├── YumasteApiApplication.java      # Entry point
-    │   ├── controllers/                    # Layer presentazione (REST)
-    │   │   ├── AdminController.java        # Endpoint amministrativi
-    │   │   ├── AuthController.java         # Registrazione e login
-    │   │   ├── PublicController.java       # Endpoint pubblici
-    │   │   └── UserController.java         # Operazioni utente autenticato
-    │   ├── services/                       # Business logic
-    │   ├── repositories/                   # Accesso dati (Spring Data JPA)
-    │   ├── models/                         # Entità JPA
-    │   ├── DTO/                            # Data Transfer Objects
-    │   ├── mapper/                         # MapStruct mappers
-    │   ├── exceptions/                     # Gestione eccezioni custom
-    │   └── security/                       # Configurazione sicurezza JWT
-    │       ├── ApplicationConfig.java
-    │       ├── SecurityConfig.java
-    │       ├── JwtService.java
-    │       └── JwtAuthenticationFilter.java
-    └── resources/
-        └── application.properties          # Configurazione applicazione
+src/main/java/com/yumaste/yumasteapi/
+│
+├── YumasteApiApplication.java          # Entry point
+│
+├── controllers/                        # REST layer — 4 controllers
+│   ├── AuthController.java             # /api/auth — register, login
+│   ├── PublicController.java           # /api/public — public endpoints
+│   ├── UserController.java             # /api/user — authenticated user ops
+│   └── AdminController.java            # /api/admin — admin CRUD operations
+│
+├── services/                           # Business logic layer
+├── repositories/                       # Spring Data JPA repositories
+├── models/                             # JPA entities (18 domain entities)
+├── DTO/                                # Data Transfer Objects
+├── mapper/                             # MapStruct entity ↔ DTO mappers
+├── exceptions/                         # Custom exception handling
+└── security/                           # JWT security config
+    ├── SecurityConfig.java
+    ├── JwtService.java
+    └── JwtAuthenticationFilter.java
+```
+
+### CI/CD Flow
+
+```
+git push → main
+     │
+     ▼
+┌─────────────────────────────────────────────────────┐
+│                 GitHub Actions                        │
+│                                                       │
+│  1. Set up JDK 21 (Eclipse Temurin)                  │
+│  2. mvn clean verify (build + JaCoCo coverage)       │
+│  3. SonarCloud analysis (quality gate + coverage)    │
+│  4. docker buildx build (multi-stage, linux/amd64)   │
+│  5. docker push → Docker Hub                         │
+└─────────────────────────────────────────────────────┘
+     │
+     ▼
+  Docker Hub → Oracle Cloud (OCI) deployment
 ```
 
 ---
 
-## 🗃️ Modelli di Dominio
+## 🗃️ Domain Model
 
-Il dominio è modellato con le seguenti entità JPA:
+18 JPA entities covering the full business domain:
 
-| Entità | Descrizione |
+| Entity | Description |
 |---|---|
-| `Utente` | Utente della piattaforma (implementa `UserDetails` per Spring Security) |
-| `IndirizzoUtente` | Indirizzo di consegna associato all'utente |
-| `Box` | Box alimentare ordinabile |
-| `ComposizioneBox` | Associazione Box ↔ Ingredienti (con quantità) |
-| `Ingrediente` | Ingrediente con valori nutrizionali e fornitore |
-| `ValoriNutrizionali` | Macronutrienti dell'ingrediente |
-| `Allergene` | Allergeni catalogati |
-| `IngredienteAllergene` | Relazione N:N tra Ingrediente e Allergene |
-| `Fornitore` | Fornitore degli ingredienti |
-| `Magazzino` | Magazzino fisico |
-| `IngredienteMagazzino` | Stock di un ingrediente in magazzino |
-| `Carrello` | Carrello dell'utente |
-| `Ordine` | Ordine effettuato dall'utente |
-| `DettaglioOrdine` | Righe di dettaglio di un ordine |
-| `Spedizione` | Spedizione collegata a un ordine |
-| `Fattura` | Fattura generata all'ordine |
-| `Sconto` | Codice sconto generale |
-| `ScontoBox` | Sconto applicato su una specifica box |
-| `ScontoCategoria` | Sconto applicato per categoria |
+| `Utente` | Platform user (implements `UserDetails`) |
+| `IndirizzoUtente` | Delivery address |
+| `Box` | Orderable food box product |
+| `ComposizioneBox` | Box ↔ Ingredient composition (with quantities) |
+| `Ingrediente` | Ingredient with nutritional data and supplier |
+| `ValoriNutrizionali` | Macronutrients per ingredient |
+| `Allergene` | Allergen catalog |
+| `IngredienteAllergene` | N:N Ingredient ↔ Allergen |
+| `Fornitore` | Ingredient supplier |
+| `Magazzino` | Physical warehouse |
+| `IngredienteMagazzino` | Ingredient stock in warehouse |
+| `Carrello` | User shopping cart |
+| `Ordine` | Customer order |
+| `DettaglioOrdine` | Order line items |
+| `Spedizione` | Shipping record |
+| `Fattura` | Generated invoice (PDF) |
+| `Sconto` | General discount code |
+| `ScontoBox` / `ScontoCategoria` | Box-level / category-level discounts |
 
-> 🗄️ Per lo schema completo del database (DDL, DML e diagramma UML) consulta la repository [yumaste-db](https://github.com/SantoFemiano/yumaste-db/tree/main).
+> 📊 Full ER diagram and DDL/DML scripts available in [yumaste-db](https://github.com/SantoFemiano/yumaste-db).
 
 ---
 
-## 🔌 Endpoint API
+## 🔌 API Endpoints
 
 ### 🔓 Auth — `/api/auth`
-Endpoints pubblici per autenticazione:
 
-| Metodo | Path | Descrizione |
-|---|---|---|
-| `POST` | `/api/auth/register` | Registrazione nuovo utente |
-| `POST` | `/api/auth/login` | Login e ottenimento token JWT |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Register new user | ❌ Public |
+| `POST` | `/api/auth/login` | Login & receive JWT token | ❌ Public |
 
 ### 🌐 Public — `/api/public`
-Endpoints accessibili senza autenticazione:
 
-| Metodo | Path | Descrizione |
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `GET` | `/api/public/boxes` | Browse food box catalog | ❌ Public |
+| `GET` | `/api/public/ingredients` | List ingredients | ❌ Public |
+| `GET` | `/api/public/allergens` | List allergens | ❌ Public |
+
+### 👤 User — `/api/user` *(requires `USER` role)*
+
+| Method | Path | Description |
 |---|---|---|
-| `GET` | `/api/public/...` | Visualizzazione box, ingredienti, allergeni |
+| `GET` | `/api/user/profile` | Get user profile |
+| `PUT` | `/api/user/profile` | Update profile |
+| `GET` | `/api/user/orders` | List own orders |
+| `POST` | `/api/user/orders` | Place new order |
+| `GET/POST/DELETE` | `/api/user/cart` | Manage cart |
 
-### 👤 User — `/api/user`
-Endpoints per utenti autenticati (ruolo `USER`):
+### 🔐 Admin — `/api/admin` *(requires `ADMIN` role)*
 
-| Metodo | Path | Descrizione |
-|---|---|---|
-| `GET` | `/api/user/...` | Profilo, ordini, carrello |
-| `POST` | `/api/user/...` | Creazione ordini, gestione carrello |
-| `PUT` | `/api/user/...` | Aggiornamento dati profilo |
+Full CRUD on: boxes, ingredients, suppliers, warehouse, discounts, users, orders, shipments, invoices.
 
-### 🔐 Admin — `/api/admin`
-Endpoints riservati agli amministratori (ruolo `ADMIN`):
-
-| Metodo | Path | Descrizione |
-|---|---|---|
-| `GET/POST/PUT/DELETE` | `/api/admin/...` | CRUD su box, ingredienti, fornitori, magazzino, sconti, utenti |
-
-> 📖 Per la lista completa e dettagliata degli endpoint consultare la [Swagger UI](#-documentazione-api-swagger) a runtime.
+> 📖 Full interactive documentation available at runtime via [Swagger UI](#-api-documentation-swagger).
 
 ---
 
-## 🔐 Sicurezza & Autenticazione
+## 🔐 Security & Authentication
 
-Il sistema utilizza **JWT (JSON Web Token)** stateless:
-
-1. L'utente si registra o effettua il login tramite `/api/auth`
-2. Il server genera un token JWT firmato con una chiave segreta
-3. Il client include il token nell'header `Authorization: Bearer <token>` per ogni richiesta protetta
-4. `JwtAuthenticationFilter` intercetta ogni request, valida il token e imposta il contesto di sicurezza
+JWT-based stateless security:
 
 ```
-Client                          Server
-  |                               |
-  |-- POST /api/auth/login ------->|
-  |<-- { "token": "eyJ..." } ------|
-  |                               |
-  |-- GET /api/user/profile ------>|
-  |   Authorization: Bearer eyJ...|
-  |<-- 200 OK { userdata } --------|
+Client                              Server
+  │                                    │
+  ├── POST /api/auth/login ──────────▶ │
+  │◀── { "token": "eyJ..." } ──────── │
+  │                                    │
+  ├── GET /api/user/profile ─────────▶ │
+  │   Authorization: Bearer eyJ...     │
+  │◀── 200 OK { userProfile } ─────── │
 ```
 
-### Ruoli
-- **`USER`** — Utente standard, può fare ordini e gestire il proprio profilo
-- **`ADMIN`** — Amministratore con accesso completo al pannello di gestione
+| Role | Access |
+|---|---|
+| `USER` | Own profile, cart, order placement, order history |
+| `ADMIN` | Full platform management (boxes, inventory, users, reports) |
 
 ---
 
-## ⚙️ Configurazione
+## 🐳 Docker
 
-Il file `src/main/resources/application.properties` utilizza variabili d'ambiente per tutte le configurazioni sensibili:
+The application uses an optimized **multi-stage Docker build** leveraging Spring Boot layer extraction to maximize cache efficiency:
 
-```properties
-# Database MySQL
-spring.datasource.url=${DB_URL}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+- **Stage 1 (builder):** `eclipse-temurin:21-jdk-alpine` — compiles the app and extracts layered JAR
+- **Stage 2 (runtime):** `eclipse-temurin:21-jre-alpine` — minimal JRE image with layered dependencies
 
-# JPA / Hibernate
-spring.jpa.hibernate.ddl-auto=validate
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+```bash
+# Pull from Docker Hub
+docker pull santofemiano/yumaste-backend:latest
 
-# Server
-server.port=8084
-
-# JWT
-application.security.jwt.secret-key=${JWT_SECRET_KEY}
-application.security.jwt.expiration=${JWT_EXPIRATION}
+# Run locally (requires external MySQL)
+docker run -p 8084:8084 \
+  -e DB_URL=jdbc:mysql://host.docker.internal:3306/yumaste \
+  -e DB_USERNAME=root \
+  -e DB_PASSWORD=secret \
+  -e JWT_SECRET_KEY=your-256bit-secret \
+  -e JWT_EXPIRATION=86400000 \
+  santofemiano/yumaste-backend:latest
 ```
-
-> ⚠️ **Non committare mai credenziali reali nel repository.** Usa variabili d'ambiente o un file `.env` locale (già incluso in `.gitignore`).
 
 ---
 
-## 🚀 Avvio del Progetto
+## 🚀 Local Setup
 
-### Prerequisiti
+### Prerequisites
 
 - Java 21+
 - MySQL 8.x
-- Maven (o usare il wrapper incluso `./mvnw`)
+- Maven (or use the included `./mvnw` wrapper)
 
-### 1. Clona il repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/SantoFemiano/yumaste-backend.git
 cd yumaste-backend
 ```
 
-### 2. Crea e inizializza il database MySQL
-
-Clona ed esegui i file SQL dalla repository [yumaste-db](https://github.com/SantoFemiano/yumaste-db/tree/main):
+### 2. Initialize the database
 
 ```bash
 git clone https://github.com/SantoFemiano/yumaste-db.git
-mysql -u <utente> -p -e "CREATE DATABASE yumaste;"
-mysql -u <utente> -p yumaste < yumaste-db/DDL.sql
-# Opzionale: dati di esempio
-mysql -u <utente> -p yumaste < yumaste-db/DML.sql
+mysql -u <user> -p -e "CREATE DATABASE yumaste;"
+mysql -u <user> -p yumaste < yumaste-db/DDL.sql
+# Optional: seed data
+mysql -u <user> -p yumaste < yumaste-db/DML.sql
 ```
 
-### 3. Configura le variabili d'ambiente
-
-Crea un file `.env` nella root del progetto oppure esporta le variabili nel tuo terminale:
+### 3. Configure environment variables
 
 ```bash
 export DB_URL=jdbc:mysql://localhost:3306/yumaste
 export DB_USERNAME=root
-export DB_PASSWORD=tuapassword
-export JWT_SECRET_KEY=una-chiave-segreta-molto-lunga-almeno-256-bit
+export DB_PASSWORD=yourpassword
+export JWT_SECRET_KEY=a-very-long-secret-key-at-least-256-bits
 export JWT_EXPIRATION=86400000
+export GEMINI_API_KEY=your-gemini-api-key
+export MAIL_USERNAME=your@email.com
+export MAIL_PASSWORD=yourpassword
 ```
 
-### 4. Avvia l'applicazione
+### 4. Run
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Oppure compila e avvia il JAR:
-
-```bash
-./mvnw clean package
-java -jar target/yumaste-api-0.0.1-SNAPSHOT.jar
-```
-
-L'API sarà disponibile su: `http://localhost:8084`
+API available at: `http://localhost:8084`
 
 ---
 
-## 📚 Documentazione API (Swagger)
+## 📚 API Documentation (Swagger)
 
-Una volta avviata l'applicazione, la documentazione interattiva OpenAPI è disponibile a:
+Once the app is running, the interactive OpenAPI documentation is available at:
 
 ```
 http://localhost:8084/swagger-ui/index.html
 ```
 
-Da qui è possibile esplorare e testare tutti gli endpoint direttamente dal browser.
+### Screenshots
 
-## 📸 Screenshot — Swagger UI
-
-### 🔓 Auth & Public Controller
+#### 🔓 Auth & Public Controller
 ![Auth e Public Controller](Screenshot%202026-03-31%20alle%2018.17.04.png)
 
-### 👤 User Controller
+#### 👤 User Controller
 ![User Controller](Screenshot%202026-03-31%20alle%2018.16.11.png)
 
-### 🔐 Admin Controller (parte 1)
+#### 🔐 Admin Controller (1/2)
 ![Admin Controller - parte 1](Screenshot%202026-03-31%20alle%2018.16.43.png)
 
-### 🔐 Admin Controller (parte 2)
+#### 🔐 Admin Controller (2/2)
 ![Admin Controller - parte 2](Screenshot%202026-03-31%20alle%2018.16.58.png)
 
 ---
 
-## 🌍 Variabili d'Ambiente
+## 🌍 Environment Variables
 
-| Variabile | Descrizione | Esempio |
+| Variable | Description | Example |
 |---|---|---|
-| `DB_URL` | URL JDBC del database MySQL | `jdbc:mysql://localhost:3306/yumaste` |
-| `DB_USERNAME` | Username del database | `root` |
-| `DB_PASSWORD` | Password del database | `secret` |
-| `JWT_SECRET_KEY` | Chiave segreta per firmare i JWT (min. 256 bit) | `mySecretKey...` |
-| `JWT_EXPIRATION` | Durata del token in millisecondi | `86400000` (24h) |
+| `DB_URL` | JDBC connection URL | `jdbc:mysql://localhost:3306/yumaste` |
+| `DB_USERNAME` | Database username | `root` |
+| `DB_PASSWORD` | Database password | `secret` |
+| `JWT_SECRET_KEY` | JWT signing key (min 256-bit) | `myVeryLongSecretKey...` |
+| `JWT_EXPIRATION` | Token TTL in milliseconds | `86400000` (24h) |
+| `GEMINI_API_KEY` | Google Gemini API key | `AIza...` |
+| `MAIL_USERNAME` | SMTP email address | `noreply@yumaste.com` |
+| `MAIL_PASSWORD` | SMTP password | `smtp_secret` |
+
+> ⚠️ Never commit real credentials. Use environment variables or a `.env` file (already in `.gitignore`).
 
 ---
 
-## 👤 Autori
+## 🧪 Testing & Quality
+
+```bash
+# Run tests + generate JaCoCo coverage report
+./mvnw clean verify
+
+# Coverage report available at:
+# target/site/jacoco/index.html
+```
+
+Code quality is monitored continuously via **SonarCloud** on every push to `main`, checking for:
+- Bugs, vulnerabilities, code smells
+- Test coverage (JaCoCo XML report)
+- Security hotspots
+
+---
+
+## 👤 Authors
 
 **Santo Femiano**
 - GitHub: [@SantoFemiano](https://github.com/SantoFemiano)
-  
+
 **Salvatore Santaniello**
 - GitHub: [@salvsant](https://github.com/salvsant)
----
