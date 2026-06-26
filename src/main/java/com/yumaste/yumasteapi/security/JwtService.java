@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@SuppressWarnings("java:S2143")
 public class JwtService {
 
     private static final String TOKEN_TYPE_CLAIM = "token_type";
@@ -73,7 +74,7 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(Date.from(Instant.now()));
+        return extractExpiration(token).toInstant().isBefore(Instant.now());
     }
 
 
