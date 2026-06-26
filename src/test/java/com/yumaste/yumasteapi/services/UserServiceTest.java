@@ -37,7 +37,6 @@ class UserServiceTest {
     @Mock IndirizzoMapper indirizzoMapper;
     @Mock UtenteMapper utenteMapper;
     @Mock PasswordEncoder passwordEncoder;
-    @Mock UserService self;
 
     @InjectMocks
     UserService userService;
@@ -77,7 +76,9 @@ class UserServiceTest {
     @DisplayName("putProfile - lancia ResourceNotFoundException se utente non trovato")
     void putProfile_userNotFound_throws() {
         when(utenteRepository.findByEmail(any())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.putProfile(utente, new UserUpdateDTO("A", "B", "a@b.it")))
+
+        UserUpdateDTO updateDTO = new UserUpdateDTO("Luigi","Verdi","luigiverdi@gmail.com");
+        assertThatThrownBy(() -> userService.putProfile(utente,updateDTO))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
