@@ -3,6 +3,7 @@ package com.yumaste.yumasteapi.exceptions;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -42,6 +43,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleConflictException(
             ConflictException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request);
+    }
+
+    // Gestione errore 401 (es. credenziali di login errate)
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(
+            AuthenticationException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", "Credenziali non valide.", request);
     }
 
     // Validazione Bean

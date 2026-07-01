@@ -7,6 +7,7 @@ import com.yumaste.yumasteapi.dto.response.AuthResponse;
 import com.yumaste.yumasteapi.models.Utente;
 import com.yumaste.yumasteapi.repositories.UtenteRepository;
 import com.yumaste.yumasteapi.security.JwtService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
 
         // 1. Controllo base: l'email esiste già?
         if (utenteRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -70,7 +71,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         // 1. Diciamo a Spring Security di autenticare l'utente con l'email e la password fornite.
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -95,7 +96,7 @@ public class AuthController {
     // NUOVO ENDPOINT: GENERAZIONE NUOVO ACCESS TOKEN TRAMITE REFRESH TOKEN
     // -------------------------------------------------------------------------
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
 
         if (refreshToken == null || refreshToken.isBlank()) {
