@@ -1,11 +1,14 @@
 package com.yumaste.yumasteapi.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +25,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Override
     protected void doFilterInternal(
@@ -45,10 +50,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
 
         // 4. Estraggo l'email dal token (ci serve il JwtService per farlo)
-        userEmail = jwtService.extractUsername(jwt);
-        String tokenType = jwtService.extractTokenType(jwt);
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+            String tokenType = jwtService.extractTokenType(jwt);
 
-        if (!"access".equals(tokenType)) {
+            if (!"access".equals(tokenType)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        } catch (JwtException | IllegalArgumentException e) {
+            // Token scaduto, malformato o con firma non valida: non autentico e lascio
+            // che sia la catena di sicurezza a rispondere 401 (nessuna Authentication nel contesto).
+            log.debug("Token JWT non valido: {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
